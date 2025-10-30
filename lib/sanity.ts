@@ -49,6 +49,7 @@ export async function getModelBySlug(slug: string) {
       category,
       "mainImage": mainImage.asset->url,
       "hoverImage": hoverImage.asset->url,
+      "heroVideo": heroVideo.asset->url,
       "galleryImages": galleryImages[].asset->url,
       height,
       neck,
