@@ -505,8 +505,8 @@ export default function ModelDetailPage() {
             }}>
               MY WORK
             </h2>
-            <a
-              href="#"
+            <Link
+              href={`/models/${model.slug}/portfolio`}
               style={{
                 color: 'white',
                 fontSize: '14px',
@@ -519,7 +519,7 @@ export default function ModelDetailPage() {
               }}
             >
               VIEW PORTFOLIO
-            </a>
+            </Link>
           </div>
         </div>
 
