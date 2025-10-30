@@ -594,15 +594,31 @@ export default function ModelDetailPage() {
             overflow: 'hidden',
             cursor: 'pointer'
           }}>
-            <img
-              src={model.showsImage || model.hoverImage || model.mainImage}
-              alt="Shows"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
-            />
+            {model.showsVideo ? (
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              >
+                <source src={model.showsVideo} type="video/mp4" />
+              </video>
+            ) : (
+              <img
+                src={model.showsImage || model.hoverImage || model.mainImage}
+                alt="Shows"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            )}
             <div style={{
               position: 'absolute',
               bottom: '60px',
