@@ -50,6 +50,15 @@ export default {
       },
     },
     {
+      name: 'heroVideo',
+      title: 'Hero Video (optional)',
+      description: 'Video shown at the top of the model page. If not provided, the main image will be used.',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+    },
+    {
       name: 'galleryImages',
       title: 'Gallery Images',
       type: 'array',
