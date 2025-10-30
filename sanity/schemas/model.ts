@@ -61,6 +61,7 @@ export default {
     {
       name: 'galleryImages',
       title: 'Gallery Images',
+      description: 'Main gallery images shown on the model page',
       type: 'array',
       of: [
         {
@@ -70,6 +71,62 @@ export default {
           },
         },
       ],
+    },
+    {
+      name: 'portfolioImage',
+      title: 'My Work (Portfolio) - Main Image',
+      description: 'Image shown in the "MY WORK" section',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+    {
+      name: 'portfolioGallery',
+      title: 'Portfolio Gallery',
+      description: 'Gallery of images shown when clicking on "VIEW PORTFOLIO"',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+        },
+      ],
+    },
+    {
+      name: 'instagramImage',
+      title: 'My World (Instagram) - Main Image',
+      description: 'Image shown in the "MY WORLD" section',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+    {
+      name: 'instagramUrl',
+      title: 'Instagram URL',
+      description: 'Link to the model\'s Instagram profile',
+      type: 'url',
+    },
+    {
+      name: 'showsImage',
+      title: 'Shows - Main Image',
+      description: 'Image shown in the "SHOWS" section',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+    {
+      name: 'showsVideo',
+      title: 'Shows Video',
+      description: 'Video for the shows section (optional)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
     },
     {
       name: 'height',

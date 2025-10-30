@@ -477,7 +477,7 @@ export default function ModelDetailPage() {
           cursor: 'pointer'
         }}>
           <img
-            src={model.hoverImage || model.mainImage}
+            src={model.portfolioImage || model.hoverImage || model.mainImage}
             alt="My Work"
             style={{
               width: '100%',
@@ -539,7 +539,7 @@ export default function ModelDetailPage() {
             cursor: 'pointer'
           }}>
             <img
-              src={model.mainImage}
+              src={model.instagramImage || model.mainImage}
               alt="My World"
               style={{
                 width: '100%',
@@ -568,7 +568,9 @@ export default function ModelDetailPage() {
                 MY WORLD
               </h2>
               <a
-                href="#"
+                href={model.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   color: 'white',
                   fontSize: '14px',
@@ -593,7 +595,7 @@ export default function ModelDetailPage() {
             cursor: 'pointer'
           }}>
             <img
-              src={model.hoverImage || model.mainImage}
+              src={model.showsImage || model.hoverImage || model.mainImage}
               alt="Shows"
               style={{
                 width: '100%',
