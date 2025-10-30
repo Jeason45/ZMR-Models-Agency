@@ -7,7 +7,7 @@ export default defineConfig({
   name: 'default',
   title: 'ZMR Models Agency',
 
-  projectId: 'uampkd0a', // Tu devras remplacer ça
+  projectId: 'uampkd0a',
   dataset: 'production',
 
   plugins: [structureTool(), visionTool()],
@@ -15,4 +15,6 @@ export default defineConfig({
   schema: {
     types: schemaTypes,
   },
+
+  basePath: '/studio',
 })
