@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import modelsData from '@/data/models/models.json';
+import { getAllModels, urlFor } from '@/lib/sanity';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -335,6 +335,8 @@ export default function ModelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredModelId, setHoveredModelId] = useState<string | null>(null);
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [models, setModels] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const lastScrollY = useRef(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('up');
 
@@ -342,10 +344,8 @@ export default function ModelsPage() {
     const updateScrollDirection = () => {
       const scrollY = window.pageYOffset;
       const direction = scrollY > lastScrollY.current ? 'down' : 'up';
-      console.log('ScrollY:', scrollY, 'Direction:', direction);
 
       if (direction !== scrollDirectionRef.current && Math.abs(scrollY - lastScrollY.current) > 10) {
-        console.log('Changing direction to:', direction);
         scrollDirectionRef.current = direction;
         setScrollDirection(direction);
       }
@@ -353,30 +353,50 @@ export default function ModelsPage() {
       lastScrollY.current = scrollY > 0 ? scrollY : 0;
     };
 
-    console.log('Adding scroll listener (only once)');
     window.addEventListener('scroll', updateScrollDirection);
     return () => {
-      console.log('Removing scroll listener');
       window.removeEventListener('scroll', updateScrollDirection);
     };
   }, []);
 
-  const allModels: Model[] = [
-    ...modelsData.women,
-    ...modelsData.men
-  ];
+  // Fetch models from Sanity
+  useEffect(() => {
+    async function fetchModels() {
+      try {
+        const data = await getAllModels();
+        setModels(data);
+      } catch (error) {
+        console.error('Error fetching models:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchModels();
+  }, []);
 
   // Filter by category
   const categoryFiltered = selectedCategory === 'all'
-    ? allModels
-    : selectedCategory === 'women'
-    ? modelsData.women
-    : modelsData.men;
+    ? models
+    : models.filter(m => m.category === (selectedCategory === 'women' ? 'woman' : 'man'));
 
   // Filter by search query
   const filteredModels = categoryFiltered.filter((model) =>
     model.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <main style={{
+        minHeight: '100vh',
+        backgroundColor: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div>Loading models...</div>
+      </main>
+    );
+  }
 
   return (
     <>
@@ -481,12 +501,12 @@ export default function ModelsPage() {
       }}>
         {filteredModels.map((model) => (
           <Link
-            key={model.id}
-            href={`/models/${model.id}`}
+            key={model._id}
+            href={`/models/${model.slug}`}
             style={{
               textDecoration: 'none'
             }}
-            onMouseEnter={() => setHoveredModelId(model.id)}
+            onMouseEnter={() => setHoveredModelId(model._id)}
             onMouseLeave={() => setHoveredModelId(null)}
           >
             {/* Image Container */}
@@ -503,11 +523,11 @@ export default function ModelsPage() {
                 backgroundColor: '#1a1a1a',
                 position: 'relative',
                 transition: 'transform 0.3s',
-                transform: hoveredModelId === model.id ? 'scale(1.02)' : 'scale(1)'
+                transform: hoveredModelId === model._id ? 'scale(1.02)' : 'scale(1)'
               }}>
                 {/* Model Image */}
                 <img
-                  src={hoveredModelId === model.id && model.imageHover ? model.imageHover : model.image}
+                  src={hoveredModelId === model._id && model.hoverImage ? model.hoverImage : model.mainImage}
                   alt={model.name}
                   style={{
                     width: '100%',

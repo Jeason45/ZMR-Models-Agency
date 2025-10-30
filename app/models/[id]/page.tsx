@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import modelsData from '@/data/models/models.json';
+import { getModelBySlug } from '@/lib/sanity';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -269,8 +269,10 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
 
 export default function ModelDetailPage() {
   const params = useParams();
-  const modelId = params.id as string;
+  const modelSlug = params.id as string;
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [model, setModel] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const lastScrollY = useRef(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('up');
 
@@ -291,9 +293,35 @@ export default function ModelDetailPage() {
     return () => window.removeEventListener('scroll', updateScrollDirection);
   }, []);
 
-  // Find model from JSON data
-  const allModels = [...modelsData.women, ...modelsData.men];
-  const model = allModels.find((m) => m.id === modelId);
+  // Fetch model from Sanity
+  useEffect(() => {
+    async function fetchModel() {
+      try {
+        const data = await getModelBySlug(modelSlug);
+        setModel(data);
+      } catch (error) {
+        console.error('Error fetching model:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchModel();
+  }, [modelSlug]);
+
+  if (loading) {
+    return (
+      <main style={{
+        minHeight: '100vh',
+        backgroundColor: 'black',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white'
+      }}>
+        <div>Loading...</div>
+      </main>
+    );
+  }
 
   if (!model) {
     return (
@@ -366,7 +394,7 @@ export default function ModelDetailPage() {
             </video>
           ) : (
             <img
-              src={model.image}
+              src={model.mainImage}
               alt={model.name}
               style={{
                 width: '100%',
@@ -449,7 +477,7 @@ export default function ModelDetailPage() {
           cursor: 'pointer'
         }}>
           <img
-            src={model.imageHover || model.image}
+            src={model.hoverImage || model.mainImage}
             alt="My Work"
             style={{
               width: '100%',
@@ -511,7 +539,7 @@ export default function ModelDetailPage() {
             cursor: 'pointer'
           }}>
             <img
-              src={model.image}
+              src={model.mainImage}
               alt="My World"
               style={{
                 width: '100%',
@@ -565,7 +593,7 @@ export default function ModelDetailPage() {
             cursor: 'pointer'
           }}>
             <img
-              src={model.imageHover || model.image}
+              src={model.hoverImage || model.mainImage}
               alt="Shows"
               style={{
                 width: '100%',
