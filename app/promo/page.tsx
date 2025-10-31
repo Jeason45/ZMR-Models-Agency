@@ -250,31 +250,6 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             ))}
           </nav>
 
-          <div style={{
-            position: 'absolute',
-            bottom: 'clamp(20px, 5vh, 40px)',
-            left: '50%',
-            transform: 'translateX(-50%)'
-          }}>
-            <a
-              href="https://www.instagram.com/zmrmodels/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: 'white',
-                fontSize: 'clamp(12px, 2vw, 14px)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2em',
-                textDecoration: 'none',
-                transition: 'opacity 0.3s'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
-              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-            >
-              Instagram
-            </a>
-          </div>
-
           <button
             onClick={() => setIsMenuOpen(false)}
             style={{
