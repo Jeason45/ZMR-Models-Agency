@@ -501,8 +501,7 @@ export default function ActorDetailPage() {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            pointerEvents: 'none'
+            alignItems: 'center'
           }}>
             <h2 style={{
               color: 'white',
@@ -515,10 +514,26 @@ export default function ActorDetailPage() {
             }}>
               SHOWREEL
             </h2>
+            <a
+              href="#"
+              style={{
+                color: 'white',
+                fontSize: '14px',
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                marginTop: '20px',
+                textDecoration: 'none',
+                borderBottom: '1px solid white',
+                paddingBottom: '4px',
+                pointerEvents: 'auto'
+              }}
+            >
+              VIEW REELS
+            </a>
           </div>
         </div>
 
-        {/* 4 & 5. CREDITS and SOCIAL - Side by Side */}
+        {/* 4 & 5. SOCIAL and CREDITS - Side by Side */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
@@ -526,7 +541,63 @@ export default function ActorDetailPage() {
           marginTop: '40px',
           padding: '0 20px'
         }}>
-          {/* CREDITS Zone */}
+          {/* SOCIAL Zone - LEFT */}
+          <div id="social" style={{
+            position: 'relative',
+            height: '80vh',
+            overflow: 'hidden',
+            cursor: 'pointer'
+          }}>
+            <img
+              src={actor.instagramImage || actor.mainImage}
+              alt="Social"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '60px',
+              left: '0',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: 'clamp(40px, 8vw, 80px)',
+                fontWeight: 900,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                margin: 0,
+                textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
+              }}>
+                SOCIAL
+              </h2>
+              <a
+                href={actor.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'white',
+                  fontSize: '14px',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  marginTop: '20px',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid white',
+                  paddingBottom: '4px'
+                }}
+              >
+                VIEW INSTAGRAM
+              </a>
+            </div>
+          </div>
+
+          {/* CREDITS Zone - RIGHT */}
           <div id="credits" style={{
             position: 'relative',
             minHeight: '80vh',
@@ -606,62 +677,6 @@ export default function ActorDetailPage() {
                   No credits available yet
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* SOCIAL Zone */}
-          <div id="social" style={{
-            position: 'relative',
-            height: '80vh',
-            overflow: 'hidden',
-            cursor: 'pointer'
-          }}>
-            <img
-              src={actor.instagramImage || actor.mainImage}
-              alt="Social"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
-            />
-            <div style={{
-              position: 'absolute',
-              bottom: '60px',
-              left: '0',
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: 'clamp(40px, 8vw, 80px)',
-                fontWeight: 900,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                margin: 0,
-                textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
-              }}>
-                SOCIAL
-              </h2>
-              <a
-                href={actor.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: 'white',
-                  fontSize: '14px',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  marginTop: '20px',
-                  textDecoration: 'none',
-                  borderBottom: '1px solid white',
-                  paddingBottom: '4px'
-                }}
-              >
-                VIEW INSTAGRAM
-              </a>
             </div>
           </div>
         </div>
