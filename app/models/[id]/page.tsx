@@ -176,14 +176,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: '#0a0a0a',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: '#0a0a0a',
               transform: 'rotate(-45deg)'
             }} />
           </button>
@@ -250,14 +250,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: '#0a0a0a',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: '#0a0a0a',
               transform: 'rotate(-45deg)'
             }} />
           </button>
@@ -312,7 +312,7 @@ export default function ModelDetailPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -327,7 +327,7 @@ export default function ModelDetailPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

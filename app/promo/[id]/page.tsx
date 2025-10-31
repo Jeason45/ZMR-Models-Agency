@@ -29,7 +29,7 @@ export default function PromoDetailPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -44,7 +44,7 @@ export default function PromoDetailPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
