@@ -101,15 +101,16 @@ export default function Home() {
         </div>
 
         {/* Top Right Icons: Search, Instagram, Hamburger */}
-        <div style={{
-          position: 'fixed',
-          top: '32px',
-          right: '32px',
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '24px'
-        }}>
+        {!isMenuOpen && (
+          <div style={{
+            position: 'fixed',
+            top: '32px',
+            right: '32px',
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '24px'
+          }}>
           {/* Search Icon */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -183,7 +184,8 @@ export default function Home() {
               transform: isMenuOpen ? 'rotate(-45deg) translateY(-10px)' : 'none'
             }} />
           </button>
-        </div>
+          </div>
+        )}
       </main>
 
       {/* Search Overlay */}
@@ -265,7 +267,7 @@ export default function Home() {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'white',
+          backgroundColor: 'black',
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
@@ -282,7 +284,7 @@ export default function Home() {
                 key={item.name}
                 href={item.href}
                 style={{
-                  color: 'black',
+                  color: 'white',
                   fontSize: 'clamp(50px, 8vw, 100px)',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
@@ -309,7 +311,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color: 'black',
+                color: 'white',
                 fontSize: '14px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.2em',
@@ -347,14 +349,14 @@ export default function Home() {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(-45deg)'
             }} />
           </button>
