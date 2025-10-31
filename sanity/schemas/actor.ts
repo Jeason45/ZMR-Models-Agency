@@ -96,6 +96,20 @@ export default {
       },
     },
     {
+      name: 'reelsGallery',
+      title: 'Reels Gallery',
+      description: 'Collection of video reels (shown when clicking "VIEW REELS")',
+      type: 'array',
+      of: [
+        {
+          type: 'file',
+          options: {
+            accept: 'video/*',
+          },
+        },
+      ],
+    },
+    {
       name: 'credits',
       title: 'Credits',
       description: 'List of films, commercials, or theater productions',

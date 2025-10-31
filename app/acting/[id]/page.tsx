@@ -474,7 +474,10 @@ export default function ActorDetailPage() {
         }}>
           {actor.showreelVideo ? (
             <video
-              controls
+              autoPlay
+              muted
+              loop
+              playsInline
               style={{
                 width: '100%',
                 height: '100%',
