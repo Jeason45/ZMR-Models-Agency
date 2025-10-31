@@ -10,7 +10,7 @@ export default function ReelsPage() {
   const actorSlug = params.id as string;
   const [actor, setActor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVideoIndex, setSelectedVideoIndex] = useState<number | null>(null);
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
@@ -27,8 +27,30 @@ export default function ReelsPage() {
     fetchActor();
   }, [actorSlug]);
 
+  // Play video on selection
+  useEffect(() => {
+    if (selectedVideoIndex !== null) {
+      const video = videoRefs.current[selectedVideoIndex];
+      if (video) {
+        video.play();
+      }
+    }
+  }, [selectedVideoIndex]);
+
+  const handleVideoClick = (index: number) => {
+    // Pause current video
+    const currentVideo = videoRefs.current[selectedVideoIndex];
+    if (currentVideo) {
+      currentVideo.pause();
+      currentVideo.currentTime = 0;
+    }
+
+    // Select new video
+    setSelectedVideoIndex(index);
+  };
+
   const handleMouseEnter = (index: number) => {
-    if (selectedVideoIndex === null) {
+    if (index !== selectedVideoIndex) {
       const video = videoRefs.current[index];
       if (video) {
         video.play();
@@ -37,41 +59,13 @@ export default function ReelsPage() {
   };
 
   const handleMouseLeave = (index: number) => {
-    if (selectedVideoIndex === null) {
+    if (index !== selectedVideoIndex) {
       const video = videoRefs.current[index];
       if (video) {
         video.pause();
         video.currentTime = 0;
       }
     }
-  };
-
-  const handleVideoClick = (index: number) => {
-    // Pause all videos
-    videoRefs.current.forEach((video) => {
-      if (video) {
-        video.pause();
-        video.currentTime = 0;
-      }
-    });
-
-    // Set selected and play it
-    setSelectedVideoIndex(index);
-    setTimeout(() => {
-      const selectedVideo = videoRefs.current[index];
-      if (selectedVideo) {
-        selectedVideo.play();
-      }
-    }, 100);
-  };
-
-  const closeGallery = () => {
-    const video = videoRefs.current[selectedVideoIndex!];
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-    }
-    setSelectedVideoIndex(null);
   };
 
   if (loading) {
@@ -109,14 +103,83 @@ export default function ReelsPage() {
     );
   }
 
-  const isGalleryMode = selectedVideoIndex !== null;
+  const getCardPosition = (index: number) => {
+    const diff = index - selectedVideoIndex;
+
+    if (diff === 0) {
+      return {
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '420px',
+        height: '747px',
+        opacity: 1,
+        zIndex: 10,
+        scale: 1
+      };
+    } else if (diff === -1) {
+      return {
+        left: '25%',
+        transform: 'translateX(-50%) scale(0.8)',
+        width: '150px',
+        height: '267px',
+        opacity: 0.5,
+        zIndex: 5
+      };
+    } else if (diff === -2) {
+      return {
+        left: '10%',
+        transform: 'translateX(-50%) scale(0.6)',
+        width: '150px',
+        height: '267px',
+        opacity: 0.25,
+        zIndex: 3
+      };
+    } else if (diff === 1) {
+      return {
+        left: '75%',
+        transform: 'translateX(-50%) scale(0.8)',
+        width: '150px',
+        height: '267px',
+        opacity: 0.5,
+        zIndex: 5
+      };
+    } else if (diff === 2) {
+      return {
+        left: '90%',
+        transform: 'translateX(-50%) scale(0.6)',
+        width: '150px',
+        height: '267px',
+        opacity: 0.25,
+        zIndex: 3
+      };
+    } else if (diff < -2) {
+      return {
+        left: '5%',
+        transform: 'translateX(-50%) scale(0.5)',
+        width: '150px',
+        height: '267px',
+        opacity: 0.1,
+        zIndex: 1
+      };
+    } else {
+      return {
+        left: '95%',
+        transform: 'translateX(-50%) scale(0.5)',
+        width: '150px',
+        height: '267px',
+        opacity: 0.1,
+        zIndex: 1
+      };
+    }
+  };
 
   return (
     <main style={{
       minHeight: '100vh',
-      backgroundColor: 'black',
+      backgroundColor: '#000',
       padding: '40px 20px',
-      transition: 'all 0.5s ease'
+      position: 'relative',
+      overflow: 'hidden'
     }}>
       {/* Back button */}
       <Link
@@ -129,49 +192,19 @@ export default function ReelsPage() {
           color: 'white',
           fontSize: '24px',
           textDecoration: 'none',
-          transition: 'opacity 0.3s',
-          opacity: isGalleryMode ? 0 : 1,
-          pointerEvents: isGalleryMode ? 'none' : 'auto'
+          transition: 'opacity 0.3s'
         }}
-        onMouseOver={(e) => e.currentTarget.style.opacity = isGalleryMode ? '0' : '0.5'}
-        onMouseOut={(e) => e.currentTarget.style.opacity = isGalleryMode ? '0' : '1'}
+        onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
+        onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
       >
         ←
       </Link>
 
-      {/* Close Gallery button (appears in gallery mode) */}
-      {isGalleryMode && (
-        <button
-          onClick={closeGallery}
-          style={{
-            position: 'fixed',
-            top: '40px',
-            right: '40px',
-            zIndex: 100,
-            color: 'white',
-            fontSize: '40px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'opacity 0.3s',
-            lineHeight: 1,
-            padding: 0
-          }}
-          onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
-          onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          ×
-        </button>
-      )}
-
       {/* Title */}
       <div style={{
         textAlign: 'center',
-        marginBottom: '60px',
-        paddingTop: '80px',
-        opacity: isGalleryMode ? 0 : 1,
-        transition: 'opacity 0.5s ease',
-        pointerEvents: isGalleryMode ? 'none' : 'auto'
+        marginBottom: '80px',
+        paddingTop: '80px'
       }}>
         <h1 style={{
           color: 'white',
@@ -194,57 +227,52 @@ export default function ReelsPage() {
         </p>
       </div>
 
-      {/* Reels Gallery Container */}
+      {/* Magnetic Gallery Container */}
       <div style={{
+        position: 'relative',
+        minHeight: '800px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: isGalleryMode ? '20px' : '30px',
-        maxWidth: isGalleryMode ? '100%' : '1400px',
-        margin: '0 auto',
-        flexWrap: isGalleryMode ? 'nowrap' : 'wrap',
-        transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-        minHeight: '80vh'
+        justifyContent: 'center'
       }}>
         {actor.reelsGallery.map((videoUrl: string, index: number) => {
-          const isSelected = selectedVideoIndex === index;
-          const isInGalleryMode = selectedVideoIndex !== null;
+          const position = getCardPosition(index);
+          const isSelected = index === selectedVideoIndex;
 
           return (
             <div
               key={index}
               style={{
-                position: 'relative',
-                aspectRatio: '9/16',
+                position: 'absolute',
+                width: position.width,
+                height: position.height,
+                left: position.left,
+                transform: position.transform,
+                opacity: position.opacity,
+                zIndex: position.zIndex,
+                transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                cursor: 'pointer',
+                borderRadius: '20px',
                 overflow: 'hidden',
                 backgroundColor: '#1a1a1a',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                width: isSelected
-                  ? 'clamp(300px, 50vw, 600px)'
-                  : isInGalleryMode
-                    ? 'clamp(100px, 15vw, 200px)'
-                    : 'clamp(280px, 30vw, 400px)',
-                opacity: isInGalleryMode && !isSelected ? 0.5 : 1,
-                transform: isSelected ? 'scale(1)' : isInGalleryMode ? 'scale(0.9)' : 'scale(1)',
-                flexShrink: 0
+                border: isSelected
+                  ? '3px solid rgba(255,255,255,0.4)'
+                  : '1px solid rgba(255,255,255,0.1)',
+                boxShadow: isSelected
+                  ? '0 50px 100px rgba(255,255,255,0.15)'
+                  : 'none'
               }}
+              onClick={() => handleVideoClick(index)}
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={() => handleMouseLeave(index)}
-              onClick={() => handleVideoClick(index)}
               onMouseOver={(e) => {
-                if (!isInGalleryMode || isSelected) {
-                  e.currentTarget.style.transform = isSelected ? 'scale(1.02)' : 'scale(1.02)';
+                if (!isSelected) {
+                  e.currentTarget.style.opacity = String(Math.min(Number(position.opacity) + 0.2, 1));
                 }
               }}
               onMouseOut={(e) => {
-                if (isSelected) {
-                  e.currentTarget.style.transform = 'scale(1)';
-                } else if (isInGalleryMode) {
-                  e.currentTarget.style.transform = 'scale(0.9)';
-                } else {
-                  e.currentTarget.style.transform = 'scale(1)';
+                if (!isSelected) {
+                  e.currentTarget.style.opacity = String(position.opacity);
                 }
               }}
             >
@@ -259,8 +287,7 @@ export default function ReelsPage() {
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover',
-                  transition: 'all 0.3s ease'
+                  objectFit: 'cover'
                 }}
               >
                 <source src={videoUrl} type="video/mp4" />
@@ -273,41 +300,42 @@ export default function ReelsPage() {
                 left: '20px',
                 backgroundColor: 'rgba(0,0,0,0.7)',
                 color: 'white',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                fontSize: '14px',
+                padding: isSelected ? '10px 20px' : '6px 12px',
+                borderRadius: '8px',
+                fontSize: isSelected ? '16px' : '12px',
                 fontWeight: 600,
                 letterSpacing: '0.1em',
-                opacity: isInGalleryMode && !isSelected ? 0 : 1,
-                transition: 'opacity 0.3s ease',
+                opacity: isSelected ? 1 : 0.8,
+                transition: 'all 0.3s ease',
                 pointerEvents: 'none'
               }}>
                 REEL {index + 1}
               </div>
 
-              {/* Play indicator for non-selected in gallery mode */}
-              {isInGalleryMode && !isSelected && (
+              {/* Play indicator for non-selected */}
+              {!isSelected && (
                 <div style={{
                   position: 'absolute',
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: '50px',
-                  height: '50px',
+                  width: position.opacity > 0.4 ? '40px' : '30px',
+                  height: position.opacity > 0.4 ? '40px' : '30px',
                   borderRadius: '50%',
                   backgroundColor: 'rgba(255,255,255,0.3)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.3s ease',
-                  pointerEvents: 'none'
+                  pointerEvents: 'none',
+                  backdropFilter: 'blur(10px)'
                 }}>
                   <div style={{
                     width: 0,
                     height: 0,
-                    borderLeft: '15px solid white',
-                    borderTop: '10px solid transparent',
-                    borderBottom: '10px solid transparent',
+                    borderLeft: position.opacity > 0.4 ? '12px solid white' : '9px solid white',
+                    borderTop: position.opacity > 0.4 ? '8px solid transparent' : '6px solid transparent',
+                    borderBottom: position.opacity > 0.4 ? '8px solid transparent' : '6px solid transparent',
                     marginLeft: '3px'
                   }} />
                 </div>
@@ -317,21 +345,92 @@ export default function ReelsPage() {
         })}
       </div>
 
-      {/* Counter in gallery mode */}
-      {isGalleryMode && (
-        <div style={{
-          position: 'fixed',
-          bottom: '40px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'white',
-          fontSize: '16px',
-          letterSpacing: '0.2em',
-          fontWeight: 300,
-          zIndex: 100
-        }}>
-          REEL {selectedVideoIndex + 1} / {actor.reelsGallery.length}
-        </div>
+      {/* Counter */}
+      <div style={{
+        position: 'fixed',
+        bottom: '40px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        color: 'white',
+        fontSize: '16px',
+        letterSpacing: '0.2em',
+        fontWeight: 300,
+        zIndex: 100
+      }}>
+        REEL {selectedVideoIndex + 1} / {actor.reelsGallery.length}
+      </div>
+
+      {/* Navigation arrows (optional) */}
+      {selectedVideoIndex > 0 && (
+        <button
+          onClick={() => handleVideoClick(selectedVideoIndex - 1)}
+          style={{
+            position: 'fixed',
+            left: '40px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            color: 'white',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            fontSize: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+          }}
+        >
+          ‹
+        </button>
+      )}
+
+      {selectedVideoIndex < actor.reelsGallery.length - 1 && (
+        <button
+          onClick={() => handleVideoClick(selectedVideoIndex + 1)}
+          style={{
+            position: 'fixed',
+            right: '40px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            color: 'white',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            fontSize: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+          }}
+        >
+          ›
+        </button>
       )}
     </main>
   );
