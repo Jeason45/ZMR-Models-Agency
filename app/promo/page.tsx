@@ -21,15 +21,19 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
     <>
       {/* Logo with scroll effect */}
       {!isMenuOpen && (
-        <div style={{
-          position: 'fixed',
-          top: scrollDirection === 'down' ? '-100px' : '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          pointerEvents: 'none',
-          transition: 'top 0.5s ease-in-out'
-        }}>
+        <Link
+          href="/"
+          style={{
+            position: 'fixed',
+            top: scrollDirection === 'down' ? '-100px' : '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'top 0.5s ease-in-out'
+          }}
+        >
           <div style={{ textAlign: 'center' }}>
             <h1 style={{
               color: 'white',
@@ -37,8 +41,12 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               letterSpacing: '0.2em',
               fontSize: 'clamp(35px, 8vw, 110px)',
               lineHeight: 1,
-              margin: 0
-            }}>
+              margin: 0,
+              transition: 'opacity 0.3s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            >
               ZMR
             </h1>
             <p style={{
@@ -52,7 +60,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               Models Agency
             </p>
           </div>
-        </div>
+        </Link>
       )}
 
       {/* Top Right Icons */}
@@ -86,6 +94,30 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             <path d="m21 21-4.35-4.35" strokeLinecap="round" />
           </svg>
         </button>
+
+        {/* Instagram Icon */}
+        <a
+          href="https://www.instagram.com/zmrmodelsagency"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none'
+          }}
+          aria-label="Instagram"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+        </a>
 
         {/* Hamburger Menu */}
         <button

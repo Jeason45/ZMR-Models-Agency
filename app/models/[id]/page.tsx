@@ -20,62 +20,137 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
 
   return (
     <>
-      {/* Top Right Icons */}
-      <div style={{
-        position: 'fixed',
-        top: scrollDirection === 'down' ? '-100px' : '32px',
-        right: '32px',
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px',
-        transition: 'top 0.5s ease-in-out'
-      }}>
-        {/* Search Icon */}
-        <button
-          onClick={() => setIsSearchOpen(!isSearchOpen)}
+      {/* Logo with scroll effect */}
+      {!isMenuOpen && (
+        <Link
+          href="/"
           style={{
-            background: 'none',
-            border: 'none',
+            position: 'fixed',
+            top: scrollDirection === 'down' ? '-100px' : '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            textDecoration: 'none',
             cursor: 'pointer',
-            padding: 0
+            transition: 'top 0.5s ease-in-out'
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" strokeLinecap="round" />
-          </svg>
-        </button>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{
+              color: 'white',
+              fontWeight: 300,
+              letterSpacing: '0.2em',
+              fontSize: 'clamp(35px, 8vw, 110px)',
+              lineHeight: 1,
+              margin: 0,
+              transition: 'opacity 0.3s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              ZMR
+            </h1>
+            <p style={{
+              color: 'white',
+              fontWeight: 300,
+              letterSpacing: '0.4em',
+              fontSize: 'clamp(9px, 1.3vw, 12px)',
+              textTransform: 'uppercase',
+              marginTop: '12px'
+            }}>
+              Models Agency
+            </p>
+          </div>
+        </Link>
+      )}
 
-        {/* Hamburger Menu */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: '32px',
-            height: '32px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0
-          }}
-        >
-          <span style={{
-            width: '100%',
-            height: '2px',
-            backgroundColor: 'white',
-            marginBottom: '8px'
-          }} />
-          <span style={{
-            width: '100%',
-            height: '2px',
-            backgroundColor: 'white'
-          }} />
-        </button>
-      </div>
+      {/* Top Right Icons */}
+      {!isMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: scrollDirection === 'down' ? '-100px' : '32px',
+          right: '32px',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '24px',
+          transition: 'top 0.5s ease-in-out'
+        }}>
+          {/* Search Icon */}
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            aria-label="Search"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" strokeLinecap="round" />
+            </svg>
+          </button>
+
+          {/* Instagram Icon */}
+          <a
+            href="https://www.instagram.com/zmrmodelsagency"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none'
+            }}
+            aria-label="Instagram"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </a>
+
+          {/* Hamburger Menu */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '32px',
+              height: '32px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0
+            }}
+            aria-label="Menu"
+          >
+            <span style={{
+              width: '100%',
+              height: '2px',
+              backgroundColor: 'white',
+              marginBottom: '8px'
+            }} />
+            <span style={{
+              width: '100%',
+              height: '2px',
+              backgroundColor: 'white'
+            }} />
+          </button>
+        </div>
+      )}
 
       {/* Search Overlay */}
       {isSearchOpen && (
