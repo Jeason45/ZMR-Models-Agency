@@ -108,6 +108,7 @@ export async function getActorBySlug(slug: string) {
       skills,
       "showreelVideo": showreelVideo.asset->url,
       "showreelImage": showreelImage.asset->url,
+      "reelsGallery": reelsGallery[].asset->url,
       credits,
       "creditsImage": creditsImage.asset->url,
       "instagramImage": instagramImage.asset->url,

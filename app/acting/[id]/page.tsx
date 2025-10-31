@@ -432,7 +432,7 @@ export default function ActorDetailPage() {
               flexWrap: 'wrap',
               justifyContent: 'center'
             }}>
-              <a href="#showreel" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>SHOWREEL</a>
+              <Link href={`/acting/${actor.slug}/reels`} style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>SHOWREEL</Link>
               <a href="#credits" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>CREDITS</a>
               <a href="#social" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>SOCIAL</a>
             </div>
@@ -517,8 +517,8 @@ export default function ActorDetailPage() {
             }}>
               SHOWREEL
             </h2>
-            <a
-              href="#"
+            <Link
+              href={`/acting/${actor.slug}/reels`}
               style={{
                 color: 'white',
                 fontSize: '14px',
@@ -532,7 +532,7 @@ export default function ActorDetailPage() {
               }}
             >
               VIEW REELS
-            </a>
+            </Link>
           </div>
         </div>
 
