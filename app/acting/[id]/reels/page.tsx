@@ -164,7 +164,9 @@ export default function ReelsPage() {
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             <video
-              ref={(el) => (videoRefs.current[index] = el)}
+              ref={(el) => {
+                videoRefs.current[index] = el;
+              }}
               muted
               loop
               playsInline
