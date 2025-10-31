@@ -105,68 +105,69 @@ export default function ReelsPage() {
 
   const getCardPosition = (index: number) => {
     const diff = index - selectedVideoIndex;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     if (diff === 0) {
       return {
         left: '50%',
         transform: 'translateX(-50%)',
-        width: '420px',
-        height: '747px',
+        width: isMobile ? '280px' : 'clamp(300px, 40vw, 420px)',
+        height: isMobile ? '498px' : 'clamp(533px, 71vw, 747px)',
         opacity: 1,
         zIndex: 10,
         scale: 1
       };
     } else if (diff === -1) {
       return {
-        left: '25%',
+        left: isMobile ? '15%' : '25%',
         transform: 'translateX(-50%) scale(0.8)',
-        width: '150px',
-        height: '267px',
+        width: isMobile ? '100px' : '150px',
+        height: isMobile ? '178px' : '267px',
         opacity: 0.5,
         zIndex: 5
       };
     } else if (diff === -2) {
       return {
-        left: '10%',
+        left: isMobile ? '5%' : '10%',
         transform: 'translateX(-50%) scale(0.6)',
-        width: '150px',
-        height: '267px',
+        width: isMobile ? '100px' : '150px',
+        height: isMobile ? '178px' : '267px',
         opacity: 0.25,
         zIndex: 3
       };
     } else if (diff === 1) {
       return {
-        left: '75%',
+        left: isMobile ? '85%' : '75%',
         transform: 'translateX(-50%) scale(0.8)',
-        width: '150px',
-        height: '267px',
+        width: isMobile ? '100px' : '150px',
+        height: isMobile ? '178px' : '267px',
         opacity: 0.5,
         zIndex: 5
       };
     } else if (diff === 2) {
       return {
-        left: '90%',
+        left: isMobile ? '95%' : '90%',
         transform: 'translateX(-50%) scale(0.6)',
-        width: '150px',
-        height: '267px',
+        width: isMobile ? '100px' : '150px',
+        height: isMobile ? '178px' : '267px',
         opacity: 0.25,
         zIndex: 3
       };
     } else if (diff < -2) {
       return {
-        left: '5%',
+        left: isMobile ? '0%' : '5%',
         transform: 'translateX(-50%) scale(0.5)',
-        width: '150px',
-        height: '267px',
+        width: isMobile ? '100px' : '150px',
+        height: isMobile ? '178px' : '267px',
         opacity: 0.1,
         zIndex: 1
       };
     } else {
       return {
-        left: '95%',
+        left: isMobile ? '100%' : '95%',
         transform: 'translateX(-50%) scale(0.5)',
-        width: '150px',
-        height: '267px',
+        width: isMobile ? '100px' : '150px',
+        height: isMobile ? '178px' : '267px',
         opacity: 0.1,
         zIndex: 1
       };
@@ -177,7 +178,7 @@ export default function ReelsPage() {
     <main style={{
       minHeight: '100vh',
       backgroundColor: '#000',
-      padding: '40px 20px',
+      padding: '20px 10px',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -186,8 +187,8 @@ export default function ReelsPage() {
         href={`/acting/${actorSlug}`}
         style={{
           position: 'fixed',
-          top: '40px',
-          left: '40px',
+          top: '20px',
+          left: '20px',
           zIndex: 100,
           color: 'white',
           fontSize: '24px',
@@ -203,12 +204,12 @@ export default function ReelsPage() {
       {/* Title */}
       <div style={{
         textAlign: 'center',
-        marginBottom: '80px',
-        paddingTop: '80px'
+        marginBottom: 'clamp(40px, 8vh, 80px)',
+        paddingTop: 'clamp(60px, 10vh, 80px)'
       }}>
         <h1 style={{
           color: 'white',
-          fontSize: 'clamp(40px, 8vw, 80px)',
+          fontSize: 'clamp(32px, 8vw, 80px)',
           fontWeight: 900,
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
@@ -218,7 +219,7 @@ export default function ReelsPage() {
         </h1>
         <p style={{
           color: '#999',
-          fontSize: '14px',
+          fontSize: 'clamp(11px, 2vw, 14px)',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           marginTop: '20px'
@@ -230,7 +231,7 @@ export default function ReelsPage() {
       {/* Magnetic Gallery Container */}
       <div style={{
         position: 'relative',
-        minHeight: '800px',
+        minHeight: 'clamp(500px, 80vh, 800px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -257,10 +258,7 @@ export default function ReelsPage() {
                 backgroundColor: '#1a1a1a',
                 border: isSelected
                   ? '3px solid rgba(255,255,255,0.4)'
-                  : '1px solid rgba(255,255,255,0.1)',
-                boxShadow: isSelected
-                  ? '0 50px 100px rgba(255,255,255,0.15)'
-                  : 'none'
+                  : '1px solid rgba(255,255,255,0.1)'
               }}
               onClick={() => handleVideoClick(index)}
               onMouseEnter={() => handleMouseEnter(index)}
