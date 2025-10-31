@@ -363,10 +363,27 @@ export default function ModelsPage() {
 
   // Fetch models from Sanity
   useEffect(() => {
+    const pageStartTime = performance.now();
+    console.log('🚀 DIAGNOSTIC: Page Models - Début chargement');
+
     async function fetchModels() {
       try {
+        const fetchStartTime = performance.now();
         const data = await getAllModels();
+        const fetchEndTime = performance.now();
+
+        console.log(`📥 Fetch terminé: ${(fetchEndTime - fetchStartTime).toFixed(2)}ms`);
+
+        const renderStartTime = performance.now();
         setModels(data);
+
+        requestAnimationFrame(() => {
+          const renderEndTime = performance.now();
+          const totalTime = renderEndTime - pageStartTime;
+          console.log(`🎨 Rendu terminé: ${(renderEndTime - renderStartTime).toFixed(2)}ms`);
+          console.log(`⏱️  TOTAL (Fetch + Rendu): ${totalTime.toFixed(2)}ms`);
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        });
       } catch (error) {
         console.error('Error fetching models:', error);
       } finally {
