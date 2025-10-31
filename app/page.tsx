@@ -68,40 +68,7 @@ export default function Home() {
           </video>
         </div>
 
-        {/* Logo positioned at top with elegant spacing */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          pointerEvents: 'none'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <h1 style={{
-              color: 'white',
-              fontWeight: 300,
-              letterSpacing: '0.2em',
-              fontSize: 'clamp(35px, 8vw, 110px)',
-              lineHeight: 1,
-              margin: 0
-            }}>
-              ZMR
-            </h1>
-            <p style={{
-              color: 'white',
-              fontWeight: 300,
-              letterSpacing: '0.4em',
-              fontSize: 'clamp(9px, 1.3vw, 12px)',
-              textTransform: 'uppercase',
-              marginTop: '12px'
-            }}>
-              Models Agency
-            </p>
-          </div>
-        </div>
-
-        {/* Top Right Icons: Search, Instagram, Hamburger */}
+        {/* Top Right Icons: Search, Hamburger */}
         {!isMenuOpen && (
           <div style={{
             position: 'fixed',
@@ -131,26 +98,6 @@ export default function Home() {
               <path d="m21 21-4.35-4.35" strokeLinecap="round" />
             </svg>
           </button>
-
-          {/* Instagram Icon */}
-          <a
-            href="https://www.instagram.com/zmrmodels/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textDecoration: 'none'
-            }}
-            aria-label="Instagram"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" strokeLinecap="round" />
-            </svg>
-          </a>
 
           {/* Hamburger Menu Button */}
           <button
