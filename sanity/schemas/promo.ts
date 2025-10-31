@@ -20,18 +20,24 @@ export default {
       validation: (Rule: any) => Rule.required(),
     },
     {
-      name: 'category',
-      title: 'Category',
-      type: 'string',
+      name: 'categories',
+      title: 'Categories',
+      description: 'Select one or multiple categories',
+      type: 'array',
+      of: [
+        {
+          type: 'string',
+        },
+      ],
       options: {
         list: [
           { title: 'Beauty & Fashion', value: 'beauty-fashion' },
           { title: 'Luxury Events', value: 'luxury-events' },
           { title: 'Lifestyle', value: 'lifestyle' },
         ],
-        layout: 'radio',
+        layout: 'checkbox',
       },
-      validation: (Rule: any) => Rule.required(),
+      validation: (Rule: any) => Rule.required().min(1),
     },
     {
       name: 'mainImage',
@@ -173,7 +179,15 @@ export default {
     select: {
       title: 'name',
       media: 'mainImage',
-      subtitle: 'category',
+      categories: 'categories',
+    },
+    prepare(selection: any) {
+      const { title, media, categories } = selection;
+      return {
+        title,
+        media,
+        subtitle: categories ? categories.join(', ') : 'No categories',
+      };
     },
   },
 }

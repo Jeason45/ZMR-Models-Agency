@@ -359,10 +359,10 @@ export default function PromoPage() {
     fetchPromos();
   }, []);
 
-  // Filter by category
+  // Filter by category (now checking if selectedCategory is in the categories array)
   const categoryFiltered = selectedCategory === 'all'
     ? promos
-    : promos.filter(p => p.category === selectedCategory);
+    : promos.filter(p => p.categories && p.categories.includes(selectedCategory));
 
   // Filter by search query
   const filteredPromos = categoryFiltered.filter((promo) =>
