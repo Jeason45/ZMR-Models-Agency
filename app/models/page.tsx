@@ -521,21 +521,40 @@ export default function ModelsPage() {
                 width: '100%',
                 height: '100%',
                 backgroundColor: '#1a1a1a',
-                position: 'relative',
-                transition: 'transform 0.3s',
-                transform: hoveredModelId === model._id ? 'scale(1.02)' : 'scale(1)'
+                position: 'relative'
               }}>
-                {/* Model Image */}
+                {/* Main Image */}
                 <img
-                  src={hoveredModelId === model._id && model.hoverImage ? model.hoverImage : model.mainImage}
+                  src={model.mainImage}
                   alt={model.name}
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    transition: 'opacity 0.3s'
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    opacity: hoveredModelId === model._id ? 0 : 1,
+                    transition: 'opacity 0.5s ease-in-out'
                   }}
                 />
+                {/* Hover Image */}
+                {model.hoverImage && (
+                  <img
+                    src={model.hoverImage}
+                    alt={model.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      opacity: hoveredModelId === model._id ? 1 : 0,
+                      transition: 'opacity 0.5s ease-in-out'
+                    }}
+                  />
+                )}
               </div>
             </div>
 
