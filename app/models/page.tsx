@@ -55,16 +55,17 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
       </div>
 
       {/* Top Right Icons */}
-      <div style={{
-        position: 'fixed',
-        top: scrollDirection === 'down' ? '-100px' : '32px',
-        right: '32px',
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px',
-        transition: 'top 0.5s ease-in-out'
-      }}>
+      {!isMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: scrollDirection === 'down' ? '-100px' : '32px',
+          right: '32px',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '24px',
+          transition: 'top 0.5s ease-in-out'
+        }}>
         {/* Search Icon */}
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
@@ -138,7 +139,8 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             transform: isMenuOpen ? 'rotate(-45deg) translateY(-10px)' : 'none'
           }} />
         </button>
-      </div>
+        </div>
+      )}
 
       {/* Search Overlay */}
       {isSearchOpen && (
@@ -218,7 +220,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'white',
+          backgroundColor: 'black',
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
@@ -235,7 +237,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
                 key={item.name}
                 href={item.href}
                 style={{
-                  color: 'black',
+                  color: 'white',
                   fontSize: 'clamp(50px, 8vw, 100px)',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
@@ -261,7 +263,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                color: 'black',
+                color: 'white',
                 fontSize: '14px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.2em',
@@ -298,14 +300,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(-45deg)'
             }} />
           </button>
