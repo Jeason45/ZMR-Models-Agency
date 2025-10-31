@@ -198,14 +198,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: "black",
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: "black",
               transform: 'rotate(-45deg)'
             }} />
           </button>
@@ -220,7 +220,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'black',
+          backgroundColor: "black",
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
@@ -405,7 +405,7 @@ export default function ModelsPage() {
       <Navbar scrollDirection={scrollDirection} />
       <main style={{
         minHeight: '100vh',
-        backgroundColor: '#0a0a0a',
+        backgroundColor: "black",
         paddingTop: '200px',
         paddingBottom: '80px'
       }}>

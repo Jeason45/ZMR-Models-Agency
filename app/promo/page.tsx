@@ -126,7 +126,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           <span style={{
             width: '100%',
             height: '2px',
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             transition: 'all 0.3s',
             marginBottom: '8px',
             transform: isMenuOpen ? 'rotate(45deg) translateY(10px)' : 'none'
@@ -134,7 +134,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           <span style={{
             width: '100%',
             height: '2px',
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             transition: 'all 0.3s',
             transform: isMenuOpen ? 'rotate(-45deg) translateY(-10px)' : 'none'
           }} />
@@ -150,7 +150,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'black',
+          backgroundColor: 'white',
           zIndex: 45,
           display: 'flex',
           alignItems: 'flex-start',
@@ -198,14 +198,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(-45deg)'
             }} />
           </button>
@@ -220,7 +220,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'black',
+          backgroundColor: 'white',
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
@@ -300,14 +300,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'black',
+              backgroundColor: 'white',
               transform: 'rotate(-45deg)'
             }} />
           </button>
@@ -375,7 +375,7 @@ export default function PromoPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: 'white',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
@@ -390,7 +390,7 @@ export default function PromoPage() {
       <Navbar scrollDirection={scrollDirection} />
       <main style={{
         minHeight: '100vh',
-        backgroundColor: '#0a0a0a',
+        backgroundColor: "black",
         paddingTop: '200px',
         paddingBottom: '80px'
       }}>
