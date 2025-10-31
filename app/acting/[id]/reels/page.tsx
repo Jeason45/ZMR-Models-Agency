@@ -11,6 +11,7 @@ export default function ReelsPage() {
   const [actor, setActor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const [viewMode, setViewMode] = useState<'carousel' | 'grid'>('carousel');
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
@@ -65,6 +66,21 @@ export default function ReelsPage() {
         video.pause();
         video.currentTime = 0;
       }
+    }
+  };
+
+  const handleGridMouseEnter = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      video.play();
+    }
+  };
+
+  const handleGridMouseLeave = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
     }
   };
 
@@ -201,6 +217,78 @@ export default function ReelsPage() {
         ←
       </Link>
 
+      {/* View Mode Toggle */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: 100,
+        display: 'flex',
+        gap: '10px',
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        padding: '8px',
+        borderRadius: '12px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(10px)'
+      }}>
+        <button
+          onClick={() => setViewMode('carousel')}
+          style={{
+            background: viewMode === 'carousel' ? 'rgba(255,255,255,0.2)' : 'transparent',
+            border: 'none',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 600,
+            letterSpacing: '0.1em',
+            transition: 'all 0.3s ease',
+            textTransform: 'uppercase'
+          }}
+          onMouseOver={(e) => {
+            if (viewMode !== 'carousel') {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            }
+          }}
+          onMouseOut={(e) => {
+            if (viewMode !== 'carousel') {
+              e.currentTarget.style.background = 'transparent';
+            }
+          }}
+        >
+          Carousel
+        </button>
+        <button
+          onClick={() => setViewMode('grid')}
+          style={{
+            background: viewMode === 'grid' ? 'rgba(255,255,255,0.2)' : 'transparent',
+            border: 'none',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 600,
+            letterSpacing: '0.1em',
+            transition: 'all 0.3s ease',
+            textTransform: 'uppercase'
+          }}
+          onMouseOver={(e) => {
+            if (viewMode !== 'grid') {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            }
+          }}
+          onMouseOut={(e) => {
+            if (viewMode !== 'grid') {
+              e.currentTarget.style.background = 'transparent';
+            }
+          }}
+        >
+          Grid
+        </button>
+      </div>
+
       {/* Title */}
       <div style={{
         textAlign: 'center',
@@ -228,15 +316,88 @@ export default function ReelsPage() {
         </p>
       </div>
 
+      {/* Grid View */}
+      {viewMode === 'grid' && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(250px, 30vw, 350px), 1fr))',
+          gap: 'clamp(20px, 3vw, 40px)',
+          padding: '0 clamp(20px, 5vw, 80px)',
+          maxWidth: '1600px',
+          margin: '0 auto',
+          paddingBottom: '100px'
+        }}>
+          {actor.reelsGallery.map((videoUrl: string, index: number) => (
+            <div
+              key={index}
+              style={{
+                position: 'relative',
+                aspectRatio: '9/16',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                backgroundColor: '#1a1a1a',
+                border: '1px solid rgba(255,255,255,0.1)',
+                cursor: 'pointer',
+                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+              }}
+              onMouseEnter={() => handleGridMouseEnter(index)}
+              onMouseLeave={() => handleGridMouseLeave(index)}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'scale(1.02)';
+                e.currentTarget.style.border = '2px solid rgba(255,255,255,0.3)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.border = '1px solid rgba(255,255,255,0.1)';
+              }}
+            >
+              <video
+                ref={(el) => {
+                  videoRefs.current[index] = el;
+                }}
+                muted
+                loop
+                playsInline
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              >
+                <source src={videoUrl} type="video/mp4" />
+              </video>
+
+              {/* Reel Number Overlay */}
+              <div style={{
+                position: 'absolute',
+                top: '20px',
+                left: '20px',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                backdropFilter: 'blur(10px)'
+              }}>
+                REEL {index + 1}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Magnetic Gallery Container */}
-      <div style={{
-        position: 'relative',
-        minHeight: 'clamp(500px, 80vh, 800px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        {actor.reelsGallery.map((videoUrl: string, index: number) => {
+      {viewMode === 'carousel' && (
+        <div style={{
+          position: 'relative',
+          minHeight: 'clamp(500px, 80vh, 800px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          {actor.reelsGallery.map((videoUrl: string, index: number) => {
           const position = getCardPosition(index);
           const isSelected = index === selectedVideoIndex;
 
@@ -341,25 +502,28 @@ export default function ReelsPage() {
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
 
-      {/* Counter */}
-      <div style={{
-        position: 'fixed',
-        bottom: '40px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        color: 'white',
-        fontSize: '16px',
-        letterSpacing: '0.2em',
-        fontWeight: 300,
-        zIndex: 100
-      }}>
-        REEL {selectedVideoIndex + 1} / {actor.reelsGallery.length}
-      </div>
+      {/* Counter - Only show in carousel mode */}
+      {viewMode === 'carousel' && (
+        <div style={{
+          position: 'fixed',
+          bottom: '40px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: 'white',
+          fontSize: '16px',
+          letterSpacing: '0.2em',
+          fontWeight: 300,
+          zIndex: 100
+        }}>
+          REEL {selectedVideoIndex + 1} / {actor.reelsGallery.length}
+        </div>
+      )}
 
-      {/* Navigation arrows (optional) */}
-      {selectedVideoIndex > 0 && (
+      {/* Navigation arrows - Only show in carousel mode */}
+      {viewMode === 'carousel' && selectedVideoIndex > 0 && (
         <button
           onClick={() => handleVideoClick(selectedVideoIndex - 1)}
           style={{
@@ -395,7 +559,7 @@ export default function ReelsPage() {
         </button>
       )}
 
-      {selectedVideoIndex < actor.reelsGallery.length - 1 && (
+      {viewMode === 'carousel' && selectedVideoIndex < actor.reelsGallery.length - 1 && (
         <button
           onClick={() => handleVideoClick(selectedVideoIndex + 1)}
           style={{
