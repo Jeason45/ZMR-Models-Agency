@@ -405,17 +405,7 @@ export default function ModelsPage() {
   );
 
   if (loading) {
-    return (
-      <main style={{
-        minHeight: '100vh',
-        backgroundColor: '#0a0a0a',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ color: 'white' }}>Loading models...</div>
-      </main>
-    );
+    return null;
   }
 
   return (
