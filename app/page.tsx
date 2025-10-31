@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -280,7 +281,7 @@ export default function Home() {
             gap: '40px'
           }}>
             {menuItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
                 style={{
@@ -295,7 +296,7 @@ export default function Home() {
                 onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
           </nav>
 

@@ -375,12 +375,12 @@ export default function PromoPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'white',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <div>Loading promo talents...</div>
+        <div style={{ color: 'white' }}>Loading promo talents...</div>
       </main>
     );
   }

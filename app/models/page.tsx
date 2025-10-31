@@ -390,12 +390,12 @@ export default function ModelsPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'white',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <div>Loading models...</div>
+        <div style={{ color: 'white' }}>Loading models...</div>
       </main>
     );
   }

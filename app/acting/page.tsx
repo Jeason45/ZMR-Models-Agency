@@ -375,12 +375,12 @@ export default function ActingPage() {
     return (
       <main style={{
         minHeight: '100vh',
-        backgroundColor: 'white',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <div>Loading actors...</div>
+        <div style={{ color: 'white' }}>Loading actors...</div>
       </main>
     );
   }
