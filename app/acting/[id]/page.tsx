@@ -111,16 +111,12 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             width: '100%',
             height: '2px',
             backgroundColor: 'white',
-            transition: 'all 0.3s',
-            marginBottom: '8px',
-            transform: isMenuOpen ? 'rotate(45deg) translateY(10px)' : 'none'
+            marginBottom: '8px'
           }} />
           <span style={{
             width: '100%',
             height: '2px',
-            backgroundColor: 'white',
-            transition: 'all 0.3s',
-            transform: isMenuOpen ? 'rotate(-45deg) translateY(-10px)' : 'none'
+            backgroundColor: 'white'
           }} />
         </button>
       </div>
@@ -202,13 +198,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          padding: '20px'
         }}>
           <nav style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '40px'
+            gap: 'clamp(24px, 5vh, 40px)'
           }}>
             {menuItems.map((item) => (
               <Link
@@ -235,8 +232,8 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             onClick={() => setIsMenuOpen(false)}
             style={{
               position: 'fixed',
-              top: '32px',
-              right: '32px',
+              top: 'clamp(20px, 4vh, 32px)',
+              right: 'clamp(20px, 4vw, 32px)',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
@@ -244,8 +241,11 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               height: '32px',
               background: 'none',
               border: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              padding: 0,
+              zIndex: 50
             }}
+            aria-label="Close Menu"
           >
             <span style={{
               position: 'absolute',
