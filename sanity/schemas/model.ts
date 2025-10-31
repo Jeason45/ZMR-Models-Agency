@@ -97,8 +97,8 @@ export default {
     },
     {
       name: 'instagramImage',
-      title: 'My World (Instagram) - Main Image',
-      description: 'Image shown in the "MY WORLD" section',
+      title: 'Social (Instagram) - Main Image',
+      description: 'Image shown in the "SOCIAL" section',
       type: 'image',
       options: {
         hotspot: true,

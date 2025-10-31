@@ -523,7 +523,7 @@ export default function ModelDetailPage() {
           </div>
         </div>
 
-        {/* 4 & 5. MY WORLD and SHOWS - Side by Side */}
+        {/* 4 & 5. SOCIAL and SHOWS - Side by Side */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
@@ -531,7 +531,7 @@ export default function ModelDetailPage() {
           marginTop: '40px',
           padding: '0 20px'
         }}>
-          {/* MY WORLD Zone */}
+          {/* SOCIAL Zone */}
           <div style={{
             position: 'relative',
             height: '80vh',
@@ -540,7 +540,7 @@ export default function ModelDetailPage() {
           }}>
             <img
               src={model.instagramImage || model.mainImage}
-              alt="My World"
+              alt="Social"
               style={{
                 width: '100%',
                 height: '100%',
@@ -565,7 +565,7 @@ export default function ModelDetailPage() {
                 margin: 0,
                 textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
               }}>
-                MY WORLD
+                SOCIAL
               </h2>
               <a
                 href={model.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
