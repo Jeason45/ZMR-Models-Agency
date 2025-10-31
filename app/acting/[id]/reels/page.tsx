@@ -11,7 +11,7 @@ export default function ReelsPage() {
   const [actor, setActor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
-  const [viewMode, setViewMode] = useState<'carousel' | 'grid'>('carousel');
+  const [viewMode, setViewMode] = useState<'carousel' | 'grid'>('grid');
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
@@ -224,55 +224,28 @@ export default function ReelsPage() {
         right: '20px',
         zIndex: 100,
         display: 'flex',
-        gap: '10px',
+        gap: '8px',
         backgroundColor: 'rgba(255,255,255,0.05)',
         padding: '8px',
         borderRadius: '12px',
         border: '1px solid rgba(255,255,255,0.1)',
         backdropFilter: 'blur(10px)'
       }}>
-        <button
-          onClick={() => setViewMode('carousel')}
-          style={{
-            background: viewMode === 'carousel' ? 'rgba(255,255,255,0.2)' : 'transparent',
-            border: 'none',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 600,
-            letterSpacing: '0.1em',
-            transition: 'all 0.3s ease',
-            textTransform: 'uppercase'
-          }}
-          onMouseOver={(e) => {
-            if (viewMode !== 'carousel') {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-            }
-          }}
-          onMouseOut={(e) => {
-            if (viewMode !== 'carousel') {
-              e.currentTarget.style.background = 'transparent';
-            }
-          }}
-        >
-          Carousel
-        </button>
+        {/* Grid View Button */}
         <button
           onClick={() => setViewMode('grid')}
           style={{
             background: viewMode === 'grid' ? 'rgba(255,255,255,0.2)' : 'transparent',
             border: 'none',
             color: 'white',
-            padding: '10px 20px',
+            padding: '12px',
             borderRadius: '8px',
             cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 600,
-            letterSpacing: '0.1em',
+            fontSize: '18px',
             transition: 'all 0.3s ease',
-            textTransform: 'uppercase'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           onMouseOver={(e) => {
             if (viewMode !== 'grid') {
@@ -284,8 +257,48 @@ export default function ReelsPage() {
               e.currentTarget.style.background = 'transparent';
             }
           }}
+          title="Grid View"
         >
-          Grid
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+
+        {/* Carousel View Button */}
+        <button
+          onClick={() => setViewMode('carousel')}
+          style={{
+            background: viewMode === 'carousel' ? 'rgba(255,255,255,0.2)' : 'transparent',
+            border: 'none',
+            color: 'white',
+            padding: '12px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '18px',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          onMouseOver={(e) => {
+            if (viewMode !== 'carousel') {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            }
+          }}
+          onMouseOut={(e) => {
+            if (viewMode !== 'carousel') {
+              e.currentTarget.style.background = 'transparent';
+            }
+          }}
+          title="Carousel View"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+          </svg>
         </button>
       </div>
 
