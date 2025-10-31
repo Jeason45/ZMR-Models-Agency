@@ -205,7 +205,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 'clamp(24px, 5vh, 40px)'
+            gap: 'clamp(16px, 3vh, 32px)'
           }}>
             {menuItems.map((item) => (
               <Link
@@ -214,7 +214,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
                 prefetch={true}
                 style={{
                   color: 'white',
-                  fontSize: 'clamp(50px, 8vw, 100px)',
+                  fontSize: 'clamp(32px, 6vw, 100px)',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
                   textDecoration: 'none',
