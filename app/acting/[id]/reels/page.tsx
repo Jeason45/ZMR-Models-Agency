@@ -216,23 +216,6 @@ export default function ReelsPage() {
             >
               <source src={videoUrl} type="video/mp4" />
             </video>
-
-            {/* Reel Number Overlay */}
-            <div style={{
-              position: 'absolute',
-              top: '20px',
-              left: '20px',
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              color: 'white',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              backdropFilter: 'blur(10px)'
-            }}>
-              REEL {index + 1}
-            </div>
           </div>
         ))}
       </div>
