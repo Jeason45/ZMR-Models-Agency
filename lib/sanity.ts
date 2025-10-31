@@ -72,3 +72,155 @@ export async function getModelBySlug(slug: string) {
     { slug }
   )
 }
+
+// ====== ACTORS ======
+
+// Query to get all actors
+export async function getAllActors() {
+  return client.fetch(
+    `*[_type == "actor"] | order(name asc) {
+      _id,
+      name,
+      "slug": slug.current,
+      category,
+      "mainImage": mainImage.asset->url,
+      "hoverImage": hoverImage.asset->url,
+      ageRange,
+      languages,
+      skills
+    }`
+  )
+}
+
+// Query to get a single actor by slug
+export async function getActorBySlug(slug: string) {
+  return client.fetch(
+    `*[_type == "actor" && slug.current == $slug][0] {
+      _id,
+      name,
+      "slug": slug.current,
+      category,
+      "mainImage": mainImage.asset->url,
+      "hoverImage": hoverImage.asset->url,
+      "heroVideo": heroVideo.asset->url,
+      ageRange,
+      languages,
+      skills,
+      "showreelVideo": showreelVideo.asset->url,
+      "showreelImage": showreelImage.asset->url,
+      credits,
+      "creditsImage": creditsImage.asset->url,
+      "instagramImage": instagramImage.asset->url,
+      instagramUrl,
+      height,
+      eyes,
+      hair
+    }`,
+    { slug }
+  )
+}
+
+// ====== PROMO ======
+
+// Query to get all promo talents
+export async function getAllPromos() {
+  return client.fetch(
+    `*[_type == "promo"] | order(name asc) {
+      _id,
+      name,
+      "slug": slug.current,
+      category,
+      "mainImage": mainImage.asset->url,
+      "hoverImage": hoverImage.asset->url,
+      instagramFollowers,
+      tiktokFollowers
+    }`
+  )
+}
+
+// Query to get a single promo by slug
+export async function getPromoBySlug(slug: string) {
+  return client.fetch(
+    `*[_type == "promo" && slug.current == $slug][0] {
+      _id,
+      name,
+      "slug": slug.current,
+      category,
+      "mainImage": mainImage.asset->url,
+      "hoverImage": hoverImage.asset->url,
+      "heroVideo": heroVideo.asset->url,
+      instagramFollowers,
+      tiktokFollowers,
+      instagramUrl,
+      tiktokUrl,
+      collaborations[] {
+        brandName,
+        "logo": logo.asset->url,
+        "campaignImage": campaignImage.asset->url
+      },
+      "collaborationsImage": collaborationsImage.asset->url,
+      "eventsGallery": eventsGallery[].asset->url,
+      "eventsImage": eventsImage.asset->url,
+      "socialImage": socialImage.asset->url,
+      height,
+      eyes,
+      hair
+    }`,
+    { slug }
+  )
+}
+
+// ====== DETAILS ======
+
+// Query to get all details
+export async function getAllDetails() {
+  return client.fetch(
+    `*[_type == "detail"] | order(name asc) {
+      _id,
+      name,
+      "slug": slug.current,
+      category,
+      "mainImage": mainImage.asset->url,
+      "hoverImage": hoverImage.asset->url
+    }`
+  )
+}
+
+// Query to get a single detail by slug
+export async function getDetailBySlug(slug: string) {
+  return client.fetch(
+    `*[_type == "detail" && slug.current == $slug][0] {
+      _id,
+      name,
+      "slug": slug.current,
+      category,
+      "mainImage": mainImage.asset->url,
+      "hoverImage": hoverImage.asset->url,
+      "heroImage": heroImage.asset->url,
+      handSize,
+      ringSize,
+      wristSize,
+      footSize,
+      legLength,
+      neckSize,
+      waist,
+      hips,
+      bust,
+      height,
+      "portfolioGallery": portfolioGallery[].asset->url,
+      "portfolioImage": portfolioImage.asset->url,
+      campaigns[] {
+        brandName,
+        "logo": logo.asset->url,
+        "campaignImage": campaignImage.asset->url
+      },
+      "campaignsImage": campaignsImage.asset->url,
+      "instagramImage": instagramImage.asset->url,
+      instagramUrl,
+      eyes,
+      hair,
+      skinTone
+    }`,
+    { slug }
+  )
+}
