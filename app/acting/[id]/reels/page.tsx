@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getActorBySlug } from '@/lib/sanity';
@@ -10,6 +10,8 @@ export default function ReelsPage() {
   const actorSlug = params.id as string;
   const [actor, setActor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState<number | null>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
     async function fetchActor() {
@@ -24,6 +26,29 @@ export default function ReelsPage() {
     }
     fetchActor();
   }, [actorSlug]);
+
+  const handleMouseEnter = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      video.play();
+    }
+  };
+
+  const handleMouseLeave = (index: number) => {
+    const video = videoRefs.current[index];
+    if (video) {
+      video.pause();
+      video.currentTime = 0; // Reset to start
+    }
+  };
+
+  const handleVideoClick = (index: number) => {
+    setSelectedVideoIndex(index);
+  };
+
+  const closeFullscreen = () => {
+    setSelectedVideoIndex(null);
+  };
 
   if (loading) {
     return (
@@ -132,11 +157,14 @@ export default function ReelsPage() {
               cursor: 'pointer',
               transition: 'transform 0.3s'
             }}
+            onMouseEnter={() => handleMouseEnter(index)}
+            onMouseLeave={() => handleMouseLeave(index)}
+            onClick={() => handleVideoClick(index)}
             onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
             onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             <video
-              autoPlay
+              ref={(el) => (videoRefs.current[index] = el)}
               muted
               loop
               playsInline
@@ -167,6 +195,84 @@ export default function ReelsPage() {
           </div>
         ))}
       </div>
+
+      {/* Fullscreen Video Modal */}
+      {selectedVideoIndex !== null && (
+        <div
+          onClick={closeFullscreen}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+        >
+          {/* Close button */}
+          <button
+            onClick={closeFullscreen}
+            style={{
+              position: 'absolute',
+              top: '40px',
+              right: '40px',
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontSize: '40px',
+              cursor: 'pointer',
+              zIndex: 1001,
+              lineHeight: 1,
+              padding: 0
+            }}
+          >
+            ×
+          </button>
+
+          {/* Video container */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              width: '90%',
+              maxWidth: '600px',
+              aspectRatio: '9/16'
+            }}
+          >
+            <video
+              autoPlay
+              controls
+              loop
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain'
+              }}
+            >
+              <source src={actor.reelsGallery[selectedVideoIndex]} type="video/mp4" />
+            </video>
+          </div>
+
+          {/* Reel number indicator */}
+          <div style={{
+            position: 'absolute',
+            bottom: '40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'white',
+            fontSize: '18px',
+            letterSpacing: '0.2em',
+            fontWeight: 300
+          }}>
+            REEL {selectedVideoIndex + 1} / {actor.reelsGallery.length}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
