@@ -198,7 +198,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'white',
+          backgroundColor: '#0a0a0a',
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
@@ -211,11 +211,12 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             gap: '40px'
           }}>
             {menuItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 style={{
-                  color: 'black',
+                  color: 'white',
                   fontSize: 'clamp(50px, 8vw, 100px)',
                   fontWeight: 300,
                   letterSpacing: '-0.02em',
@@ -226,7 +227,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
                 onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -250,14 +251,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: '#0a0a0a',
+              backgroundColor: 'white',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: '#0a0a0a',
+              backgroundColor: 'white',
               transform: 'rotate(-45deg)'
             }} />
           </button>
