@@ -198,14 +198,14 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'white',
+              backgroundColor: 'black',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: 'white',
+              backgroundColor: 'black',
               transform: 'rotate(-45deg)'
             }} />
           </button>
@@ -220,7 +220,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'white',
+          backgroundColor: '#0a0a0a',
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
