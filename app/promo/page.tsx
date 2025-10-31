@@ -233,9 +233,10 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             gap: '40px'
           }}>
             {menuItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 style={{
                   color: 'white',
                   fontSize: 'clamp(50px, 8vw, 100px)',
@@ -248,7 +249,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
                 onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
           </nav>
 

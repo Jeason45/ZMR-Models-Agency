@@ -5,7 +5,7 @@ export const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id',
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
   apiVersion: '2024-01-01',
-  useCdn: true,
+  useCdn: false, // Désactivé pour bénéficier du cache Vercel
 })
 
 const builder = imageUrlBuilder(client)
@@ -16,8 +16,7 @@ export function urlFor(source: any) {
 
 // Query to get all models
 export async function getAllModels() {
-  const startTime = performance.now();
-  const result = await client.fetch(
+  return client.fetch(
     `*[_type == "model"] | order(name asc) {
       _id,
       name,
@@ -38,13 +37,6 @@ export async function getAllModels() {
       hair
     }`
   )
-  const endTime = performance.now();
-  const dataSize = JSON.stringify(result).length;
-  console.log('🔍 DIAGNOSTIC getAllModels:');
-  console.log(`⏱️  Temps API: ${(endTime - startTime).toFixed(2)}ms`);
-  console.log(`📦 Taille données: ${(dataSize / 1024).toFixed(2)} KB`);
-  console.log(`👤 Nombre models: ${result.length}`);
-  return result;
 }
 
 // Query to get a single model by slug
@@ -85,8 +77,7 @@ export async function getModelBySlug(slug: string) {
 
 // Query to get all actors
 export async function getAllActors() {
-  const startTime = performance.now();
-  const result = await client.fetch(
+  return client.fetch(
     `*[_type == "actor"] | order(name asc) {
       _id,
       name,
@@ -99,13 +90,6 @@ export async function getAllActors() {
       skills
     }`
   )
-  const endTime = performance.now();
-  const dataSize = JSON.stringify(result).length;
-  console.log('🔍 DIAGNOSTIC getAllActors:');
-  console.log(`⏱️  Temps API: ${(endTime - startTime).toFixed(2)}ms`);
-  console.log(`📦 Taille données: ${(dataSize / 1024).toFixed(2)} KB`);
-  console.log(`🎭 Nombre actors: ${result.length}`);
-  return result;
 }
 
 // Query to get a single actor by slug
@@ -141,8 +125,7 @@ export async function getActorBySlug(slug: string) {
 
 // Query to get all promo talents
 export async function getAllPromos() {
-  const startTime = performance.now();
-  const result = await client.fetch(
+  return client.fetch(
     `*[_type == "promo"] | order(name asc) {
       _id,
       name,
@@ -154,13 +137,6 @@ export async function getAllPromos() {
       tiktokFollowers
     }`
   )
-  const endTime = performance.now();
-  const dataSize = JSON.stringify(result).length;
-  console.log('🔍 DIAGNOSTIC getAllPromos:');
-  console.log(`⏱️  Temps API: ${(endTime - startTime).toFixed(2)}ms`);
-  console.log(`📦 Taille données: ${(dataSize / 1024).toFixed(2)} KB`);
-  console.log(`📣 Nombre promos: ${result.length}`);
-  return result;
 }
 
 // Query to get a single promo by slug
