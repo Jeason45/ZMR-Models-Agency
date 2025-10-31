@@ -19,6 +19,42 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
 
   return (
     <>
+      {/* Logo with scroll effect */}
+      {!isMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: scrollDirection === 'down' ? '-100px' : '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          pointerEvents: 'none',
+          transition: 'top 0.5s ease-in-out'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{
+              color: 'white',
+              fontWeight: 300,
+              letterSpacing: '0.2em',
+              fontSize: 'clamp(35px, 8vw, 110px)',
+              lineHeight: 1,
+              margin: 0
+            }}>
+              ZMR
+            </h1>
+            <p style={{
+              color: 'white',
+              fontWeight: 300,
+              letterSpacing: '0.4em',
+              fontSize: 'clamp(9px, 1.3vw, 12px)',
+              textTransform: 'uppercase',
+              marginTop: '12px'
+            }}>
+              Models Agency
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Top Right Icons */}
       {!isMenuOpen && (
         <div style={{
