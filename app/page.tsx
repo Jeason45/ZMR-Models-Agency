@@ -31,7 +31,14 @@ export default function Home() {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.load();
-      videoRef.current.play();
+      const playPromise = videoRef.current.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // Auto-play was prevented, ignore the error
+          console.log('Video playback prevented:', error);
+        });
+      }
     }
   }, [currentVideoIndex]);
 
