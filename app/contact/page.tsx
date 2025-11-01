@@ -1,22 +1,59 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function ContactPage() {
-  useEffect(() => {
-    // Charger le script Calendly
-    const script = document.createElement('script');
-    script.src = 'https://assets.calendly.com/assets/external/widget.js';
-    script.async = true;
-    document.body.appendChild(script);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...formData,
+          source: 'website'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'envoi du message');
       }
-    };
-  }, []);
+
+      setSuccess(true);
+      setFormData({ name: '', email: '', phone: '', message: '' });
+
+      setTimeout(() => {
+        setSuccess(false);
+      }, 5000);
+    } catch (err) {
+      setError('Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   return (
     <main style={{
@@ -59,7 +96,7 @@ export default function ContactPage() {
           marginBottom: '20px',
           letterSpacing: '0.05em'
         }}>
-          PRENEZ RENDEZ-VOUS
+          CONTACTEZ-NOUS
         </h1>
         <div style={{
           width: '60px',
@@ -76,28 +113,251 @@ export default function ContactPage() {
           fontWeight: 300,
           letterSpacing: '0.02em'
         }}>
-          Réservez un créneau pour discuter de votre projet avec notre agence.
-          Choisissez l'horaire qui vous convient le mieux.
+          Vous avez un projet ? Une question ? N'hésitez pas à nous contacter.
+          Nous vous répondrons dans les plus brefs délais.
         </p>
       </div>
 
-      {/* Calendly Widget */}
+      {/* Form Section */}
       <div style={{
-        maxWidth: '1000px',
+        maxWidth: '700px',
         margin: '0 auto',
-        padding: '0 20px 60px',
-        minHeight: '700px'
+        padding: '0 20px 80px'
       }}>
-        <div
-          className="calendly-inline-widget"
-          data-url="https://calendly.com/jlwebdesign33?hide_landing_page_details=1&hide_gdpr_banner=1&background_color=1a1a1a&text_color=ffffff&primary_color=a855f7"
-          style={{
-            minWidth: '320px',
-            height: '700px',
+        {success && (
+          <div style={{
+            padding: '20px',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
             borderRadius: '8px',
-            overflow: 'hidden'
-          }}
-        />
+            marginBottom: '30px',
+            color: '#10b981',
+            textAlign: 'center',
+            fontSize: '15px',
+            fontWeight: 500
+          }}>
+            Merci pour votre message ! Nous vous contacterons très bientôt.
+          </div>
+        )}
+
+        {error && (
+          <div style={{
+            padding: '20px',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '8px',
+            marginBottom: '30px',
+            color: '#ef4444',
+            textAlign: 'center',
+            fontSize: '15px',
+            fontWeight: 500
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '25px'
+        }}>
+          {/* Name */}
+          <div>
+            <label style={{
+              display: 'block',
+              marginBottom: '10px',
+              fontSize: '13px',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#9ca3af'
+            }}>
+              Nom complet *
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '4px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: 300,
+                transition: 'all 0.3s',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                e.target.style.borderColor = 'rgba(168,85,247,0.5)';
+              }}
+              onBlur={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+              }}
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label style={{
+              display: 'block',
+              marginBottom: '10px',
+              fontSize: '13px',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#9ca3af'
+            }}>
+              Email *
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '4px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: 300,
+                transition: 'all 0.3s',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                e.target.style.borderColor = 'rgba(168,85,247,0.5)';
+              }}
+              onBlur={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+              }}
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label style={{
+              display: 'block',
+              marginBottom: '10px',
+              fontSize: '13px',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#9ca3af'
+            }}>
+              Téléphone
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '4px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: 300,
+                transition: 'all 0.3s',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                e.target.style.borderColor = 'rgba(168,85,247,0.5)';
+              }}
+              onBlur={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+              }}
+            />
+          </div>
+
+          {/* Message */}
+          <div>
+            <label style={{
+              display: 'block',
+              marginBottom: '10px',
+              fontSize: '13px',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: '#9ca3af'
+            }}>
+              Message *
+            </label>
+            <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              required
+              rows={6}
+              style={{
+                width: '100%',
+                padding: '16px 20px',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '4px',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: 300,
+                transition: 'all 0.3s',
+                outline: 'none',
+                resize: 'vertical',
+                fontFamily: 'inherit'
+              }}
+              onFocus={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.08)';
+                e.target.style.borderColor = 'rgba(168,85,247,0.5)';
+              }}
+              onBlur={(e) => {
+                e.target.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+              }}
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              padding: '18px 40px',
+              backgroundColor: loading ? 'rgba(168,85,247,0.5)' : 'rgba(168,85,247,0.9)',
+              border: 'none',
+              borderRadius: '4px',
+              color: 'white',
+              fontSize: '15px',
+              fontWeight: 500,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s',
+              marginTop: '10px'
+            }}
+            onMouseOver={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = '#a855f7';
+            }}
+            onMouseOut={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = 'rgba(168,85,247,0.9)';
+            }}
+          >
+            {loading ? 'Envoi en cours...' : 'Envoyer le message'}
+          </button>
+        </form>
       </div>
 
       {/* Info Section */}
@@ -121,7 +381,7 @@ export default function ContactPage() {
             <div style={{
               fontSize: '2.5rem',
               marginBottom: '20px'
-            }}>📞</div>
+            }}>⏱️</div>
             <h3 style={{
               fontSize: '0.9rem',
               marginBottom: '12px',
@@ -130,7 +390,7 @@ export default function ContactPage() {
               letterSpacing: '0.1em',
               textTransform: 'uppercase'
             }}>
-              Consultation personnalisée
+              Réponse rapide
             </h3>
             <p style={{
               color: '#9ca3af',
@@ -138,7 +398,7 @@ export default function ContactPage() {
               lineHeight: 1.6,
               fontWeight: 300
             }}>
-              Échangez directement avec notre équipe pour vos projets
+              Nous vous répondons sous 24h ouvrées
             </p>
           </div>
 
@@ -152,7 +412,7 @@ export default function ContactPage() {
             <div style={{
               fontSize: '2.5rem',
               marginBottom: '20px'
-            }}>⏰</div>
+            }}>🔒</div>
             <h3 style={{
               fontSize: '0.9rem',
               marginBottom: '12px',
@@ -161,7 +421,7 @@ export default function ContactPage() {
               letterSpacing: '0.1em',
               textTransform: 'uppercase'
             }}>
-              Flexible et rapide
+              Confidentialité
             </h3>
             <p style={{
               color: '#9ca3af',
@@ -169,7 +429,7 @@ export default function ContactPage() {
               lineHeight: 1.6,
               fontWeight: 300
             }}>
-              Choisissez le créneau qui vous convient le mieux
+              Vos données sont protégées et sécurisées
             </p>
           </div>
 
@@ -183,7 +443,7 @@ export default function ContactPage() {
             <div style={{
               fontSize: '2.5rem',
               marginBottom: '20px'
-            }}>✉️</div>
+            }}>💼</div>
             <h3 style={{
               fontSize: '0.9rem',
               marginBottom: '12px',
@@ -192,7 +452,7 @@ export default function ContactPage() {
               letterSpacing: '0.1em',
               textTransform: 'uppercase'
             }}>
-              Confirmation automatique
+              Professionnel
             </h3>
             <p style={{
               color: '#9ca3af',
@@ -200,7 +460,7 @@ export default function ContactPage() {
               lineHeight: 1.6,
               fontWeight: 300
             }}>
-              Recevez une confirmation par email instantanément
+              Une équipe dédiée à votre projet
             </p>
           </div>
         </div>
