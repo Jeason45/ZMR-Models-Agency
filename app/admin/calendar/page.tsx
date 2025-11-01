@@ -30,9 +30,11 @@ export default function CalendarPage() {
   const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'schedule' | 'appointments'>('schedule');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'schedule' | 'appointments'>('calendar');
   const [editingDay, setEditingDay] = useState<number | null>(null);
   const [formData, setFormData] = useState({ startTime: '09:00', endTime: '18:00' });
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const daysOfWeek = [
     { value: 1, label: 'Lundi' },
@@ -115,10 +117,63 @@ export default function CalendarPage() {
   };
 
   const getUpcomingAppointments = () => {
-    return appointments
+    const filtered = statusFilter === 'all'
+      ? appointments
+      : appointments.filter(apt => apt.status === statusFilter);
+
+    return filtered
       .filter(apt => new Date(apt.date) > new Date())
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   };
+
+  const handleUpdateAppointmentStatus = async (id: string, status: string) => {
+    try {
+      await fetch('/api/appointments', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      fetchData();
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+    }
+  };
+
+  const getAppointmentsForDate = (date: Date) => {
+    return appointments.filter(apt => {
+      const aptDate = new Date(apt.date);
+      return aptDate.toDateString() === date.toDateString();
+    });
+  };
+
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    // Add empty cells for days before month starts
+    for (let i = 0; i < (startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1); i++) {
+      days.push(null);
+    }
+    // Add actual days
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(year, month, day));
+    }
+    return days;
+  };
+
+  const getStats = () => {
+    const pending = appointments.filter(a => a.status === 'pending').length;
+    const confirmed = appointments.filter(a => a.status === 'confirmed').length;
+    const upcoming = getUpcomingAppointments().length;
+    return { pending, confirmed, upcoming, total: appointments.length };
+  };
+
+  const stats = getStats();
 
   const getStatusColor = (status: string) => {
     switch(status) {
@@ -164,6 +219,71 @@ export default function CalendarPage() {
           </p>
         </div>
 
+        {/* Statistics Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '20px',
+          marginBottom: '32px'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>
+              TOTAL RENDEZ-VOUS
+            </p>
+            <p style={{ fontSize: '32px', fontWeight: 700, color: '#0f172a' }}>
+              {stats.total}
+            </p>
+          </div>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>
+              À VENIR
+            </p>
+            <p style={{ fontSize: '32px', fontWeight: 700, color: '#6366f1' }}>
+              {stats.upcoming}
+            </p>
+          </div>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>
+              EN ATTENTE
+            </p>
+            <p style={{ fontSize: '32px', fontWeight: 700, color: '#f59e0b' }}>
+              {stats.pending}
+            </p>
+          </div>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>
+              CONFIRMÉS
+            </p>
+            <p style={{ fontSize: '32px', fontWeight: 700, color: '#10b981' }}>
+              {stats.confirmed}
+            </p>
+          </div>
+        </div>
+
         {/* Tabs */}
         <div style={{
           display: 'flex',
@@ -171,6 +291,23 @@ export default function CalendarPage() {
           marginBottom: '32px',
           borderBottom: '2px solid #e2e8f0'
         }}>
+          <button
+            onClick={() => setActiveTab('calendar')}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: `3px solid ${activeTab === 'calendar' ? '#6366f1' : 'transparent'}`,
+              color: activeTab === 'calendar' ? '#6366f1' : '#64748b',
+              fontSize: '15px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              marginBottom: '-2px',
+              transition: 'all 0.2s'
+            }}
+          >
+            Vue Calendrier
+          </button>
           <button
             onClick={() => setActiveTab('schedule')}
             style={{
@@ -206,6 +343,156 @@ export default function CalendarPage() {
             Rendez-vous ({getUpcomingAppointments().length})
           </button>
         </div>
+
+        {/* Calendar View Tab */}
+        {activeTab === 'calendar' && (
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            border: '1px solid #e2e8f0',
+            padding: '32px'
+          }}>
+            {/* Month Navigation */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              <button
+                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: '#64748b'
+                }}
+              >
+                ← Mois précédent
+              </button>
+              <h3 style={{
+                fontSize: '20px',
+                fontWeight: 600,
+                color: '#0f172a'
+              }}>
+                {currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+              </h3>
+              <button
+                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: '#64748b'
+                }}
+              >
+                Mois suivant →
+              </button>
+            </div>
+
+            {/* Calendar Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: '8px'
+            }}>
+              {/* Day headers */}
+              {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
+                <div key={day} style={{
+                  padding: '12px',
+                  textAlign: 'center',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: '#64748b'
+                }}>
+                  {day}
+                </div>
+              ))}
+
+              {/* Calendar days */}
+              {getDaysInMonth(currentMonth).map((date, index) => {
+                if (!date) {
+                  return <div key={`empty-${index}`} />;
+                }
+
+                const dayAppointments = getAppointmentsForDate(date);
+                const isToday = date.toDateString() === new Date().toDateString();
+
+                return (
+                  <div
+                    key={date.toISOString()}
+                    style={{
+                      minHeight: '100px',
+                      padding: '8px',
+                      backgroundColor: isToday ? '#f0f9ff' : '#f8fafc',
+                      border: `2px solid ${isToday ? '#3b82f6' : '#e2e8f0'}`,
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => {
+                      if (!isToday) e.currentTarget.style.backgroundColor = '#f1f5f9';
+                    }}
+                    onMouseOut={(e) => {
+                      if (!isToday) e.currentTarget.style.backgroundColor = '#f8fafc';
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: isToday ? 700 : 500,
+                      color: isToday ? '#3b82f6' : '#0f172a',
+                      marginBottom: '4px'
+                    }}>
+                      {date.getDate()}
+                    </div>
+                    {dayAppointments.slice(0, 2).map(apt => {
+                      const statusInfo = getStatusColor(apt.status);
+                      return (
+                        <div
+                          key={apt.id}
+                          style={{
+                            padding: '4px 6px',
+                            backgroundColor: statusInfo.bg,
+                            borderLeft: `3px solid ${statusInfo.text}`,
+                            borderRadius: '4px',
+                            marginBottom: '4px',
+                            fontSize: '11px',
+                            fontWeight: 500,
+                            color: statusInfo.text,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {new Date(apt.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      );
+                    })}
+                    {dayAppointments.length > 2 && (
+                      <div style={{
+                        fontSize: '10px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginTop: '2px'
+                      }}>
+                        +{dayAppointments.length - 2} autre{dayAppointments.length - 2 > 1 ? 's' : ''}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Schedule Tab */}
         {activeTab === 'schedule' && (
@@ -385,14 +672,50 @@ export default function CalendarPage() {
 
         {/* Appointments Tab */}
         {activeTab === 'appointments' && (
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            border: '1px solid #e2e8f0',
-            overflow: 'hidden'
-          }}>
-            {getUpcomingAppointments().length === 0 ? (
+          <div>
+            {/* Status Filters */}
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              marginBottom: '20px',
+              backgroundColor: 'white',
+              padding: '6px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              width: 'fit-content'
+            }}>
+              {['all', 'pending', 'confirmed', 'cancelled', 'completed'].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: statusFilter === status ? '#6366f1' : 'transparent',
+                    color: statusFilter === status ? 'white' : '#64748b',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {status === 'all' ? 'Tous' :
+                   status === 'pending' ? 'En attente' :
+                   status === 'confirmed' ? 'Confirmés' :
+                   status === 'cancelled' ? 'Annulés' : 'Terminés'}
+                </button>
+              ))}
+            </div>
+
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden'
+            }}>
+              {getUpcomingAppointments().length === 0 ? (
               <div style={{
                 padding: '60px 20px',
                 textAlign: 'center',
@@ -544,10 +867,121 @@ export default function CalendarPage() {
                         </p>
                       </div>
                     )}
+
+                    {/* Action Buttons */}
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px',
+                      marginTop: '16px',
+                      paddingTop: '16px',
+                      borderTop: '1px solid #f1f5f9'
+                    }}>
+                      {appointment.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleUpdateAppointmentStatus(appointment.id, 'confirmed')}
+                            style={{
+                              flex: 1,
+                              padding: '10px 16px',
+                              backgroundColor: '#10b981',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#059669'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+                          >
+                            ✓ Confirmer
+                          </button>
+                          <button
+                            onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
+                            style={{
+                              flex: 1,
+                              padding: '10px 16px',
+                              backgroundColor: '#ef4444',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+                          >
+                            ✕ Annuler
+                          </button>
+                        </>
+                      )}
+                      {appointment.status === 'confirmed' && (
+                        <>
+                          <button
+                            onClick={() => handleUpdateAppointmentStatus(appointment.id, 'completed')}
+                            style={{
+                              flex: 1,
+                              padding: '10px 16px',
+                              backgroundColor: '#6366f1',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
+                          >
+                            ✓ Marquer comme terminé
+                          </button>
+                          <button
+                            onClick={() => handleUpdateAppointmentStatus(appointment.id, 'cancelled')}
+                            style={{
+                              padding: '10px 16px',
+                              backgroundColor: '#fee2e2',
+                              color: '#991b1b',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            Annuler
+                          </button>
+                        </>
+                      )}
+                      {appointment.status === 'cancelled' && (
+                        <button
+                          onClick={() => handleUpdateAppointmentStatus(appointment.id, 'pending')}
+                          style={{
+                            flex: 1,
+                            padding: '10px 16px',
+                            backgroundColor: '#f59e0b',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          Réactiver
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })
             )}
+            </div>
           </div>
         )}
       </div>
