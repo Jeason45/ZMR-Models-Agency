@@ -45,6 +45,7 @@ export default function ContactsPage() {
   const [statusFilter, setStatusFilter] = useState<ContactStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     fetchContacts();
@@ -189,6 +190,101 @@ export default function ContactsPage() {
     );
   };
 
+  const exportToCSV = () => {
+    const csvData = filteredContacts.map(contact => ({
+      Nom: contact.name,
+      Email: contact.email,
+      Téléphone: contact.phone || '',
+      Statut: STATUS_CONFIG[contact.status].label,
+      Source: contact.source,
+      Message: contact.message?.replace(/\n/g, ' ') || '',
+      'Date de création': formatShortDate(contact.createdAt),
+      'Nombre de RDV': contact.appointments.length
+    }));
+
+    const headers = Object.keys(csvData[0] || {});
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row =>
+        headers.map(header => {
+          const value = row[header as keyof typeof row];
+          const escaped = String(value).replace(/"/g, '""');
+          return `"${escaped}"`;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `contacts_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+      const nameIndex = headers.findIndex(h => h.toLowerCase().includes('nom'));
+      const emailIndex = headers.findIndex(h => h.toLowerCase().includes('email'));
+      const phoneIndex = headers.findIndex(h => h.toLowerCase().includes('tél') || h.toLowerCase().includes('phone'));
+      const messageIndex = headers.findIndex(h => h.toLowerCase().includes('message'));
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+
+        const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+
+        const name = values[nameIndex]?.trim();
+        const email = values[emailIndex]?.trim();
+        const phone = values[phoneIndex]?.trim() || null;
+        const message = values[messageIndex]?.trim() || null;
+
+        if (!name || !email) {
+          errorCount++;
+          continue;
+        }
+
+        try {
+          await fetch('/api/contacts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name,
+              email,
+              phone,
+              message,
+              source: 'csv_import'
+            })
+          });
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          console.error(`Error importing contact ${name}:`, error);
+        }
+      }
+
+      alert(`Import terminé!\n✓ ${successCount} contacts importés\n✗ ${errorCount} erreurs`);
+      fetchContacts();
+    } catch (error) {
+      console.error('Error importing CSV:', error);
+      alert('Erreur lors de l\'import du fichier CSV');
+    } finally {
+      setImporting(false);
+      event.target.value = '';
+    }
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -203,25 +299,113 @@ export default function ContactsPage() {
         padding: '32px 40px'
       }}>
         {/* Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{
-            fontSize: '28px',
-            fontWeight: 600,
-            color: '#0f172a',
-            marginBottom: '4px',
-            letterSpacing: '-0.02em'
-          }}>
-            Contacts
-          </h1>
-          <p style={{
-            fontSize: '14px',
-            color: '#64748b',
-            fontWeight: 400
-          }}>
-            {filteredContacts.length} contact{filteredContacts.length > 1 ? 's' : ''}
-            {statusFilter !== 'all' && ` • ${STATUS_CONFIG[statusFilter].label}`}
-            {searchQuery && ` • "${searchQuery}"`}
-          </p>
+        <div style={{
+          marginBottom: '32px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start'
+        }}>
+          <div>
+            <h1 style={{
+              fontSize: '28px',
+              fontWeight: 600,
+              color: '#0f172a',
+              marginBottom: '4px',
+              letterSpacing: '-0.02em'
+            }}>
+              Contacts
+            </h1>
+            <p style={{
+              fontSize: '14px',
+              color: '#64748b',
+              fontWeight: 400
+            }}>
+              {filteredContacts.length} contact{filteredContacts.length > 1 ? 's' : ''}
+              {statusFilter !== 'all' && ` • ${STATUS_CONFIG[statusFilter].label}`}
+              {searchQuery && ` • "${searchQuery}"`}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {/* Export Button */}
+            <button
+              onClick={exportToCSV}
+              disabled={filteredContacts.length === 0}
+              style={{
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                backgroundColor: 'white',
+                color: '#0f172a',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: filteredContacts.length === 0 ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                opacity: filteredContacts.length === 0 ? 0.5 : 1,
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                if (filteredContacts.length > 0) {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                }
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.backgroundColor = 'white';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Exporter CSV
+            </button>
+
+            {/* Import Button */}
+            <label
+              style={{
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: '1px solid #6366f1',
+                backgroundColor: '#6366f1',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: importing ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                opacity: importing ? 0.7 : 1,
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                if (!importing) {
+                  e.currentTarget.style.backgroundColor = '#4f46e5';
+                }
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#6366f1';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              {importing ? 'Import en cours...' : 'Importer CSV'}
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleImportCSV}
+                disabled={importing}
+                style={{ display: 'none' }}
+              />
+            </label>
+          </div>
         </div>
 
         {/* Filters & Search */}
