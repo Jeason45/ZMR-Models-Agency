@@ -26,10 +26,13 @@ export default {
       options: {
         list: [
           { title: 'Hands', value: 'hands' },
-          { title: 'Legs', value: 'legs' },
-          { title: 'Feet', value: 'feet' },
           { title: 'Face', value: 'face' },
+          { title: 'Feet', value: 'feet' },
+          { title: 'Legs', value: 'legs' },
           { title: 'Body', value: 'body' },
+          { title: 'Hair', value: 'hair' },
+          { title: 'Torso', value: 'torso' },
+          { title: 'Others', value: 'others' },
         ],
         layout: 'radio',
       },
@@ -210,6 +213,22 @@ export default {
       name: 'skinTone',
       title: 'Skin Tone',
       type: 'string',
+    },
+    {
+      name: 'faceSpecialty',
+      title: 'Face Specialty',
+      description: 'For face models, specify the specialty (lips, eyes, teeth, skin)',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: {
+        list: [
+          { title: 'Lips', value: 'lips' },
+          { title: 'Eyes', value: 'eyes' },
+          { title: 'Teeth/Smile', value: 'teeth' },
+          { title: 'Skin', value: 'skin' },
+        ],
+        layout: 'checkbox',
+      },
     },
   ],
   preview: {
