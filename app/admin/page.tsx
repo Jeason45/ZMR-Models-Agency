@@ -7,6 +7,8 @@ import { getAllModels } from '@/lib/sanity';
 
 export default function AdminPage() {
   const [models, setModels] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -16,8 +18,15 @@ export default function AdminPage() {
 
   const fetchData = async () => {
     try {
-      const modelsData = await getAllModels();
+      const [modelsData, appointmentsData, contactsData] = await Promise.all([
+        getAllModels(),
+        fetch('/api/appointments').then(res => res.json()),
+        fetch('/api/contacts').then(res => res.json())
+      ]);
+
       setModels(modelsData || []);
+      setAppointments(appointmentsData || []);
+      setContacts(contactsData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -126,7 +135,7 @@ export default function AdminPage() {
             </p>
           </div>
 
-          {/* Calendar Card */}
+          {/* Appointments Card */}
           <div style={{
             backgroundColor: 'white',
             padding: '24px',
@@ -167,26 +176,25 @@ export default function AdminPage() {
               </div>
             </div>
             <p style={{
-              fontSize: '16px',
-              fontWeight: 600,
+              fontSize: '32px',
+              fontWeight: 700,
               color: '#0f172a',
-              marginBottom: '4px'
+              marginBottom: '4px',
+              letterSpacing: '-0.02em'
             }}>
-              Géré via Calendly
+              {loading ? '...' : appointments.filter(apt => apt.status !== 'cancelled').length}
             </p>
-            <a
-              href="https://calendly.com/jlwebdesign33"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/admin/calendar"
               style={{
                 fontSize: '13px',
-                color: '#6366f1',
+                color: '#a855f7',
                 fontWeight: 500,
                 textDecoration: 'none'
               }}
             >
-              Voir mon calendrier →
-            </a>
+              Voir le calendrier →
+            </Link>
           </div>
 
           {/* Contacts Card */}
@@ -230,18 +238,19 @@ export default function AdminPage() {
               </div>
             </div>
             <p style={{
-              fontSize: '16px',
-              fontWeight: 600,
+              fontSize: '32px',
+              fontWeight: 700,
               color: '#0f172a',
-              marginBottom: '4px'
+              marginBottom: '4px',
+              letterSpacing: '-0.02em'
             }}>
-              Synchronisés
+              {loading ? '...' : contacts.length}
             </p>
             <Link
               href="/admin/contacts"
               style={{
                 fontSize: '13px',
-                color: '#6366f1',
+                color: '#3b82f6',
                 fontWeight: 500,
                 textDecoration: 'none'
               }}
@@ -348,12 +357,7 @@ export default function AdminPage() {
                 Ajouter un modèle
               </div>
             </a>
-            <a
-              href="https://calendly.com/jlwebdesign33"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: 'none' }}
-            >
+            <Link href="/admin/calendar" style={{ textDecoration: 'none' }}>
               <div
                 style={{
                   padding: '16px 20px',
@@ -386,9 +390,9 @@ export default function AdminPage() {
                   <line x1="8" y1="2" x2="8" y2="6"/>
                   <line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
-                Calendly Dashboard
+                Voir le calendrier
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
