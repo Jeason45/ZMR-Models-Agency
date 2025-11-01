@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contact {
+  id              String    @id @default(cuid())
+  name            String
+  email           String
+  phone           String?
+  type            String    // "Professional" or "Model Application"
+  message         String    @db.Text
+  contactMethod   String    @default("callback") // "callback" or "appointment"
+  appointmentId   String?   @unique
+  appointment     Appointment? @relation(fields: [appointmentId], references: [id])
+  status          String    @default("new") // "new", "read", "replied", "archived"
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("contacts")
+}
+
+model Appointment {
+  id          String    @id @default(cuid())
+  contactId   String?   @unique
+  contact     Contact?
+  date        DateTime
+  duration    Int       @default(30) // in minutes
+  status      String    @default("pending") // "pending", "confirmed", "cancelled", "completed"
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([date])
+  @@index([status])
+  @@map("appointments")
+}
+
+model Availability {
+  id        String   @id @default(cuid())
+  dayOfWeek Int      // 0 = Sunday, 1 = Monday, etc.
+  startTime String   // "09:00"
+  endTime   String   // "18:00"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("availabilities")
+}
