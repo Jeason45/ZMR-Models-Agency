@@ -131,22 +131,23 @@ export default function ContactPage() {
         animation: 'pulse 8s ease-in-out infinite'
       }} />
 
-      {/* Back button */}
-      <Link href="/" style={{
-        position: 'fixed',
-        top: '40px',
-        left: '40px',
-        color: 'white',
-        fontSize: '28px',
-        textDecoration: 'none',
-        zIndex: 100,
-        transition: 'opacity 0.3s',
-        opacity: 0.7,
-        fontWeight: 200
-      }}
-      onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-      onMouseOut={(e) => e.currentTarget.style.opacity = '0.7'}>
-        ← Retour
+      {/* Back Arrow */}
+      <Link
+        href="/"
+        style={{
+          position: 'fixed',
+          top: '40px',
+          left: '40px',
+          zIndex: 100,
+          color: 'white',
+          fontSize: '24px',
+          textDecoration: 'none',
+          transition: 'opacity 0.3s'
+        }}
+        onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
+        onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+      >
+        ←
       </Link>
 
       <div style={{
