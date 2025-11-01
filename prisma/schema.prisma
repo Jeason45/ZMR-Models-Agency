@@ -21,3 +21,47 @@ model User {
 
   @@map("users")
 }
+
+model Contact {
+  id           String        @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  message      String?
+  status       String        @default("new") // "new", "contacted", "converted", "archived"
+  source       String?       // "website", "referral", etc.
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+
+  @@map("contacts")
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  contactId   String
+  contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  status      String   @default("scheduled") // "scheduled", "confirmed", "cancelled", "completed"
+  location    String?  // "video", "phone", "office"
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("appointments")
+}
+
+model Availability {
+  id        String   @id @default(cuid())
+  dayOfWeek Int // 0 = Sunday, 1 = Monday, etc.
+  startTime String // "09:00"
+  endTime   String // "17:00"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("availability")
+}
