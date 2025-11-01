@@ -26,10 +26,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, message, source } = body;
+    const { name, email, phone, message, source, selectedType, wantCallback, selectedDay, selectedSlot } = body;
 
     if (!name || !email) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
+    }
+
+    // Ajouter le type (professional/model) au message si disponible
+    let fullMessage = message || '';
+    if (selectedType) {
+      fullMessage = `Type: ${selectedType === 'professional' ? 'Professionnel' : 'Mannequin'}\n\n${fullMessage}`;
     }
 
     const contact = await prisma.contact.create({
@@ -37,11 +43,34 @@ export async function POST(request: NextRequest) {
         name,
         email,
         phone,
-        message,
+        message: fullMessage,
         source: source || 'website',
         status: 'new'
       }
     });
+
+    // Si un rappel est demandé, créer un rendez-vous
+    if (wantCallback && selectedDay && selectedSlot) {
+      const [startHour] = selectedSlot.split(' - ');
+      const [hours, minutes] = startHour.split(':');
+
+      const appointmentDate = new Date(selectedDay);
+      appointmentDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const endDate = new Date(appointmentDate);
+      endDate.setHours(endDate.getHours() + 1); // Rendez-vous d'1 heure
+
+      await prisma.appointment.create({
+        data: {
+          contactId: contact.id,
+          title: `Rappel - ${contact.name}`,
+          description: `Type: ${selectedType === 'professional' ? 'Professionnel' : 'Mannequin'}`,
+          startTime: appointmentDate,
+          endTime: endDate,
+          status: 'scheduled'
+        }
+      });
+    }
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {
