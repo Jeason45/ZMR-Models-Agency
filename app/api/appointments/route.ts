@@ -91,8 +91,13 @@ export async function PATCH(request: Request) {
     });
 
     // Si le statut passe à "confirmed", envoyer l'email de confirmation
+    console.log('🔵 Status reçu:', status);
+    console.log('🔵 Appointment contact:', appointment.contact ? appointment.contact.email : 'Pas de contact');
+
     if (status === 'confirmed' && appointment.contact) {
       try {
+        console.log('📧 Envoi email confirmation RDV à:', appointment.contact.email);
+
         const confirmationEmail = appointmentConfirmationEmail({
           clientName: appointment.contact.name,
           date: appointment.date,
@@ -100,17 +105,20 @@ export async function PATCH(request: Request) {
           notes: appointment.notes || undefined,
         });
 
-        await resend.emails.send({
+        const result = await resend.emails.send({
           from: 'ZMR Models Agency <onboarding@resend.dev>',
           to: appointment.contact.email,
           subject: confirmationEmail.subject,
           html: confirmationEmail.html,
         });
 
-        console.log('Email de confirmation RDV envoyé à:', appointment.contact.email);
+        console.log('✅ Email de confirmation RDV envoyé:', result);
       } catch (emailError) {
-        console.error('Erreur lors de l\'envoi de l\'email de confirmation RDV:', emailError);
+        console.error('❌ Erreur lors de l\'envoi de l\'email de confirmation RDV:', emailError);
+        console.error('❌ Stack:', emailError instanceof Error ? emailError.stack : 'No stack');
       }
+    } else {
+      console.log('⚠️ Email non envoyé - Status:', status, '- Contact:', appointment.contact ? 'Présent' : 'Absent');
     }
 
     return NextResponse.json(appointment);
