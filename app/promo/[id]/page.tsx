@@ -26,7 +26,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           href="/"
           style={{
             position: 'fixed',
-            top: scrollDirection === 'down' ? '-200px' : '20px',
+            top: scrollDirection === 'down' ? '-300px' : '20px',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 10,
@@ -68,7 +68,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
       {!isMenuOpen && (
         <div style={{
           position: 'fixed',
-          top: scrollDirection === 'down' ? '-200px' : '32px',
+          top: scrollDirection === 'down' ? '-300px' : '32px',
           right: '32px',
           zIndex: 50,
           display: 'flex',
@@ -382,7 +382,7 @@ export default function PromoDetailPage() {
         href="/promo"
         style={{
           position: 'fixed',
-          top: scrollDirection === 'down' ? '-200px' : '32px',
+          top: scrollDirection === 'down' ? '-300px' : '32px',
           left: '32px',
           zIndex: 50,
           display: 'flex',
