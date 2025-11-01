@@ -15,8 +15,13 @@ export async function GET(request: Request) {
     return NextResponse.json(contacts);
   } catch (error) {
     console.error('Error fetching contacts:', error);
+    // Return detailed error for debugging
     return NextResponse.json(
-      { error: 'Failed to fetch contacts' },
+      {
+        error: 'Failed to fetch contacts',
+        details: error instanceof Error ? error.message : String(error),
+        dbUrl: process.env.DATABASE_URL ? 'DB_URL is set' : 'DB_URL is missing'
+      },
       { status: 500 }
     );
   }
