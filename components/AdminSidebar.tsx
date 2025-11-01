@@ -8,9 +8,7 @@ export default function AdminSidebar() {
 
   const navItems = [
     { href: '/admin', icon: '📊', label: 'Dashboard' },
-    { href: '/admin/contacts', icon: '📧', label: 'Contacts' },
     { href: '/admin/models', icon: '👥', label: 'Modèles' },
-    { href: '/admin/calendar', icon: '📅', label: 'Calendrier' },
   ];
 
   const isActive = (href: string) => {
