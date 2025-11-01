@@ -66,14 +66,18 @@ export async function POST(request: Request) {
 
     // Envoyer les emails (sans bloquer la réponse si ça échoue)
     try {
+      console.log('🔵 Début envoi emails pour:', name, email);
+
       // Email de confirmation au client
       const clientEmail = clientConfirmationEmail(name, message);
-      await resend.emails.send({
+      console.log('📧 Envoi email client à:', email);
+      const clientResult = await resend.emails.send({
         from: 'ZMR Models Agency <onboarding@resend.dev>',
         to: email,
         subject: clientEmail.subject,
         html: clientEmail.html,
       });
+      console.log('✅ Email client envoyé:', clientResult);
 
       // Email de notification à l'admin
       const adminEmail = adminNotificationEmail({
@@ -83,17 +87,21 @@ export async function POST(request: Request) {
         type,
         message,
       });
-      await resend.emails.send({
+      const adminEmailAddress = process.env.ADMIN_EMAIL || 'jlwebdesign33@gmail.com';
+      console.log('📧 Envoi email admin à:', adminEmailAddress);
+      const adminResult = await resend.emails.send({
         from: 'ZMR Models Agency <onboarding@resend.dev>',
-        to: process.env.ADMIN_EMAIL || 'jlwebdesign33@gmail.com',
+        to: adminEmailAddress,
         subject: adminEmail.subject,
         html: adminEmail.html,
       });
+      console.log('✅ Email admin envoyé:', adminResult);
 
-      console.log('Emails envoyés avec succès pour le contact:', contact.id);
+      console.log('✅ Emails envoyés avec succès pour le contact:', contact.id);
     } catch (emailError) {
       // Log l'erreur mais ne bloque pas la création du contact
-      console.error('Erreur lors de l\'envoi des emails:', emailError);
+      console.error('❌ Erreur lors de l\'envoi des emails:', emailError);
+      console.error('❌ Stack:', emailError instanceof Error ? emailError.stack : 'No stack');
     }
 
     return NextResponse.json(contact, { status: 201 });
