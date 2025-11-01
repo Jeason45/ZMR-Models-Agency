@@ -2,50 +2,98 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
-import { getAllModels, urlFor } from '@/lib/sanity';
+import { getAllTalents, urlFor } from '@/lib/sanity';
+
+type TalentCategory = 'all' | 'models' | 'acting' | 'promo' | 'details';
 
 export default function AdminModelsPage() {
-  const [models, setModels] = useState<any[]>([]);
+  const [talents, setTalents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState<TalentCategory>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent');
-  const [selectedModel, setSelectedModel] = useState<any>(null);
+  const [selectedTalent, setSelectedTalent] = useState<any>(null);
 
   useEffect(() => {
-    fetchModels();
+    fetchTalents();
   }, []);
 
-  const fetchModels = async () => {
+  const fetchTalents = async () => {
     try {
-      const data = await getAllModels();
-      setModels(data);
+      const data = await getAllTalents();
+      setTalents(data);
     } catch (error) {
-      console.error('Error fetching models:', error);
+      console.error('Error fetching talents:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredModels = models
-    .filter(m => filter === 'all' || m.category === filter)
-    .filter(m => searchTerm === '' || m.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredTalents = talents
+    .filter(t => categoryFilter === 'all' || t.talentCategory === categoryFilter)
+    .filter(t => searchTerm === '' || t.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'name') {
         return a.name.localeCompare(b.name);
       }
-      // Sort by recent (_createdAt or _updatedAt from Sanity)
       return new Date(b._createdAt || b._updatedAt || 0).getTime() -
              new Date(a._createdAt || a._updatedAt || 0).getTime();
     });
 
   const getStats = () => {
-    const women = models.filter(m => m.category === 'Woman').length;
-    const men = models.filter(m => m.category === 'Man').length;
-    return { total: models.length, women, men };
+    const modelsCount = talents.filter(t => t.talentCategory === 'models').length;
+    const actingCount = talents.filter(t => t.talentCategory === 'acting').length;
+    const promoCount = talents.filter(t => t.talentCategory === 'promo').length;
+    const detailsCount = talents.filter(t => t.talentCategory === 'details').length;
+
+    return {
+      total: talents.length,
+      models: modelsCount,
+      acting: actingCount,
+      promo: promoCount,
+      details: detailsCount
+    };
   };
 
   const stats = getStats();
+
+  const getTalentBadgeColor = (talentCategory: string) => {
+    switch (talentCategory) {
+      case 'models':
+        return { bg: '#dbeafe', color: '#1e40af' };
+      case 'acting':
+        return { bg: '#fce7f3', color: '#db2777' };
+      case 'promo':
+        return { bg: '#f3e8ff', color: '#9333ea' };
+      case 'details':
+        return { bg: '#d1fae5', color: '#059669' };
+      default:
+        return { bg: '#f1f5f9', color: '#64748b' };
+    }
+  };
+
+  const getTalentLabel = (talentCategory: string) => {
+    switch (talentCategory) {
+      case 'models':
+        return 'Mannequins';
+      case 'acting':
+        return 'Comédiens';
+      case 'promo':
+        return 'Promo';
+      case 'details':
+        return 'Détails';
+      default:
+        return talentCategory;
+    }
+  };
+
+  const getTalentUrl = (talent: any) => {
+    return `/${talent.talentCategory}/${talent.slug}`;
+  };
+
+  const getStudioUrl = (talent: any) => {
+    return `/studio/desk/${talent._type};${talent._id}`;
+  };
 
   return (
     <div style={{
@@ -78,13 +126,13 @@ export default function AdminModelsPage() {
                 color: '#0f172a',
                 marginBottom: '8px'
               }}>
-                Gestion des Modèles
+                Gestion des Talents
               </h2>
               <p style={{
                 fontSize: '16px',
                 color: '#64748b'
               }}>
-                Gérez votre portfolio de mannequins
+                Gérez tous vos talents : mannequins, comédiens, promo & détails
               </p>
             </div>
 
@@ -106,57 +154,85 @@ export default function AdminModelsPage() {
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
             >
-              + Ajouter un modèle
+              + Ajouter un talent
             </a>
           </div>
 
           {/* Statistics Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '20px',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: '16px',
             marginBottom: '24px'
           }}>
             <div style={{
               backgroundColor: 'white',
-              padding: '24px',
+              padding: '20px',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
             }}>
-              <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>
-                TOTAL MODÈLES
+              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Total
               </p>
-              <p style={{ fontSize: '32px', fontWeight: 700, color: '#0f172a' }}>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#0f172a' }}>
                 {stats.total}
               </p>
             </div>
             <div style={{
               backgroundColor: 'white',
-              padding: '24px',
+              padding: '20px',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
             }}>
-              <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>
-                FEMMES
+              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Mannequins
               </p>
-              <p style={{ fontSize: '32px', fontWeight: 700, color: '#db2777' }}>
-                {stats.women}
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#1e40af' }}>
+                {stats.models}
               </p>
             </div>
             <div style={{
               backgroundColor: 'white',
-              padding: '24px',
+              padding: '20px',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
             }}>
-              <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px', fontWeight: 500 }}>
-                HOMMES
+              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Comédiens
               </p>
-              <p style={{ fontSize: '32px', fontWeight: 700, color: '#1e40af' }}>
-                {stats.men}
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#db2777' }}>
+                {stats.acting}
+              </p>
+            </div>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Promo
+              </p>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#9333ea' }}>
+                {stats.promo}
+              </p>
+            </div>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Détails
+              </p>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#059669' }}>
+                {stats.details}
               </p>
             </div>
           </div>
@@ -171,7 +247,7 @@ export default function AdminModelsPage() {
             <div style={{ flex: 1 }}>
               <input
                 type="text"
-                placeholder="Rechercher un modèle..."
+                placeholder="Rechercher un talent..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
@@ -197,23 +273,30 @@ export default function AdminModelsPage() {
               borderRadius: '8px',
               border: '1px solid #e2e8f0'
             }}>
-              {['all', 'Woman', 'Man'].map((category) => (
+              {[
+                { value: 'all', label: 'Tous' },
+                { value: 'models', label: 'Mannequins' },
+                { value: 'acting', label: 'Comédiens' },
+                { value: 'promo', label: 'Promo' },
+                { value: 'details', label: 'Détails' }
+              ].map((category) => (
                 <button
-                  key={category}
-                  onClick={() => setFilter(category)}
+                  key={category.value}
+                  onClick={() => setCategoryFilter(category.value as TalentCategory)}
                   style={{
                     padding: '8px 16px',
-                    backgroundColor: filter === category ? '#6366f1' : 'transparent',
-                    color: filter === category ? 'white' : '#64748b',
+                    backgroundColor: categoryFilter === category.value ? '#6366f1' : 'transparent',
+                    color: categoryFilter === category.value ? 'white' : '#64748b',
                     border: 'none',
                     borderRadius: '6px',
                     fontSize: '14px',
                     fontWeight: 500,
                     cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap'
                   }}
                 >
-                  {category === 'all' ? 'Tous' : category === 'Woman' ? 'Femmes' : 'Hommes'}
+                  {category.label}
                 </button>
               ))}
             </div>
@@ -240,7 +323,7 @@ export default function AdminModelsPage() {
           </div>
         </div>
 
-        {/* Models Grid */}
+        {/* Talents Grid */}
         {loading ? (
           <div style={{
             textAlign: 'center',
@@ -255,157 +338,206 @@ export default function AdminModelsPage() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
             gap: '24px'
           }}>
-            {filteredModels.map((model) => (
-              <div
-                key={model._id}
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  border: '1px solid #e2e8f0',
-                  transition: 'all 0.3s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                }}
-              >
-                {/* Image */}
-                {model.profileImage && (
-                  <div style={{
-                    width: '100%',
-                    height: '300px',
+            {filteredTalents.map((talent) => {
+              const badgeColor = getTalentBadgeColor(talent.talentCategory);
+
+              return (
+                <div
+                  key={talent._id}
+                  style={{
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
                     overflow: 'hidden',
-                    backgroundColor: '#f1f5f9'
-                  }}>
-                    <img
-                      src={urlFor(model.profileImage).width(400).height(500).url()}
-                      alt={model.name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Info */}
-                <div style={{ padding: '16px' }}>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    marginBottom: '8px'
-                  }}>
-                    {model.name}
-                  </h3>
-
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    marginBottom: '12px'
-                  }}>
-                    <span style={{
-                      padding: '4px 12px',
-                      backgroundColor: model.category === 'Woman' ? '#fce7f3' : '#dbeafe',
-                      color: model.category === 'Woman' ? '#db2777' : '#1e40af',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      borderRadius: '6px'
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    border: '1px solid #e2e8f0',
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                  }}
+                >
+                  {/* Image */}
+                  {talent.mainImage && (
+                    <div style={{
+                      width: '100%',
+                      height: '300px',
+                      overflow: 'hidden',
+                      backgroundColor: '#f1f5f9'
                     }}>
-                      {model.category}
-                    </span>
-                  </div>
-
-                  {model.measurements && (
-                    <p style={{
-                      fontSize: '13px',
-                      color: '#64748b',
-                      marginBottom: '4px'
-                    }}>
-                      {model.measurements.height && `${model.measurements.height}cm`}
-                      {model.measurements.bust && ` • ${model.measurements.bust}`}
-                    </p>
+                      <img
+                        src={typeof talent.mainImage === 'string' ? talent.mainImage : urlFor(talent.mainImage).width(400).height(500).url()}
+                        alt={talent.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </div>
                   )}
 
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    marginTop: '12px'
-                  }}>
-                    <button
-                      onClick={() => setSelectedModel(model)}
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        backgroundColor: '#f1f5f9',
+                  {/* Info */}
+                  <div style={{ padding: '16px' }}>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: 600,
+                      color: '#0f172a',
+                      marginBottom: '8px'
+                    }}>
+                      {talent.name}
+                    </h3>
+
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px',
+                      marginBottom: '12px',
+                      flexWrap: 'wrap'
+                    }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        backgroundColor: badgeColor.bg,
+                        color: badgeColor.color,
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        borderRadius: '6px'
+                      }}>
+                        {getTalentLabel(talent.talentCategory)}
+                      </span>
+                      {talent.category && (
+                        <span style={{
+                          padding: '4px 12px',
+                          backgroundColor: '#f1f5f9',
+                          color: '#64748b',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          borderRadius: '6px'
+                        }}>
+                          {talent.category}
+                        </span>
+                      )}
+                      {talent.categories && (
+                        <span style={{
+                          padding: '4px 12px',
+                          backgroundColor: '#f1f5f9',
+                          color: '#64748b',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          borderRadius: '6px'
+                        }}>
+                          {Array.isArray(talent.categories) ? talent.categories[0] : talent.categories}
+                        </span>
+                      )}
+                    </div>
+
+                    {talent.height && (
+                      <p style={{
+                        fontSize: '13px',
                         color: '#64748b',
-                        border: 'none',
-                        borderRadius: '6px',
+                        marginBottom: '4px'
+                      }}>
+                        {talent.height}
+                        {talent.bust && ` • ${talent.bust}`}
+                      </p>
+                    )}
+
+                    {talent.ageRange && (
+                      <p style={{
                         fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        textAlign: 'center'
-                      }}
-                    >
-                      Détails
-                    </button>
-                    <a
-                      href={`/models/${model.slug?.current}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
+                        color: '#64748b',
+                        marginBottom: '4px'
+                      }}>
+                        {talent.ageRange}
+                      </p>
+                    )}
+
+                    {talent.instagramFollowers && (
+                      <p style={{
                         fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        display: 'block'
-                      }}
-                    >
-                      Voir
-                    </a>
-                    <a
-                      href={`/studio/desk/model;${model._id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        backgroundColor: '#6366f1',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        display: 'block'
-                      }}
-                    >
-                      Modifier
-                    </a>
+                        color: '#64748b',
+                        marginBottom: '4px'
+                      }}>
+                        📸 {talent.instagramFollowers} followers
+                      </p>
+                    )}
+
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px',
+                      marginTop: '12px'
+                    }}>
+                      <button
+                        onClick={() => setSelectedTalent(talent)}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          backgroundColor: '#f1f5f9',
+                          color: '#64748b',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center'
+                        }}
+                      >
+                        Détails
+                      </button>
+                      <a
+                        href={getTalentUrl(talent)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          textDecoration: 'none',
+                          display: 'block'
+                        }}
+                      >
+                        Voir
+                      </a>
+                      <a
+                        href={getStudioUrl(talent)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          backgroundColor: '#6366f1',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          textDecoration: 'none',
+                          display: 'block'
+                        }}
+                      >
+                        Modifier
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {!loading && filteredModels.length === 0 && (
+        {!loading && filteredTalents.length === 0 && (
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -415,13 +547,13 @@ export default function AdminModelsPage() {
           }}>
             <p style={{ fontSize: '48px', marginBottom: '16px' }}>📋</p>
             <p style={{ fontSize: '16px', color: '#64748b', fontWeight: 500 }}>
-              Aucun modèle trouvé
+              Aucun talent trouvé
             </p>
           </div>
         )}
 
-        {/* Model Detail Modal */}
-        {selectedModel && (
+        {/* Talent Detail Modal */}
+        {selectedTalent && (
           <div
             style={{
               position: 'fixed',
@@ -436,7 +568,7 @@ export default function AdminModelsPage() {
               zIndex: 1000,
               padding: '20px'
             }}
-            onClick={() => setSelectedModel(null)}
+            onClick={() => setSelectedTalent(null)}
           >
             <div
               style={{
@@ -463,10 +595,10 @@ export default function AdminModelsPage() {
                   fontWeight: 700,
                   color: '#0f172a'
                 }}>
-                  {selectedModel.name}
+                  {selectedTalent.name}
                 </h3>
                 <button
-                  onClick={() => setSelectedModel(null)}
+                  onClick={() => setSelectedTalent(null)}
                   style={{
                     padding: '8px 12px',
                     backgroundColor: '#f1f5f9',
@@ -491,10 +623,10 @@ export default function AdminModelsPage() {
               }}>
                 {/* Left: Image */}
                 <div>
-                  {selectedModel.profileImage && (
+                  {selectedTalent.mainImage && (
                     <img
-                      src={urlFor(selectedModel.profileImage).width(600).height(800).url()}
-                      alt={selectedModel.name}
+                      src={typeof selectedTalent.mainImage === 'string' ? selectedTalent.mainImage : urlFor(selectedTalent.mainImage).width(600).height(800).url()}
+                      alt={selectedTalent.name}
                       style={{
                         width: '100%',
                         borderRadius: '12px',
@@ -513,125 +645,241 @@ export default function AdminModelsPage() {
                       fontWeight: 500,
                       marginBottom: '8px'
                     }}>
-                      CATÉGORIE
+                      TYPE
                     </p>
                     <span style={{
                       padding: '6px 14px',
-                      backgroundColor: selectedModel.category === 'Woman' ? '#fce7f3' : '#dbeafe',
-                      color: selectedModel.category === 'Woman' ? '#db2777' : '#1e40af',
+                      backgroundColor: getTalentBadgeColor(selectedTalent.talentCategory).bg,
+                      color: getTalentBadgeColor(selectedTalent.talentCategory).color,
                       fontSize: '14px',
                       fontWeight: 600,
                       borderRadius: '6px',
                       display: 'inline-block'
                     }}>
-                      {selectedModel.category}
+                      {getTalentLabel(selectedTalent.talentCategory)}
                     </span>
                   </div>
 
-                  {selectedModel.measurements && (
-                    <>
-                      {selectedModel.measurements.height && (
-                        <div style={{ marginBottom: '20px' }}>
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#94a3b8',
-                            fontWeight: 500,
-                            marginBottom: '8px'
-                          }}>
-                            TAILLE
-                          </p>
-                          <p style={{
-                            fontSize: '16px',
-                            color: '#0f172a',
-                            fontWeight: 500
-                          }}>
-                            {selectedModel.measurements.height} cm
-                          </p>
-                        </div>
-                      )}
+                  {selectedTalent.category && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        CATÉGORIE
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.category}
+                      </p>
+                    </div>
+                  )}
 
-                      {selectedModel.measurements.bust && (
-                        <div style={{ marginBottom: '20px' }}>
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#94a3b8',
-                            fontWeight: 500,
-                            marginBottom: '8px'
-                          }}>
-                            MENSURATIONS
-                          </p>
-                          <p style={{
-                            fontSize: '16px',
-                            color: '#0f172a',
-                            fontWeight: 500
-                          }}>
-                            {selectedModel.measurements.bust}
-                            {selectedModel.measurements.waist && ` - ${selectedModel.measurements.waist}`}
-                            {selectedModel.measurements.hips && ` - ${selectedModel.measurements.hips}`}
-                          </p>
-                        </div>
-                      )}
+                  {selectedTalent.categories && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        CATÉGORIES
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {Array.isArray(selectedTalent.categories) ? selectedTalent.categories.join(', ') : selectedTalent.categories}
+                      </p>
+                    </div>
+                  )}
 
-                      {selectedModel.measurements.shoeSize && (
-                        <div style={{ marginBottom: '20px' }}>
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#94a3b8',
-                            fontWeight: 500,
-                            marginBottom: '8px'
-                          }}>
-                            POINTURE
-                          </p>
-                          <p style={{
-                            fontSize: '16px',
-                            color: '#0f172a',
-                            fontWeight: 500
-                          }}>
-                            {selectedModel.measurements.shoeSize}
-                          </p>
-                        </div>
-                      )}
+                  {selectedTalent.height && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        TAILLE
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.height}
+                      </p>
+                    </div>
+                  )}
 
-                      {selectedModel.measurements.hairColor && (
-                        <div style={{ marginBottom: '20px' }}>
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#94a3b8',
-                            fontWeight: 500,
-                            marginBottom: '8px'
-                          }}>
-                            CHEVEUX
-                          </p>
-                          <p style={{
-                            fontSize: '16px',
-                            color: '#0f172a',
-                            fontWeight: 500
-                          }}>
-                            {selectedModel.measurements.hairColor}
-                          </p>
-                        </div>
-                      )}
+                  {selectedTalent.bust && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        MENSURATIONS
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.bust}
+                        {selectedTalent.waist && ` - ${selectedTalent.waist}`}
+                        {selectedTalent.hips && ` - ${selectedTalent.hips}`}
+                      </p>
+                    </div>
+                  )}
 
-                      {selectedModel.measurements.eyeColor && (
-                        <div style={{ marginBottom: '20px' }}>
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#94a3b8',
-                            fontWeight: 500,
-                            marginBottom: '8px'
-                          }}>
-                            YEUX
-                          </p>
-                          <p style={{
-                            fontSize: '16px',
-                            color: '#0f172a',
-                            fontWeight: 500
-                          }}>
-                            {selectedModel.measurements.eyeColor}
-                          </p>
-                        </div>
-                      )}
-                    </>
+                  {selectedTalent.ageRange && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        ÂGE
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.ageRange}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedTalent.languages && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        LANGUES
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.languages}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedTalent.skills && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        COMPÉTENCES
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.skills}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedTalent.instagramFollowers && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        INSTAGRAM
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.instagramFollowers} followers
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedTalent.tiktokFollowers && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        TIKTOK
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.tiktokFollowers} followers
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedTalent.eyes && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        YEUX
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.eyes}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedTalent.hair && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginBottom: '8px'
+                      }}>
+                        CHEVEUX
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#0f172a',
+                        fontWeight: 500
+                      }}>
+                        {selectedTalent.hair}
+                      </p>
+                    </div>
                   )}
 
                   {/* Action Buttons */}
@@ -643,7 +891,7 @@ export default function AdminModelsPage() {
                     borderTop: '1px solid #e2e8f0'
                   }}>
                     <a
-                      href={`/models/${selectedModel.slug?.current}`}
+                      href={getTalentUrl(selectedTalent)}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -664,7 +912,7 @@ export default function AdminModelsPage() {
                       Voir sur le site
                     </a>
                     <a
-                      href={`/studio/desk/model;${selectedModel._id}`}
+                      href={getStudioUrl(selectedTalent)}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

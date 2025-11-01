@@ -225,3 +225,22 @@ export async function getDetailBySlug(slug: string) {
     { slug }
   )
 }
+
+// ====== ALL TALENTS (Combined) ======
+
+// Query to get ALL talents (models, actors, promo, details) for admin dashboard
+export async function getAllTalents() {
+  const [models, actors, promos, details] = await Promise.all([
+    getAllModels(),
+    getAllActors(),
+    getAllPromos(),
+    getAllDetails()
+  ])
+
+  return [
+    ...models.map((m: any) => ({ ...m, _type: 'model', talentCategory: 'models' })),
+    ...actors.map((a: any) => ({ ...a, _type: 'actor', talentCategory: 'acting' })),
+    ...promos.map((p: any) => ({ ...p, _type: 'promo', talentCategory: 'promo' })),
+    ...details.map((d: any) => ({ ...d, _type: 'detail', talentCategory: 'details' }))
+  ]
+}

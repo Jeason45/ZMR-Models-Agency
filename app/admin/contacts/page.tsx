@@ -45,7 +45,8 @@ export default function ContactsPage() {
   const [statusFilter, setStatusFilter] = useState<ContactStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
-  const [importing, setImporting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
 
   useEffect(() => {
     fetchContacts();
@@ -53,6 +54,7 @@ export default function ContactsPage() {
 
   useEffect(() => {
     filterContacts();
+    setCurrentPage(1); // Reset to first page when filters change
   }, [contacts, statusFilter, searchQuery]);
 
   const fetchContacts = async () => {
@@ -190,100 +192,12 @@ export default function ContactsPage() {
     );
   };
 
-  const exportToCSV = () => {
-    const csvData = filteredContacts.map(contact => ({
-      Nom: contact.name,
-      Email: contact.email,
-      Téléphone: contact.phone || '',
-      Statut: STATUS_CONFIG[contact.status].label,
-      Source: contact.source,
-      Message: contact.message?.replace(/\n/g, ' ') || '',
-      'Date de création': formatShortDate(contact.createdAt),
-      'Nombre de RDV': contact.appointments.length
-    }));
 
-    const headers = Object.keys(csvData[0] || {});
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row =>
-        headers.map(header => {
-          const value = row[header as keyof typeof row];
-          const escaped = String(value).replace(/"/g, '""');
-          return `"${escaped}"`;
-        }).join(',')
-      )
-    ].join('\n');
-
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `contacts_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-  };
-
-  const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setImporting(true);
-
-    try {
-      const text = await file.text();
-      const lines = text.split('\n');
-      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-
-      const nameIndex = headers.findIndex(h => h.toLowerCase().includes('nom'));
-      const emailIndex = headers.findIndex(h => h.toLowerCase().includes('email'));
-      const phoneIndex = headers.findIndex(h => h.toLowerCase().includes('tél') || h.toLowerCase().includes('phone'));
-      const messageIndex = headers.findIndex(h => h.toLowerCase().includes('message'));
-
-      let successCount = 0;
-      let errorCount = 0;
-
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-
-        const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-
-        const name = values[nameIndex]?.trim();
-        const email = values[emailIndex]?.trim();
-        const phone = values[phoneIndex]?.trim() || null;
-        const message = values[messageIndex]?.trim() || null;
-
-        if (!name || !email) {
-          errorCount++;
-          continue;
-        }
-
-        try {
-          await fetch('/api/contacts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name,
-              email,
-              phone,
-              message,
-              source: 'csv_import'
-            })
-          });
-          successCount++;
-        } catch (error) {
-          errorCount++;
-          console.error(`Error importing contact ${name}:`, error);
-        }
-      }
-
-      alert(`Import terminé!\n✓ ${successCount} contacts importés\n✗ ${errorCount} erreurs`);
-      fetchContacts();
-    } catch (error) {
-      console.error('Error importing CSV:', error);
-      alert('Erreur lors de l\'import du fichier CSV');
-    } finally {
-      setImporting(false);
-      event.target.value = '';
-    }
-  };
+  // Pagination logic
+  const totalPages = Math.ceil(filteredContacts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedContacts = filteredContacts.slice(startIndex, endIndex);
 
   return (
     <div style={{
@@ -324,87 +238,6 @@ export default function ContactsPage() {
               {statusFilter !== 'all' && ` • ${STATUS_CONFIG[statusFilter].label}`}
               {searchQuery && ` • "${searchQuery}"`}
             </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: '12px' }}>
-            {/* Export Button */}
-            <button
-              onClick={exportToCSV}
-              disabled={filteredContacts.length === 0}
-              style={{
-                padding: '10px 20px',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                backgroundColor: 'white',
-                color: '#0f172a',
-                fontSize: '14px',
-                fontWeight: 500,
-                cursor: filteredContacts.length === 0 ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                opacity: filteredContacts.length === 0 ? 0.5 : 1,
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                if (filteredContacts.length > 0) {
-                  e.currentTarget.style.borderColor = '#cbd5e1';
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
-                }
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.borderColor = '#e2e8f0';
-                e.currentTarget.style.backgroundColor = 'white';
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Exporter CSV
-            </button>
-
-            {/* Import Button */}
-            <label
-              style={{
-                padding: '10px 20px',
-                borderRadius: '8px',
-                border: '1px solid #6366f1',
-                backgroundColor: '#6366f1',
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: 500,
-                cursor: importing ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                opacity: importing ? 0.7 : 1,
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                if (!importing) {
-                  e.currentTarget.style.backgroundColor = '#4f46e5';
-                }
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#6366f1';
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              {importing ? 'Import en cours...' : 'Importer CSV'}
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleImportCSV}
-                disabled={importing}
-                style={{ display: 'none' }}
-              />
-            </label>
           </div>
         </div>
 
@@ -524,7 +357,7 @@ export default function ContactsPage() {
                 </div>
 
                 {/* Table Rows */}
-                {filteredContacts.map((contact) => (
+                {paginatedContacts.map((contact) => (
                   <div
                     key={contact.id}
                     onClick={() => setSelectedContact(contact)}
@@ -584,6 +417,101 @@ export default function ContactsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div style={{
+                padding: '20px 24px',
+                borderTop: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: '#f8fafc'
+              }}>
+                <div style={{
+                  fontSize: '13px',
+                  color: '#64748b'
+                }}>
+                  Page {currentPage} sur {totalPages} • {filteredContacts.length} résultat{filteredContacts.length > 1 ? 's' : ''}
+                </div>
+
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #e2e8f0',
+                      backgroundColor: currentPage === 1 ? '#f8fafc' : 'white',
+                      color: currentPage === 1 ? '#cbd5e1' : '#0f172a',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    ←
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    // Show first page, last page, current page and pages around current
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            border: pageNum === currentPage ? '1px solid #6366f1' : '1px solid #e2e8f0',
+                            backgroundColor: pageNum === currentPage ? '#eef2ff' : 'white',
+                            color: pageNum === currentPage ? '#6366f1' : '#0f172a',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      (pageNum === currentPage - 2 && currentPage > 3) ||
+                      (pageNum === currentPage + 2 && currentPage < totalPages - 2)
+                    ) {
+                      return <span key={pageNum} style={{ padding: '6px', color: '#cbd5e1' }}>...</span>;
+                    }
+                    return null;
+                  })}
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #e2e8f0',
+                      backgroundColor: currentPage === totalPages ? '#f8fafc' : 'white',
+                      color: currentPage === totalPages ? '#cbd5e1' : '#0f172a',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    →
+                  </button>
+                </div>
               </div>
             )}
           </div>
