@@ -5,7 +5,6 @@ import AdminSidebar from '@/components/AdminSidebar';
 
 export default function CalendarPage() {
   useEffect(() => {
-    // Charger le script Calendly
     const script = document.createElement('script');
     script.src = 'https://assets.calendly.com/assets/external/widget.js';
     script.async = true;
@@ -22,38 +21,42 @@ export default function CalendarPage() {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f8fafc'
+      backgroundColor: '#f1f5f9'
     }}>
       <AdminSidebar />
 
       <div style={{
         flex: 1,
-        marginLeft: '280px',
-        padding: '40px'
+        marginLeft: '260px',
+        padding: '32px 40px',
+        transition: 'margin-left 0.3s ease'
       }}>
+        {/* Header */}
         <div style={{
           marginBottom: '32px'
         }}>
-          <h2 style={{
-            fontSize: '32px',
-            fontWeight: 700,
+          <h1 style={{
+            fontSize: '28px',
+            fontWeight: 600,
             color: '#0f172a',
-            marginBottom: '8px'
+            marginBottom: '4px',
+            letterSpacing: '-0.02em'
           }}>
             Calendrier
-          </h2>
+          </h1>
           <p style={{
-            fontSize: '16px',
-            color: '#64748b'
+            fontSize: '14px',
+            color: '#64748b',
+            fontWeight: 400
           }}>
-            Gérez vos disponibilités et consultez vos rendez-vous
+            Gérez vos disponibilités et rendez-vous
           </p>
         </div>
 
         {/* Quick Actions */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '16px',
           marginBottom: '32px'
         }}>
@@ -66,24 +69,35 @@ export default function CalendarPage() {
             <div style={{
               padding: '20px',
               backgroundColor: 'white',
-              border: '2px solid #e2e8f0',
-              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(99, 102, 241, 0.1)';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.07)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
             >
-              <div style={{ fontSize: '28px', marginBottom: '12px' }}>📅</div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+                <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+              </svg>
               <div style={{
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 600,
                 color: '#0f172a'
               }}>
@@ -101,24 +115,32 @@ export default function CalendarPage() {
             <div style={{
               padding: '20px',
               backgroundColor: 'white',
-              border: '2px solid #e2e8f0',
-              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(99, 102, 241, 0.1)';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.07)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
             >
-              <div style={{ fontSize: '28px', marginBottom: '12px' }}>⚙️</div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2-2l-4.2-4.2m13.2 5.2l-6 0m-6 0l-6 0m13.2 5.2l-4.2-4.2m-2 2l-4.2 4.2"/>
+              </svg>
               <div style={{
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 600,
                 color: '#0f172a'
               }}>
@@ -136,24 +158,32 @@ export default function CalendarPage() {
             <div style={{
               padding: '20px',
               backgroundColor: 'white',
-              border: '2px solid #e2e8f0',
-              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(99, 102, 241, 0.1)';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.07)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
             >
-              <div style={{ fontSize: '28px', marginBottom: '12px' }}>🕐</div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
               <div style={{
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 600,
                 color: '#0f172a'
               }}>
@@ -171,24 +201,33 @@ export default function CalendarPage() {
             <div style={{
               padding: '20px',
               backgroundColor: 'white',
-              border: '2px solid #e2e8f0',
-              borderRadius: '12px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = '#6366f1';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(99, 102, 241, 0.1)';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.07)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
             >
-              <div style={{ fontSize: '28px', marginBottom: '12px' }}>📊</div>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
               <div style={{
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 600,
                 color: '#0f172a'
               }}>
@@ -198,19 +237,20 @@ export default function CalendarPage() {
           </a>
         </div>
 
-        {/* Embedded Calendly Dashboard */}
+        {/* Embedded Calendar */}
         <div style={{
           backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          padding: '28px',
+          borderRadius: '8px',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
           border: '1px solid #e2e8f0'
         }}>
           <h3 style={{
-            fontSize: '20px',
+            fontSize: '16px',
             fontWeight: 600,
             color: '#0f172a',
-            marginBottom: '20px'
+            marginBottom: '20px',
+            letterSpacing: '-0.01em'
           }}>
             Aperçu du calendrier
           </h3>
@@ -218,9 +258,9 @@ export default function CalendarPage() {
           <div style={{
             minHeight: '600px',
             backgroundColor: '#f8fafc',
-            borderRadius: '8px',
+            borderRadius: '6px',
             overflow: 'hidden',
-            border: '1px solid #e2e8f0'
+            border: '1px solid #f1f5f9'
           }}>
             <div
               className="calendly-inline-widget"
@@ -234,41 +274,46 @@ export default function CalendarPage() {
 
           <div style={{
             marginTop: '20px',
-            padding: '16px',
-            backgroundColor: '#f0f9ff',
-            borderRadius: '8px',
-            border: '1px solid #bae6fd'
+            padding: '16px 20px',
+            backgroundColor: '#eff6ff',
+            borderRadius: '6px',
+            border: '1px solid #dbeafe',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <span style={{ fontSize: '20px' }}>💡</span>
-              <div>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#0c4a6e',
-                  marginBottom: '4px'
-                }}>
-                  Astuce Pro
-                </div>
-                <div style={{
-                  fontSize: '13px',
-                  color: '#075985',
-                  lineHeight: 1.5
-                }}>
-                  Pour gérer tous vos événements et accéder à toutes les fonctionnalités,
-                  ouvrez votre <a
-                    href="https://calendly.com/app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: '#0284c7', textDecoration: 'underline' }}
-                  >
-                    dashboard Calendly complet
-                  </a>
-                </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4"/>
+              <path d="M12 8h.01"/>
+            </svg>
+            <div style={{ flex: 1 }}>
+              <div style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#1e40af',
+                marginBottom: '2px'
+              }}>
+                Conseil
+              </div>
+              <div style={{
+                fontSize: '13px',
+                color: '#1e40af',
+                lineHeight: 1.5
+              }}>
+                Pour gérer tous vos événements, ouvrez votre{' '}
+                <a
+                  href="https://calendly.com/app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#2563eb',
+                    fontWeight: 600,
+                    textDecoration: 'none'
+                  }}
+                >
+                  dashboard Calendly complet
+                </a>
               </div>
             </div>
           </div>
