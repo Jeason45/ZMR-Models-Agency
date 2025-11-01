@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resend } from '@/lib/resend';
+import { appointmentConfirmationEmail } from '@/lib/email-templates';
 
 // GET - Récupérer tous les appointments
 export async function GET(request: Request) {
@@ -83,7 +85,33 @@ export async function PATCH(request: Request) {
         ...(status && { status }),
         ...(notes !== undefined && { notes }),
       },
+      include: {
+        contact: true,
+      },
     });
+
+    // Si le statut passe à "confirmed", envoyer l'email de confirmation
+    if (status === 'confirmed' && appointment.contact) {
+      try {
+        const confirmationEmail = appointmentConfirmationEmail({
+          clientName: appointment.contact.name,
+          date: appointment.date,
+          duration: appointment.duration,
+          notes: appointment.notes || undefined,
+        });
+
+        await resend.emails.send({
+          from: 'ZMR Models Agency <onboarding@resend.dev>',
+          to: appointment.contact.email,
+          subject: confirmationEmail.subject,
+          html: confirmationEmail.html,
+        });
+
+        console.log('Email de confirmation RDV envoyé à:', appointment.contact.email);
+      } catch (emailError) {
+        console.error('Erreur lors de l\'envoi de l\'email de confirmation RDV:', emailError);
+      }
+    }
 
     return NextResponse.json(appointment);
   } catch (error) {

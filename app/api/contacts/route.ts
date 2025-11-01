@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resend } from '@/lib/resend';
+import { clientConfirmationEmail, adminNotificationEmail } from '@/lib/email-templates';
 
 // GET - Récupérer tous les contacts (pour le CRM)
 export async function GET(request: Request) {
@@ -61,6 +63,38 @@ export async function POST(request: Request) {
         status: 'new',
       },
     });
+
+    // Envoyer les emails (sans bloquer la réponse si ça échoue)
+    try {
+      // Email de confirmation au client
+      const clientEmail = clientConfirmationEmail(name, message);
+      await resend.emails.send({
+        from: 'ZMR Models Agency <onboarding@resend.dev>',
+        to: email,
+        subject: clientEmail.subject,
+        html: clientEmail.html,
+      });
+
+      // Email de notification à l'admin
+      const adminEmail = adminNotificationEmail({
+        name,
+        email,
+        phone,
+        type,
+        message,
+      });
+      await resend.emails.send({
+        from: 'ZMR Models Agency <onboarding@resend.dev>',
+        to: process.env.ADMIN_EMAIL || 'jlwebdesign33@gmail.com',
+        subject: adminEmail.subject,
+        html: adminEmail.html,
+      });
+
+      console.log('Emails envoyés avec succès pour le contact:', contact.id);
+    } catch (emailError) {
+      // Log l'erreur mais ne bloque pas la création du contact
+      console.error('Erreur lors de l\'envoi des emails:', emailError);
+    }
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {
