@@ -1,29 +1,344 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getPromoBySlug } from '@/lib/sanity';
+import { getModelBySlug } from '@/lib/sanity';
 
-export default function PromoDetailPage() {
+function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const menuItems = [
+    { name: 'Models', href: '/models' },
+    { name: 'Acting', href: '/acting' },
+    { name: 'Promo', href: '/promo' },
+    { name: 'Détails', href: '/details' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Contact', href: '/contact' },
+  ];
+
+  return (
+    <>
+      {/* Logo with scroll effect */}
+      {!isMenuOpen && (
+        <Link
+          href="/"
+          style={{
+            position: 'fixed',
+            top: scrollDirection === 'down' ? '-100px' : '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'top 0.5s ease-in-out'
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{
+              color: 'white',
+              fontWeight: 300,
+              letterSpacing: '0.2em',
+              fontSize: 'clamp(35px, 8vw, 110px)',
+              lineHeight: 1,
+              margin: 0,
+              transition: 'opacity 0.3s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              ZMR
+            </h1>
+            <p style={{
+              color: 'white',
+              fontWeight: 300,
+              letterSpacing: '0.4em',
+              fontSize: 'clamp(9px, 1.3vw, 12px)',
+              textTransform: 'uppercase',
+              marginTop: '12px'
+            }}>
+              Models Agency
+            </p>
+          </div>
+        </Link>
+      )}
+
+      {/* Top Right Icons */}
+      {!isMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: scrollDirection === 'down' ? '-100px' : '32px',
+          right: '32px',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '24px',
+          transition: 'top 0.5s ease-in-out'
+        }}>
+          {/* Search Icon */}
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            aria-label="Search"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" strokeLinecap="round" />
+            </svg>
+          </button>
+
+          {/* Instagram Icon */}
+          <a
+            href="https://www.instagram.com/zmrmodelsagency"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none'
+            }}
+            aria-label="Instagram"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </a>
+
+          {/* Hamburger Menu */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '32px',
+              height: '32px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0
+            }}
+            aria-label="Menu"
+          >
+            <span style={{
+              width: '100%',
+              height: '2px',
+              backgroundColor: 'white',
+              marginBottom: '8px'
+            }} />
+            <span style={{
+              width: '100%',
+              height: '2px',
+              backgroundColor: 'white'
+            }} />
+          </button>
+        </div>
+      )}
+
+      {/* Search Overlay */}
+      {isSearchOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'white',
+          zIndex: 45,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          paddingTop: '150px'
+        }}>
+          <input
+            type="text"
+            placeholder="Search..."
+            autoFocus
+            style={{
+              width: '100%',
+              maxWidth: '600px',
+              fontSize: '32px',
+              fontWeight: 300,
+              border: 'none',
+              borderBottom: '1px solid #e0e0e0',
+              paddingBottom: '16px',
+              outline: 'none',
+              background: 'transparent'
+            }}
+          />
+          <button
+            onClick={() => setIsSearchOpen(false)}
+            style={{
+              position: 'fixed',
+              top: '32px',
+              right: '32px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '32px',
+              height: '32px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <span style={{
+              position: 'absolute',
+              width: '100%',
+              height: '2px',
+              backgroundColor: '#0a0a0a',
+              transform: 'rotate(45deg)'
+            }} />
+            <span style={{
+              position: 'absolute',
+              width: '100%',
+              height: '2px',
+              backgroundColor: '#0a0a0a',
+              transform: 'rotate(-45deg)'
+            }} />
+          </button>
+        </div>
+      )}
+
+      {/* Menu Overlay */}
+      {isMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#0a0a0a',
+          zIndex: 40,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <nav style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 'clamp(16px, 3vh, 32px)'
+          }}>
+            {menuItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                prefetch={true}
+                style={{
+                  color: 'white',
+                  fontSize: 'clamp(32px, 6vw, 100px)',
+                  fontWeight: 300,
+                  letterSpacing: '-0.02em',
+                  textDecoration: 'none',
+                  transition: 'opacity 0.3s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
+                onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            style={{
+              position: 'fixed',
+              top: 'clamp(20px, 4vh, 32px)',
+              right: 'clamp(20px, 4vw, 32px)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '32px',
+              height: '32px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              zIndex: 50
+            }}
+            aria-label="Close Menu"
+          >
+            <span style={{
+              position: 'absolute',
+              width: '100%',
+              height: '2px',
+              backgroundColor: 'white',
+              transform: 'rotate(45deg)'
+            }} />
+            <span style={{
+              position: 'absolute',
+              width: '100%',
+              height: '2px',
+              backgroundColor: 'white',
+              transform: 'rotate(-45deg)'
+            }} />
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default function ModelDetailPage() {
   const params = useParams();
-  const promoSlug = params.id as string;
-  const [promo, setPromo] = useState<any>(null);
+  const modelSlug = params.id as string;
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [model, setModel] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const lastScrollY = useRef(0);
+  const scrollDirectionRef = useRef<'up' | 'down'>('up');
 
   useEffect(() => {
-    async function fetchPromo() {
+    const updateScrollDirection = () => {
+      const scrollY = window.pageYOffset;
+      const direction = scrollY > lastScrollY.current ? 'down' : 'up';
+
+      if (direction !== scrollDirectionRef.current && Math.abs(scrollY - lastScrollY.current) > 10) {
+        scrollDirectionRef.current = direction;
+        setScrollDirection(direction);
+      }
+
+      lastScrollY.current = scrollY > 0 ? scrollY : 0;
+    };
+
+    window.addEventListener('scroll', updateScrollDirection);
+    return () => window.removeEventListener('scroll', updateScrollDirection);
+  }, []);
+
+  // Fetch model from Sanity
+  useEffect(() => {
+    async function fetchModel() {
       try {
-        const data = await getPromoBySlug(promoSlug);
-        setPromo(data);
+        const data = await getModelBySlug(modelSlug);
+        setModel(data);
       } catch (error) {
-        console.error('Error fetching promo:', error);
+        console.error('Error fetching model:', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchPromo();
-  }, [promoSlug]);
+    fetchModel();
+  }, [modelSlug]);
 
   if (loading) {
     return (
@@ -40,7 +355,7 @@ export default function PromoDetailPage() {
     );
   }
 
-  if (!promo) {
+  if (!model) {
     return (
       <main style={{
         minHeight: '100vh',
@@ -50,24 +365,27 @@ export default function PromoDetailPage() {
         justifyContent: 'center',
         color: 'white'
       }}>
-        <div>Promo talent not found</div>
+        <div style={{ textAlign: 'center' }}>
+          <h1>Model not found</h1>
+          <Link href="/models" style={{ color: 'white', marginTop: '20px', display: 'inline-block' }}>
+            ← Back to Models
+          </Link>
+        </div>
       </main>
     );
   }
 
   return (
-    <main style={{
-      minHeight: '100vh',
-      backgroundColor: '#000',
-      color: 'white'
-    }}>
-      {/* Back Button */}
+    <>
+      <Navbar scrollDirection={scrollDirection} />
+
+      {/* Back Arrow */}
       <Link
-        href="/promo"
+        href="/models"
         style={{
           position: 'fixed',
-          top: '20px',
-          left: '20px',
+          top: '40px',
+          left: '40px',
           zIndex: 100,
           color: 'white',
           fontSize: '24px',
@@ -80,454 +398,297 @@ export default function PromoDetailPage() {
         ←
       </Link>
 
-      {/* Hero Section with Video or Image */}
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        height: '100vh',
-        overflow: 'hidden'
+      <main style={{
+        minHeight: '100vh',
+        backgroundColor: '#000',
+        paddingTop: '0'
       }}>
-        {promo.heroVideo ? (
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-          >
-            <source src={promo.heroVideo} type="video/mp4" />
-          </video>
-        ) : (
-          <img
-            src={promo.mainImage}
-            alt={promo.name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-          />
-        )}
-
-        {/* Name Overlay */}
+        {/* 1. Hero Section - Video or Image */}
         <div style={{
-          position: 'absolute',
-          bottom: '60px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          textAlign: 'center'
+          position: 'relative',
+          width: '100%',
+          height: '50vh',
+          overflow: 'hidden'
         }}>
-          <h1 style={{
-            fontSize: 'clamp(60px, 12vw, 160px)',
-            fontWeight: 900,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            margin: 0,
-            textShadow: '0 10px 30px rgba(0,0,0,0.5)'
-          }}>
-            {promo.name}
-          </h1>
-        </div>
-      </div>
-
-      {/* Info Line */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 'clamp(40px, 8vw, 120px)',
-        padding: 'clamp(60px, 10vh, 120px) 40px',
-        flexWrap: 'wrap'
-      }}>
-        {promo.height && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: 'clamp(11px, 1.5vw, 14px)',
-              letterSpacing: '0.2em',
-              color: '#666',
-              marginBottom: '12px',
-              textTransform: 'uppercase'
-            }}>Height</div>
-            <div style={{
-              fontSize: 'clamp(16px, 2vw, 20px)',
-              fontWeight: 300
-            }}>{promo.height}</div>
-          </div>
-        )}
-        {promo.eyes && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: 'clamp(11px, 1.5vw, 14px)',
-              letterSpacing: '0.2em',
-              color: '#666',
-              marginBottom: '12px',
-              textTransform: 'uppercase'
-            }}>Eyes</div>
-            <div style={{
-              fontSize: 'clamp(16px, 2vw, 20px)',
-              fontWeight: 300
-            }}>{promo.eyes}</div>
-          </div>
-        )}
-        {promo.hair && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: 'clamp(11px, 1.5vw, 14px)',
-              letterSpacing: '0.2em',
-              color: '#666',
-              marginBottom: '12px',
-              textTransform: 'uppercase'
-            }}>Hair</div>
-            <div style={{
-              fontSize: 'clamp(16px, 2vw, 20px)',
-              fontWeight: 300
-            }}>{promo.hair}</div>
-          </div>
-        )}
-      </div>
-
-      {/* Navigation Links */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: 'clamp(40px, 8vw, 80px)',
-        padding: '40px 20px 80px',
-        flexWrap: 'wrap'
-      }}>
-        <a
-          href="#collaborations"
-          style={{
-            color: 'white',
-            fontSize: 'clamp(14px, 2vw, 18px)',
-            fontWeight: 300,
-            letterSpacing: '0.15em',
-            textDecoration: 'none',
-            textTransform: 'uppercase',
-            transition: 'opacity 0.3s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
-          onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          Collaborations
-        </a>
-        <a
-          href="#events"
-          style={{
-            color: 'white',
-            fontSize: 'clamp(14px, 2vw, 18px)',
-            fontWeight: 300,
-            letterSpacing: '0.15em',
-            textDecoration: 'none',
-            textTransform: 'uppercase',
-            transition: 'opacity 0.3s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
-          onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          Events
-        </a>
-        <a
-          href="#social"
-          style={{
-            color: 'white',
-            fontSize: 'clamp(14px, 2vw, 18px)',
-            fontWeight: 300,
-            letterSpacing: '0.15em',
-            textDecoration: 'none',
-            textTransform: 'uppercase',
-            transition: 'opacity 0.3s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
-          onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          Social
-        </a>
-      </div>
-
-      {/* SOCIAL Section (left) and COLLABORATIONS Section (right) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 600px), 1fr))',
-        gap: 'clamp(40px, 5vw, 80px)',
-        padding: '0 clamp(20px, 5vw, 80px) clamp(80px, 12vh, 160px)',
-        maxWidth: '1800px',
-        margin: '0 auto'
-      }}>
-        {/* SOCIAL Section - LEFT */}
-        <div id="social" style={{
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <h2 style={{
-            fontSize: 'clamp(32px, 6vw, 60px)',
-            fontWeight: 900,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            marginBottom: 'clamp(20px, 3vh, 40px)'
-          }}>
-            Social
-          </h2>
-
-          {promo.socialImage && (
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              aspectRatio: '4/5',
-              overflow: 'hidden',
-              marginBottom: '20px'
-            }}>
-              <img
-                src={promo.socialImage}
-                alt="Social"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            </div>
-          )}
-
-          {/* Followers Stats */}
-          <div style={{
-            display: 'flex',
-            gap: '40px',
-            marginBottom: '30px',
-            flexWrap: 'wrap'
-          }}>
-            {promo.instagramFollowers && (
-              <div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#666',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  marginBottom: '8px'
-                }}>
-                  Instagram
-                </div>
-                <div style={{
-                  fontSize: '24px',
-                  fontWeight: 300
-                }}>
-                  {promo.instagramFollowers}
-                </div>
-              </div>
-            )}
-            {promo.tiktokFollowers && (
-              <div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#666',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  marginBottom: '8px'
-                }}>
-                  TikTok
-                </div>
-                <div style={{
-                  fontSize: '24px',
-                  fontWeight: 300
-                }}>
-                  {promo.tiktokFollowers}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Social Links */}
-          <div style={{
-            display: 'flex',
-            gap: '20px',
-            flexWrap: 'wrap'
-          }}>
-            {promo.instagramUrl && (
-              <a
-                href={promo.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: 'white',
-                  fontSize: '14px',
-                  textDecoration: 'underline',
-                  letterSpacing: '0.1em',
-                  transition: 'opacity 0.3s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-              >
-                VIEW INSTAGRAM →
-              </a>
-            )}
-            {promo.tiktokUrl && (
-              <a
-                href={promo.tiktokUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: 'white',
-                  fontSize: '14px',
-                  textDecoration: 'underline',
-                  letterSpacing: '0.1em',
-                  transition: 'opacity 0.3s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.opacity = '0.6'}
-                onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-              >
-                VIEW TIKTOK →
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* COLLABORATIONS Section - RIGHT */}
-        <div id="collaborations" style={{
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <h2 style={{
-            fontSize: 'clamp(32px, 6vw, 60px)',
-            fontWeight: 900,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            marginBottom: 'clamp(20px, 3vh, 40px)'
-          }}>
-            Collaborations
-          </h2>
-
-          {promo.collaborationsImage && (
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              aspectRatio: '4/5',
-              overflow: 'hidden',
-              marginBottom: '30px'
-            }}>
-              <img
-                src={promo.collaborationsImage}
-                alt="Collaborations"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            </div>
-          )}
-
-          {/* Brand Logos */}
-          {promo.collaborations && promo.collaborations.length > 0 && (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-              gap: '20px',
-              alignItems: 'center'
-            }}>
-              {promo.collaborations.map((collab: any, index: number) => (
-                <div
-                  key={index}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '20px',
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    borderRadius: '8px',
-                    aspectRatio: '1/1'
-                  }}
-                >
-                  {collab.logo ? (
-                    <img
-                      src={collab.logo}
-                      alt={collab.brandName}
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        objectFit: 'contain',
-                        filter: 'brightness(0) invert(1)'
-                      }}
-                    />
-                  ) : (
-                    <span style={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em'
-                    }}>
-                      {collab.brandName}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* EVENTS Section - Full Width */}
-      <div id="events" style={{
-        padding: '0 clamp(20px, 5vw, 80px) clamp(80px, 12vh, 160px)',
-        maxWidth: '1800px',
-        margin: '0 auto'
-      }}>
-        <h2 style={{
-          fontSize: 'clamp(32px, 6vw, 60px)',
-          fontWeight: 900,
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-          marginBottom: 'clamp(20px, 3vh, 40px)',
-          textAlign: 'center'
-        }}>
-          Events
-        </h2>
-
-        {promo.eventsImage && (
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            aspectRatio: '16/9',
-            overflow: 'hidden',
-            marginBottom: '40px'
-          }}>
+          {model.heroVideo ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            >
+              <source src={model.heroVideo} type="video/mp4" />
+            </video>
+          ) : (
             <img
-              src={promo.eventsImage}
-              alt="Events"
+              src={model.mainImage}
+              alt={model.name}
               style={{
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover'
               }}
             />
+          )}
+          <div style={{
+            position: 'absolute',
+            bottom: '60px',
+            left: 0,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <h1 style={{
+              color: 'white',
+              fontSize: 'clamp(60px, 10vw, 120px)',
+              fontWeight: 900,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              textAlign: 'center',
+              margin: 0,
+              marginBottom: '30px',
+              textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
+            }}>
+              {model.name}
+            </h1>
+            {/* Navigation Links */}
+            <div style={{
+              display: 'flex',
+              gap: '30px',
+              flexWrap: 'wrap',
+              justifyContent: 'center'
+            }}>
+              <a href="#" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>PORTFOLIO</a>
+              <a href="#" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>INSTAGRAM</a>
+              <a href="#" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>SHOWS</a>
+            </div>
           </div>
-        )}
+        </div>
 
-        {promo.eventsGallery && promo.eventsGallery.length > 0 && (
-          <div>
+        {/* 2. Measurements Line */}
+        <div style={{
+          padding: '40px',
+          textAlign: 'center',
+          borderBottom: '1px solid #222'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '30px',
+            flexWrap: 'wrap',
+            fontSize: '13px',
+            color: 'white',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em'
+          }}>
+            <div><span style={{ color: '#999' }}>HEIGHT</span> 6'2'' 1/2</div>
+            <div><span style={{ color: '#999' }}>NECK</span> 15''</div>
+            <div><span style={{ color: '#999' }}>WAIST</span> 28''</div>
+            <div><span style={{ color: '#999' }}>SUIT</span> 37L</div>
+            <div><span style={{ color: '#999' }}>INSEAM</span> 34''</div>
+            <div><span style={{ color: '#999' }}>SHOE</span> 12</div>
+            <div><span style={{ color: '#999' }}>EYES</span> BROWN</div>
+            <div><span style={{ color: '#999' }}>HAIR</span> BLACK</div>
+          </div>
+        </div>
+
+        {/* 3. MY WORK Zone */}
+        <div style={{
+          position: 'relative',
+          width: '100%',
+          height: '80vh',
+          overflow: 'hidden',
+          cursor: 'pointer'
+        }}>
+          <img
+            src={model.portfolioImage || model.hoverImage || model.mainImage}
+            alt="My Work"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+          <div style={{
+            position: 'absolute',
+            bottom: '60px',
+            left: '0',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <h2 style={{
+              color: 'white',
+              fontSize: 'clamp(60px, 10vw, 120px)',
+              fontWeight: 900,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              margin: 0,
+              textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
+            }}>
+              MY WORK
+            </h2>
             <Link
-              href={`/promo/${promoSlug}/events`}
+              href={`/models/${model.slug}/portfolio`}
               style={{
-                display: 'inline-block',
                 color: 'white',
                 fontSize: '14px',
-                textDecoration: 'underline',
-                letterSpacing: '0.1em',
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
                 marginTop: '20px',
-                transition: 'opacity 0.3s',
-                textAlign: 'center',
-                width: '100%'
+                textDecoration: 'none',
+                borderBottom: '1px solid white',
+                paddingBottom: '4px'
               }}
-              onMouseOver={(e) => e.currentTarget.style.opacity = '0.6'}
-              onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
             >
-              VIEW EVENTS GALLERY →
+              VIEW PORTFOLIO
             </Link>
           </div>
-        )}
-      </div>
-    </main>
+        </div>
+
+        {/* 4 & 5. SOCIAL and SHOWS - Side by Side */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '40px',
+          marginTop: '40px',
+          padding: '0 20px'
+        }}>
+          {/* SOCIAL Zone */}
+          <div style={{
+            position: 'relative',
+            height: '80vh',
+            overflow: 'hidden',
+            cursor: 'pointer'
+          }}>
+            <img
+              src={model.instagramImage || model.mainImage}
+              alt="Social"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '60px',
+              left: '0',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: 'clamp(40px, 8vw, 80px)',
+                fontWeight: 900,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                margin: 0,
+                textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
+              }}>
+                SOCIAL
+              </h2>
+              <a
+                href={model.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'white',
+                  fontSize: '14px',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  marginTop: '20px',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid white',
+                  paddingBottom: '4px'
+                }}
+              >
+                VIEW INSTAGRAM
+              </a>
+            </div>
+          </div>
+
+          {/* SHOWS Zone */}
+          <div style={{
+            position: 'relative',
+            height: '80vh',
+            overflow: 'hidden',
+            cursor: 'pointer'
+          }}>
+            {model.showsVideo ? (
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              >
+                <source src={model.showsVideo} type="video/mp4" />
+              </video>
+            ) : (
+              <img
+                src={model.showsImage || model.hoverImage || model.mainImage}
+                alt="Shows"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            )}
+            <div style={{
+              position: 'absolute',
+              bottom: '60px',
+              left: '0',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: 'clamp(40px, 8vw, 80px)',
+                fontWeight: 900,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                margin: 0,
+                textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
+              }}>
+                SHOWS
+              </h2>
+              <a
+                href="#"
+                style={{
+                  color: 'white',
+                  fontSize: '14px',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  marginTop: '20px',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid white',
+                  paddingBottom: '4px'
+                }}
+              >
+                VIDEOS
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </>
   );
 }
