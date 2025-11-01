@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getModelBySlug } from '@/lib/sanity';
+import { getPromoBySlug } from '@/lib/sanity';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
           href="/"
           style={{
             position: 'fixed',
-            top: scrollDirection === 'down' ? '-100px' : '20px',
+            top: scrollDirection === 'down' ? '-200px' : '20px',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 10,
@@ -68,7 +68,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
       {!isMenuOpen && (
         <div style={{
           position: 'fixed',
-          top: scrollDirection === 'down' ? '-100px' : '32px',
+          top: scrollDirection === 'down' ? '-200px' : '32px',
           right: '32px',
           zIndex: 50,
           display: 'flex',
@@ -299,11 +299,11 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   );
 }
 
-export default function ModelDetailPage() {
+export default function PromoDetailPage() {
   const params = useParams();
-  const modelSlug = params.id as string;
+  const promoSlug = params.id as string;
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
-  const [model, setModel] = useState<any>(null);
+  const [promo, setPromo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const lastScrollY = useRef(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('up');
@@ -325,20 +325,20 @@ export default function ModelDetailPage() {
     return () => window.removeEventListener('scroll', updateScrollDirection);
   }, []);
 
-  // Fetch model from Sanity
+  // Fetch promo from Sanity
   useEffect(() => {
-    async function fetchModel() {
+    async function fetchPromo() {
       try {
-        const data = await getModelBySlug(modelSlug);
-        setModel(data);
+        const data = await getPromoBySlug(promoSlug);
+        setPromo(data);
       } catch (error) {
-        console.error('Error fetching model:', error);
+        console.error('Error fetching promo:', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchModel();
-  }, [modelSlug]);
+    fetchPromo();
+  }, [promoSlug]);
 
   if (loading) {
     return (
@@ -355,23 +355,21 @@ export default function ModelDetailPage() {
     );
   }
 
-  if (!model) {
+  if (!promo) {
     return (
-      <main style={{
-        minHeight: '100vh',
-        backgroundColor: '#0a0a0a',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <h1>Model not found</h1>
-          <Link href="/models" style={{ color: 'white', marginTop: '20px', display: 'inline-block' }}>
-            ← Back to Models
-          </Link>
-        </div>
-      </main>
+      <>
+        <Navbar scrollDirection={scrollDirection} />
+        <main style={{
+          minHeight: '100vh',
+          backgroundColor: '#0a0a0a',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white'
+        }}>
+          <div>Promo talent not found</div>
+        </main>
+      </>
     );
   }
 
@@ -379,23 +377,32 @@ export default function ModelDetailPage() {
     <>
       <Navbar scrollDirection={scrollDirection} />
 
-      {/* Back Arrow */}
+      {/* Back Arrow Button */}
       <Link
-        href="/models"
+        href="/promo"
         style={{
           position: 'fixed',
-          top: '40px',
-          left: '40px',
-          zIndex: 100,
-          color: 'white',
-          fontSize: '24px',
+          top: scrollDirection === 'down' ? '-200px' : '32px',
+          left: '32px',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '40px',
+          height: '40px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
           textDecoration: 'none',
-          transition: 'opacity 0.3s'
+          transition: 'top 0.5s ease-in-out, opacity 0.3s'
         }}
-        onMouseOver={(e) => e.currentTarget.style.opacity = '0.5'}
+        onMouseOver={(e) => e.currentTarget.style.opacity = '0.6'}
         onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+        aria-label="Back to Promo"
       >
-        ←
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
       </Link>
 
       <main style={{
@@ -410,7 +417,7 @@ export default function ModelDetailPage() {
           height: '50vh',
           overflow: 'hidden'
         }}>
-          {model.heroVideo ? (
+          {promo.heroVideo ? (
             <video
               autoPlay
               muted
@@ -422,12 +429,12 @@ export default function ModelDetailPage() {
                 objectFit: 'cover'
               }}
             >
-              <source src={model.heroVideo} type="video/mp4" />
+              <source src={promo.heroVideo} type="video/mp4" />
             </video>
           ) : (
             <img
-              src={model.mainImage}
-              alt={model.name}
+              src={promo.mainImage}
+              alt={promo.name}
               style={{
                 width: '100%',
                 height: '100%',
@@ -455,7 +462,7 @@ export default function ModelDetailPage() {
               marginBottom: '30px',
               textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
             }}>
-              {model.name}
+              {promo.name}
             </h1>
             {/* Navigation Links */}
             <div style={{
@@ -507,7 +514,7 @@ export default function ModelDetailPage() {
           cursor: 'pointer'
         }}>
           <img
-            src={model.portfolioImage || model.hoverImage || model.mainImage}
+            src={promo.portfolioImage || promo.hoverImage || promo.mainImage}
             alt="My Work"
             style={{
               width: '100%',
@@ -536,7 +543,7 @@ export default function ModelDetailPage() {
               MY WORK
             </h2>
             <Link
-              href={`/models/${model.slug}/portfolio`}
+              href={`/promo/${promo.slug}/portfolio`}
               style={{
                 color: 'white',
                 fontSize: '14px',
@@ -569,7 +576,7 @@ export default function ModelDetailPage() {
             cursor: 'pointer'
           }}>
             <img
-              src={model.instagramImage || model.mainImage}
+              src={promo.instagramImage || promo.mainImage}
               alt="Social"
               style={{
                 width: '100%',
@@ -598,7 +605,7 @@ export default function ModelDetailPage() {
                 SOCIAL
               </h2>
               <a
-                href={model.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
+                href={promo.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -624,7 +631,7 @@ export default function ModelDetailPage() {
             overflow: 'hidden',
             cursor: 'pointer'
           }}>
-            {model.showsVideo ? (
+            {promo.showsVideo ? (
               <video
                 autoPlay
                 muted
@@ -636,11 +643,11 @@ export default function ModelDetailPage() {
                   objectFit: 'cover'
                 }}
               >
-                <source src={model.showsVideo} type="video/mp4" />
+                <source src={promo.showsVideo} type="video/mp4" />
               </video>
             ) : (
               <img
-                src={model.showsImage || model.hoverImage || model.mainImage}
+                src={promo.showsImage || promo.hoverImage || promo.mainImage}
                 alt="Shows"
                 style={{
                   width: '100%',
