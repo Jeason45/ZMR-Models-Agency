@@ -3,35 +3,84 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
 
+interface Contact {
+  id: string;
+  name: string;
+  email: string;
+}
+
 interface Appointment {
   id: string;
   title: string;
+  description?: string;
   startTime: string;
   endTime: string;
   status: string;
+  location?: string;
+  notes?: string;
   contact: {
     name: string;
     email: string;
   };
 }
 
+type ViewMode = 'month' | 'week';
+
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('month');
+
+  // Modal states
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newAppointment, setNewAppointment] = useState({
+    title: '',
+    description: '',
+    date: '',
+    startTime: '',
+    endTime: '',
+    contactId: '',
+    location: '',
+    notes: ''
+  });
+  const [conflicts, setConflicts] = useState<Appointment[]>([]);
 
   useEffect(() => {
     fetchAppointments();
-  }, [currentDate]);
+    fetchContacts();
+  }, [currentDate, viewMode]);
+
+  const fetchContacts = async () => {
+    try {
+      const response = await fetch('/api/contacts');
+      const data = await response.json();
+      setContacts(data);
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
-      const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+      let startDate, endDate;
+
+      if (viewMode === 'month') {
+        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+      } else {
+        // Week view
+        const dayOfWeek = currentDate.getDay();
+        startDate = new Date(currentDate);
+        startDate.setDate(currentDate.getDate() - dayOfWeek);
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+      }
 
       const response = await fetch(
-        `/api/appointments?startDate=${startOfMonth.toISOString()}&endDate=${endOfMonth.toISOString()}`
+        `/api/appointments?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
       );
       const data = await response.json();
       setAppointments(data);
@@ -39,6 +88,86 @@ export default function CalendarPage() {
       console.error('Error fetching appointments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkConflicts = (date: string, startTime: string, endTime: string) => {
+    const newStart = new Date(`${date}T${startTime}`);
+    const newEnd = new Date(`${date}T${endTime}`);
+
+    const conflictingAppointments = appointments.filter(apt => {
+      const aptStart = new Date(apt.startTime);
+      const aptEnd = new Date(apt.endTime);
+      const aptDate = aptStart.toISOString().split('T')[0];
+
+      // Check if same day
+      if (aptDate !== date) return false;
+
+      // Check for time overlap
+      return (newStart < aptEnd && newEnd > aptStart);
+    });
+
+    setConflicts(conflictingAppointments);
+    return conflictingAppointments.length > 0;
+  };
+
+  const handleCreateAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate times
+    if (newAppointment.startTime >= newAppointment.endTime) {
+      alert('L\'heure de fin doit être après l\'heure de début');
+      return;
+    }
+
+    // Check for conflicts
+    const hasConflicts = checkConflicts(
+      newAppointment.date,
+      newAppointment.startTime,
+      newAppointment.endTime
+    );
+
+    if (hasConflicts && !confirm('Il y a des conflits d\'horaires. Voulez-vous quand même créer ce rendez-vous ?')) {
+      return;
+    }
+
+    try {
+      const startDateTime = new Date(`${newAppointment.date}T${newAppointment.startTime}`);
+      const endDateTime = new Date(`${newAppointment.date}T${newAppointment.endTime}`);
+
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newAppointment.title,
+          description: newAppointment.description,
+          startTime: startDateTime.toISOString(),
+          endTime: endDateTime.toISOString(),
+          contactId: newAppointment.contactId,
+          location: newAppointment.location,
+          notes: newAppointment.notes,
+          status: 'scheduled'
+        })
+      });
+
+      if (response.ok) {
+        setShowCreateModal(false);
+        setNewAppointment({
+          title: '',
+          description: '',
+          date: '',
+          startTime: '',
+          endTime: '',
+          contactId: '',
+          location: '',
+          notes: ''
+        });
+        setConflicts([]);
+        fetchAppointments();
+      }
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      alert('Erreur lors de la création du rendez-vous');
     }
   };
 
@@ -63,29 +192,64 @@ export default function CalendarPage() {
     return days;
   };
 
+  const getWeekDays = () => {
+    const dayOfWeek = currentDate.getDay();
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - dayOfWeek);
+
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      days.push(day);
+    }
+    return days;
+  };
+
   const getAppointmentsForDate = (date: Date | null) => {
     if (!date) return [];
     return appointments.filter(apt => {
       const aptDate = new Date(apt.startTime);
       return aptDate.toDateString() === date.toDateString();
-    });
+    }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   };
 
   const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 
   const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  const dayNamesFull = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
-  const previousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+  const previousPeriod = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+    } else {
+      const newDate = new Date(currentDate);
+      newDate.setDate(currentDate.getDate() - 7);
+      setCurrentDate(newDate);
+    }
   };
 
-  const nextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+  const nextPeriod = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+    } else {
+      const newDate = new Date(currentDate);
+      newDate.setDate(currentDate.getDate() + 7);
+      setCurrentDate(newDate);
+    }
+  };
+
+  const openCreateModal = (date?: Date) => {
+    if (date) {
+      const dateStr = date.toISOString().split('T')[0];
+      setNewAppointment(prev => ({ ...prev, date: dateStr }));
+    }
+    setShowCreateModal(true);
   };
 
   const today = new Date();
-  const days = getDaysInMonth();
+  const days = viewMode === 'month' ? getDaysInMonth() : getWeekDays();
 
   return (
     <div style={{
@@ -127,74 +291,149 @@ export default function CalendarPage() {
             </p>
           </div>
 
-          {/* Month Navigation */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-            backgroundColor: 'white',
-            padding: '8px 12px',
-            borderRadius: '8px',
-            border: '1px solid #e2e8f0'
-          }}>
-            <button
-              onClick={previousMonth}
-              style={{
-                padding: '8px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                color: '#64748b',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#f1f5f9';
-                e.currentTarget.style.color = '#0f172a';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#64748b';
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="15 18 9 12 15 6"/>
-              </svg>
-            </button>
-
-            <span style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#0f172a',
-              minWidth: '180px',
-              textAlign: 'center'
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            {/* View Toggle */}
+            <div style={{
+              display: 'flex',
+              gap: '4px',
+              backgroundColor: 'white',
+              padding: '4px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
             }}>
-              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </span>
+              <button
+                onClick={() => setViewMode('month')}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: viewMode === 'month' ? '#6366f1' : 'transparent',
+                  color: viewMode === 'month' ? 'white' : '#64748b',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Mois
+              </button>
+              <button
+                onClick={() => setViewMode('week')}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: viewMode === 'week' ? '#6366f1' : 'transparent',
+                  color: viewMode === 'week' ? 'white' : '#64748b',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Semaine
+              </button>
+            </div>
 
+            {/* Month Navigation */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              backgroundColor: 'white',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <button
+                onClick={previousPeriod}
+                style={{
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f1f5f9';
+                  e.currentTarget.style.color = '#0f172a';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#64748b';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+
+              <span style={{
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#0f172a',
+                minWidth: '200px',
+                textAlign: 'center'
+              }}>
+                {viewMode === 'month'
+                  ? `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`
+                  : `Semaine du ${getWeekDays()[0].getDate()} ${monthNames[getWeekDays()[0].getMonth()]}`
+                }
+              </span>
+
+              <button
+                onClick={nextPeriod}
+                style={{
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  color: '#64748b',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f1f5f9';
+                  e.currentTarget.style.color = '#0f172a';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#64748b';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Create Appointment Button */}
             <button
-              onClick={nextMonth}
+              onClick={() => openCreateModal()}
               style={{
-                padding: '8px',
-                backgroundColor: 'transparent',
+                padding: '10px 20px',
+                backgroundColor: '#6366f1',
+                color: 'white',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 500,
                 cursor: 'pointer',
-                color: '#64748b',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#f1f5f9';
-                e.currentTarget.style.color = '#0f172a';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#64748b';
-              }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9 18 15 12 9 6"/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
+              Nouveau RDV
             </button>
           </div>
         </div>
@@ -243,53 +482,82 @@ export default function CalendarPage() {
               const dayAppointments = date ? getAppointmentsForDate(date) : [];
               const isToday = date && date.toDateString() === today.toDateString();
               const isSelected = date && selectedDate && date.toDateString() === selectedDate.toDateString();
+              const isCurrentMonth = date && date.getMonth() === currentDate.getMonth();
 
               return (
                 <div
                   key={index}
                   onClick={() => date && setSelectedDate(date)}
+                  onDoubleClick={() => date && openCreateModal(date)}
                   style={{
-                    minHeight: '100px',
+                    minHeight: viewMode === 'month' ? '100px' : '120px',
                     padding: '8px',
-                    backgroundColor: date ? 'white' : '#f8fafc',
+                    backgroundColor: date ? (isCurrentMonth || viewMode === 'week' ? 'white' : '#f8fafc') : '#f8fafc',
                     cursor: date ? 'pointer' : 'default',
                     transition: 'all 0.2s',
                     position: 'relative',
-                    border: isSelected ? '2px solid #6366f1' : 'none'
+                    border: isSelected ? '2px solid #6366f1' : 'none',
+                    opacity: (viewMode === 'month' && date && !isCurrentMonth) ? 0.5 : 1
                   }}
                   onMouseOver={(e) => {
                     if (date) e.currentTarget.style.backgroundColor = '#f8fafc';
                   }}
                   onMouseOut={(e) => {
-                    if (date) e.currentTarget.style.backgroundColor = 'white';
+                    if (date && (isCurrentMonth || viewMode === 'week')) e.currentTarget.style.backgroundColor = 'white';
                   }}
                 >
                   {date && (
                     <>
                       <div style={{
-                        fontSize: '14px',
-                        fontWeight: isToday ? 700 : 500,
-                        color: isToday ? '#6366f1' : '#0f172a',
-                        marginBottom: '4px',
-                        width: '28px',
-                        height: '28px',
                         display: 'flex',
+                        justifyContent: 'space-between',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '50%',
-                        backgroundColor: isToday ? '#eef2ff' : 'transparent'
+                        marginBottom: '4px'
                       }}>
-                        {date.getDate()}
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: isToday ? 700 : 500,
+                          color: isToday ? '#6366f1' : '#0f172a',
+                          width: '28px',
+                          height: '28px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          backgroundColor: isToday ? '#eef2ff' : 'transparent'
+                        }}>
+                          {date.getDate()}
+                        </div>
+                        {viewMode === 'week' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openCreateModal(date);
+                            }}
+                            style={{
+                              padding: '4px 8px',
+                              backgroundColor: '#6366f1',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: 500,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            +
+                          </button>
+                        )}
                       </div>
 
-                      {dayAppointments.slice(0, 2).map(apt => (
+                      {dayAppointments.slice(0, viewMode === 'month' ? 2 : 5).map(apt => (
                         <div
                           key={apt.id}
                           style={{
                             fontSize: '11px',
-                            padding: '3px 6px',
-                            backgroundColor: apt.status === 'confirmed' ? '#dcfce7' : '#dbeafe',
-                            color: apt.status === 'confirmed' ? '#15803d' : '#1e40af',
+                            padding: '4px 6px',
+                            backgroundColor: apt.status === 'confirmed' ? '#dcfce7' : apt.status === 'cancelled' ? '#fee2e2' : '#dbeafe',
+                            color: apt.status === 'confirmed' ? '#15803d' : apt.status === 'cancelled' ? '#dc2626' : '#1e40af',
                             borderRadius: '3px',
                             marginTop: '4px',
                             overflow: 'hidden',
@@ -302,14 +570,14 @@ export default function CalendarPage() {
                         </div>
                       ))}
 
-                      {dayAppointments.length > 2 && (
+                      {dayAppointments.length > (viewMode === 'month' ? 2 : 5) && (
                         <div style={{
                           fontSize: '11px',
                           color: '#64748b',
                           marginTop: '4px',
                           fontWeight: 500
                         }}>
-                          +{dayAppointments.length - 2} autre{dayAppointments.length - 2 > 1 ? 's' : ''}
+                          +{dayAppointments.length - (viewMode === 'month' ? 2 : 5)} autre{dayAppointments.length - (viewMode === 'month' ? 2 : 5) > 1 ? 's' : ''}
                         </div>
                       )}
                     </>
@@ -330,14 +598,35 @@ export default function CalendarPage() {
             boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
             border: '1px solid #e2e8f0'
           }}>
-            <h3 style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#0f172a',
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               marginBottom: '16px'
             }}>
-              Rendez-vous du {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </h3>
+              <h3 style={{
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#0f172a'
+              }}>
+                Rendez-vous du {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </h3>
+              <button
+                onClick={() => openCreateModal(selectedDate)}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#6366f1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              >
+                + Ajouter un RDV
+              </button>
+            </div>
 
             {getAppointmentsForDate(selectedDate).length === 0 ? (
               <p style={{ fontSize: '14px', color: '#64748b' }}>
@@ -382,10 +671,10 @@ export default function CalendarPage() {
                         borderRadius: '12px',
                         fontSize: '12px',
                         fontWeight: 500,
-                        backgroundColor: apt.status === 'confirmed' ? '#dcfce7' : '#dbeafe',
-                        color: apt.status === 'confirmed' ? '#15803d' : '#1e40af'
+                        backgroundColor: apt.status === 'confirmed' ? '#dcfce7' : apt.status === 'cancelled' ? '#fee2e2' : '#dbeafe',
+                        color: apt.status === 'confirmed' ? '#15803d' : apt.status === 'cancelled' ? '#dc2626' : '#1e40af'
                       }}>
-                        {apt.status === 'confirmed' ? 'Confirmé' : apt.status === 'scheduled' ? 'Planifié' : apt.status}
+                        {apt.status === 'confirmed' ? 'Confirmé' : apt.status === 'scheduled' ? 'Planifié' : apt.status === 'cancelled' ? 'Annulé' : apt.status}
                       </span>
                     </div>
                     <div style={{
@@ -394,10 +683,407 @@ export default function CalendarPage() {
                     }}>
                       <strong>Contact:</strong> {apt.contact.name} ({apt.contact.email})
                     </div>
+                    {apt.location && (
+                      <div style={{
+                        fontSize: '13px',
+                        color: '#64748b',
+                        marginTop: '4px'
+                      }}>
+                        <strong>Lieu:</strong> {apt.location}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Create Appointment Modal */}
+        {showCreateModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px'
+            }}
+            onClick={() => {
+              setShowCreateModal(false);
+              setConflicts([]);
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                maxWidth: '600px',
+                width: '100%',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div style={{
+                padding: '24px',
+                borderBottom: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: 600,
+                  color: '#0f172a'
+                }}>
+                  Nouveau Rendez-vous
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setConflicts([]);
+                  }}
+                  style={{
+                    padding: '4px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    color: '#64748b',
+                    lineHeight: 1
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <form onSubmit={handleCreateAppointment} style={{ padding: '24px' }}>
+                {/* Conflicts Warning */}
+                {conflicts.length > 0 && (
+                  <div style={{
+                    padding: '12px',
+                    backgroundColor: '#fef3c7',
+                    border: '1px solid #f59e0b',
+                    borderRadius: '6px',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      color: '#92400e',
+                      marginBottom: '8px'
+                    }}>
+                      ⚠️ Conflit d'horaires détecté
+                    </div>
+                    <div style={{ fontSize: '13px', color: '#92400e' }}>
+                      {conflicts.length} rendez-vous déjà planifié{conflicts.length > 1 ? 's' : ''} sur ce créneau :
+                      {conflicts.map(c => (
+                        <div key={c.id} style={{ marginTop: '4px' }}>
+                          • {c.title} ({new Date(c.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {new Date(c.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })})
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Title */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Titre *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newAppointment.title}
+                      onChange={(e) => setNewAppointment({...newAppointment, title: e.target.value})}
+                      placeholder="Ex: Casting pour publicité"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  {/* Date */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Date *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={newAppointment.date}
+                      onChange={(e) => {
+                        setNewAppointment({...newAppointment, date: e.target.value});
+                        if (newAppointment.startTime && newAppointment.endTime) {
+                          checkConflicts(e.target.value, newAppointment.startTime, newAppointment.endTime);
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  {/* Time Range */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        color: '#0f172a',
+                        marginBottom: '6px'
+                      }}>
+                        Heure de début *
+                      </label>
+                      <input
+                        type="time"
+                        required
+                        value={newAppointment.startTime}
+                        onChange={(e) => {
+                          setNewAppointment({...newAppointment, startTime: e.target.value});
+                          if (newAppointment.date && newAppointment.endTime) {
+                            checkConflicts(newAppointment.date, e.target.value, newAppointment.endTime);
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        color: '#0f172a',
+                        marginBottom: '6px'
+                      }}>
+                        Heure de fin *
+                      </label>
+                      <input
+                        type="time"
+                        required
+                        value={newAppointment.endTime}
+                        onChange={(e) => {
+                          setNewAppointment({...newAppointment, endTime: e.target.value});
+                          if (newAppointment.date && newAppointment.startTime) {
+                            checkConflicts(newAppointment.date, newAppointment.startTime, e.target.value);
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Contact */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Contact *
+                    </label>
+                    <select
+                      required
+                      value={newAppointment.contactId}
+                      onChange={(e) => setNewAppointment({...newAppointment, contactId: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none',
+                        backgroundColor: 'white'
+                      }}
+                    >
+                      <option value="">Sélectionner un contact</option>
+                      {contacts.map(contact => (
+                        <option key={contact.id} value={contact.id}>
+                          {contact.name} ({contact.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Location */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Lieu
+                    </label>
+                    <input
+                      type="text"
+                      value={newAppointment.location}
+                      onChange={(e) => setNewAppointment({...newAppointment, location: e.target.value})}
+                      placeholder="Ex: Studio Paris 11ème"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Description
+                    </label>
+                    <textarea
+                      value={newAppointment.description}
+                      onChange={(e) => setNewAppointment({...newAppointment, description: e.target.value})}
+                      rows={3}
+                      placeholder="Détails du rendez-vous..."
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
+
+                  {/* Notes */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Notes internes
+                    </label>
+                    <textarea
+                      value={newAppointment.notes}
+                      onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
+                      rows={2}
+                      placeholder="Notes privées (non visibles par le client)"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginTop: '24px',
+                  justifyContent: 'flex-end'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setConflicts([]);
+                    }}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: 'white',
+                      color: '#64748b',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#6366f1',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Créer le rendez-vous
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>

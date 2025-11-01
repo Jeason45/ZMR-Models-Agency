@@ -40,6 +40,21 @@ export default {
       validation: (Rule: any) => Rule.required().min(1),
     },
     {
+      name: 'status',
+      title: 'Status',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Active', value: 'active' },
+          { title: 'Inactive', value: 'inactive' },
+          { title: 'Archived', value: 'archived' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'active',
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
       name: 'mainImage',
       title: 'Main Image',
       type: 'image',

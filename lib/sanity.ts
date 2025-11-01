@@ -19,9 +19,12 @@ export async function getAllModels() {
   return client.fetch(
     `*[_type == "model"] | order(name asc) {
       _id,
+      _createdAt,
+      _updatedAt,
       name,
       "slug": slug.current,
       category,
+      status,
       "mainImage": mainImage.asset->url,
       "hoverImage": hoverImage.asset->url,
       height,
@@ -80,14 +83,20 @@ export async function getAllActors() {
   return client.fetch(
     `*[_type == "actor"] | order(name asc) {
       _id,
+      _createdAt,
+      _updatedAt,
       name,
       "slug": slug.current,
       category,
+      status,
       "mainImage": mainImage.asset->url,
       "hoverImage": hoverImage.asset->url,
       ageRange,
       languages,
-      skills
+      skills,
+      height,
+      eyes,
+      hair
     }`
   )
 }
@@ -128,13 +137,19 @@ export async function getAllPromos() {
   return client.fetch(
     `*[_type == "promo"] | order(name asc) {
       _id,
+      _createdAt,
+      _updatedAt,
       name,
       "slug": slug.current,
       categories,
+      status,
       "mainImage": mainImage.asset->url,
       "hoverImage": hoverImage.asset->url,
       instagramFollowers,
-      tiktokFollowers
+      tiktokFollowers,
+      height,
+      eyes,
+      hair
     }`
   )
 }
@@ -178,11 +193,17 @@ export async function getAllDetails() {
   return client.fetch(
     `*[_type == "detail"] | order(name asc) {
       _id,
+      _createdAt,
+      _updatedAt,
       name,
       "slug": slug.current,
       category,
+      status,
       "mainImage": mainImage.asset->url,
-      "hoverImage": hoverImage.asset->url
+      "hoverImage": hoverImage.asset->url,
+      height,
+      eyes,
+      hair
     }`
   )
 }

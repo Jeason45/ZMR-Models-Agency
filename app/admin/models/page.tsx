@@ -5,11 +5,13 @@ import AdminSidebar from '@/components/AdminSidebar';
 import { getAllTalents, urlFor } from '@/lib/sanity';
 
 type TalentCategory = 'all' | 'models' | 'acting' | 'promo' | 'details';
+type TalentStatus = 'all' | 'active' | 'inactive' | 'archived';
 
 export default function AdminModelsPage() {
   const [talents, setTalents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<TalentCategory>('all');
+  const [statusFilter, setStatusFilter] = useState<TalentStatus>('active');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent');
   const [selectedTalent, setSelectedTalent] = useState<any>(null);
@@ -31,6 +33,7 @@ export default function AdminModelsPage() {
 
   const filteredTalents = talents
     .filter(t => categoryFilter === 'all' || t.talentCategory === categoryFilter)
+    .filter(t => statusFilter === 'all' || (t.status || 'active') === statusFilter)
     .filter(t => searchTerm === '' || t.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'name') {
@@ -93,6 +96,19 @@ export default function AdminModelsPage() {
 
   const getStudioUrl = (talent: any) => {
     return `/studio/desk/${talent._type};${talent._id}`;
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return { label: 'Actif', bg: '#d1fae5', color: '#059669' };
+      case 'inactive':
+        return { label: 'Inactif', bg: '#fee2e2', color: '#dc2626' };
+      case 'archived':
+        return { label: 'Archivé', bg: '#f1f5f9', color: '#64748b' };
+      default:
+        return { label: 'Actif', bg: '#d1fae5', color: '#059669' };
+    }
   };
 
   return (
@@ -301,6 +317,42 @@ export default function AdminModelsPage() {
               ))}
             </div>
 
+            {/* Status Filter */}
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              backgroundColor: 'white',
+              padding: '6px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0'
+            }}>
+              {[
+                { value: 'active', label: 'Actifs' },
+                { value: 'inactive', label: 'Inactifs' },
+                { value: 'archived', label: 'Archivés' },
+                { value: 'all', label: 'Tous statuts' }
+              ].map((status) => (
+                <button
+                  key={status.value}
+                  onClick={() => setStatusFilter(status.value as TalentStatus)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: statusFilter === status.value ? '#10b981' : 'transparent',
+                    color: statusFilter === status.value ? 'white' : '#64748b',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {status.label}
+                </button>
+              ))}
+            </div>
+
             {/* Sort */}
             <select
               value={sortBy}
@@ -432,6 +484,16 @@ export default function AdminModelsPage() {
                           {Array.isArray(talent.categories) ? talent.categories[0] : talent.categories}
                         </span>
                       )}
+                      <span style={{
+                        padding: '4px 12px',
+                        backgroundColor: getStatusBadge(talent.status || 'active').bg,
+                        color: getStatusBadge(talent.status || 'active').color,
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        borderRadius: '6px'
+                      }}>
+                        {getStatusBadge(talent.status || 'active').label}
+                      </span>
                     </div>
 
                     {talent.height && (
@@ -647,17 +709,30 @@ export default function AdminModelsPage() {
                     }}>
                       TYPE
                     </p>
-                    <span style={{
-                      padding: '6px 14px',
-                      backgroundColor: getTalentBadgeColor(selectedTalent.talentCategory).bg,
-                      color: getTalentBadgeColor(selectedTalent.talentCategory).color,
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      borderRadius: '6px',
-                      display: 'inline-block'
-                    }}>
-                      {getTalentLabel(selectedTalent.talentCategory)}
-                    </span>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{
+                        padding: '6px 14px',
+                        backgroundColor: getTalentBadgeColor(selectedTalent.talentCategory).bg,
+                        color: getTalentBadgeColor(selectedTalent.talentCategory).color,
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        borderRadius: '6px',
+                        display: 'inline-block'
+                      }}>
+                        {getTalentLabel(selectedTalent.talentCategory)}
+                      </span>
+                      <span style={{
+                        padding: '6px 14px',
+                        backgroundColor: getStatusBadge(selectedTalent.status || 'active').bg,
+                        color: getStatusBadge(selectedTalent.status || 'active').color,
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        borderRadius: '6px',
+                        display: 'inline-block'
+                      }}>
+                        {getStatusBadge(selectedTalent.status || 'active').label}
+                      </span>
+                    </div>
                   </div>
 
                   {selectedTalent.category && (
