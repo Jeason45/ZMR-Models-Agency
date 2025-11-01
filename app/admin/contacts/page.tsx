@@ -19,9 +19,17 @@ export default function ContactsPage() {
       const url = filter === 'all' ? '/api/contacts' : `/api/contacts?status=${filter}`;
       const response = await fetch(url);
       const data = await response.json();
-      setContacts(data);
+
+      // Check if data is an array, otherwise set empty array
+      if (Array.isArray(data)) {
+        setContacts(data);
+      } else {
+        console.error('API returned error:', data);
+        setContacts([]);
+      }
     } catch (error) {
       console.error('Error fetching contacts:', error);
+      setContacts([]);
     } finally {
       setLoading(false);
     }
