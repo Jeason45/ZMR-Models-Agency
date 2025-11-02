@@ -980,7 +980,7 @@ export default function EditModelPage() {
       {formData.type !== 'DETAILS' && (
         <div>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
-            {formData.type === 'PROMO' || formData.type === 'ACTING' || formData.type === 'DETAILS' ? 'Vidéo Hero - Pour section HERO (optionnel, alternative à Image Hero)' : 'Vidéo Hero (optionnel)'}
+            {formData.type === 'PROMO' || formData.type === 'ACTING' ? 'Vidéo Hero - Pour section HERO (optionnel, alternative à Image Hero)' : 'Vidéo Hero (optionnel)'}
           </label>
           <input
             type="file"
