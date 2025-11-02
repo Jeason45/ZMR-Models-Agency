@@ -1044,7 +1044,7 @@ export default function EditModelPage() {
 
     const fields = getFieldNames();
 
-    const imageLabels = {
+    const imageLabels: Record<string, { single: string; gallery: string; video?: string }> = {
       MODELS: { single: 'Image Portfolio', gallery: 'Galerie Portfolio' },
       ACTING: { single: 'Cover Image - Pour section SHOWREEL', gallery: 'Galerie Showreel (vidéos) - Pour section SHOWREEL', video: 'Vidéo Showreel principale - Pour section SHOWREEL' },
       PROMO: { single: 'Cover Image - Pour section MY WORK', gallery: 'Galerie Portfolio - Pour section MY WORK' },
