@@ -332,12 +332,34 @@ export default function PromoPage() {
     };
   }, []);
 
-  // Fetch promos from Sanity
+  // Fetch promos from both Sanity and Prisma
   useEffect(() => {
     async function fetchPromos() {
       try {
-        const data = await getAllPromos();
-        setPromos(data);
+        // Fetch from Sanity
+        // const sanityData = await getAllPromos();
+        const sanityData: any[] = [];
+
+        // Fetch from Prisma
+        const prismaResponse = await fetch('/api/talents?type=PROMO');
+        const prismaPromos = prismaResponse.ok ? await prismaResponse.json() : [];
+
+        // Transform Prisma promos to match Sanity format
+        const transformedPrismaPromos = prismaPromos.map((promo: any) => ({
+          _id: promo.id,
+          slug: promo.slug,
+          name: promo.name,
+          categories: promo.promoCategories || [],
+          mainImage: promo.mainImage,
+          hoverImage: promo.hoverImage,
+          instagramFollowers: promo.instagramFollowers,
+          height: promo.height,
+          isPrisma: true
+        }));
+
+        // Merge both sources
+        const allPromos = [...sanityData, ...transformedPrismaPromos];
+        setPromos(allPromos);
       } catch (error) {
         console.error('Error fetching promos:', error);
       } finally {

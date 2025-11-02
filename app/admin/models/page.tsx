@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AdminSidebar from '@/components/AdminSidebar';
+import { useSidebar } from '@/components/SidebarContext';
 import { getAllTalents, urlFor } from '@/lib/sanity';
 
 type TalentCategory = 'all' | 'models' | 'acting' | 'promo' | 'details';
 type TalentStatus = 'all' | 'active' | 'inactive' | 'archived';
 
 export default function AdminModelsPage() {
+  const { sidebarWidth } = useSidebar();
   const [talents, setTalents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<TalentCategory>('all');
@@ -22,12 +25,83 @@ export default function AdminModelsPage() {
 
   const fetchTalents = async () => {
     try {
-      const data = await getAllTalents();
-      setTalents(data);
+      // Récupérer les talents Sanity - DÉSACTIVÉ (on garde uniquement Prisma)
+      // const sanityData = await getAllTalents();
+      const sanityData: any[] = [];
+
+      // Récupérer TOUS les talents Prisma (MODELS, ACTING, PROMO, DETAILS)
+      const prismaResponse = await fetch('/api/talents');
+      const prismaTalents = prismaResponse.ok ? await prismaResponse.json() : [];
+
+      // Transformer les talents Prisma pour qu'ils aient le même format que Sanity
+      const transformedPrismaTalents = prismaTalents.map((talent: any) => {
+        // Mapper le type Prisma vers talentCategory Sanity
+        const talentCategoryMap: Record<string, string> = {
+          'MODELS': 'models',
+          'ACTING': 'acting',
+          'PROMO': 'promo',
+          'DETAILS': 'details'
+        };
+
+        return {
+          _id: talent.id,
+          _type: talent.type.toLowerCase(),
+          name: talent.name,
+          slug: talent.slug,
+          category: talent.category,
+          categories: talent.promoCategories, // Pour PROMO
+          status: talent.status,
+          mainImage: talent.mainImage || null,
+          talentCategory: talentCategoryMap[talent.type] || 'models',
+          _createdAt: talent.createdAt,
+          _updatedAt: talent.updatedAt,
+          isPrisma: true,
+          // Champs additionnels
+          height: talent.height,
+          bust: talent.bust,
+          waist: talent.waist,
+          hips: talent.hips,
+          eyes: talent.eyes,
+          hair: talent.hair,
+          ageRange: talent.ageRange,
+          languages: talent.languages,
+          skills: talent.skills,
+          instagramFollowers: talent.instagramFollowers,
+          tiktokFollowers: talent.tiktokFollowers,
+        };
+      });
+
+      // Fusionner les deux sources
+      const allTalents = [...sanityData, ...transformedPrismaTalents];
+      setTalents(allTalents);
     } catch (error) {
       console.error('Error fetching talents:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteModel = async (talentId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce talent ? Cette action est irréversible.')) {
+      return;
+    }
+
+    try {
+      // Utiliser l'endpoint /api/talents pour tous les types
+      const response = await fetch(`/api/talents/${talentId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete talent');
+      }
+
+      alert('Talent supprimé avec succès !');
+      setSelectedTalent(null);
+      fetchTalents(); // Recharger la liste
+    } catch (error) {
+      console.error('Error deleting talent:', error);
+      alert('Erreur lors de la suppression du talent');
     }
   };
 
@@ -122,8 +196,9 @@ export default function AdminModelsPage() {
       {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: '280px',
-        padding: '40px'
+        marginLeft: `${sidebarWidth}px`,
+        padding: '40px',
+        transition: 'margin-left 0.3s ease'
       }}>
         {/* Header */}
         <div style={{
@@ -152,10 +227,8 @@ export default function AdminModelsPage() {
               </p>
             </div>
 
-            <a
-              href="/studio"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/admin/models/create"
               style={{
                 padding: '12px 24px',
                 backgroundColor: '#6366f1',
@@ -171,7 +244,7 @@ export default function AdminModelsPage() {
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
             >
               + Ajouter un talent
-            </a>
+            </Link>
           </div>
 
           {/* Statistics Cards */}
@@ -570,27 +643,49 @@ export default function AdminModelsPage() {
                       >
                         Voir
                       </a>
-                      <a
-                        href={getStudioUrl(talent)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          flex: 1,
-                          padding: '8px 12px',
-                          backgroundColor: '#6366f1',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          textAlign: 'center',
-                          textDecoration: 'none',
-                          display: 'block'
-                        }}
-                      >
-                        Modifier
-                      </a>
+                      {talent.isPrisma ? (
+                        <Link
+                          href={`/admin/models/edit/${talent._id}`}
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            backgroundColor: '#6366f1',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            textDecoration: 'none',
+                            display: 'block'
+                          }}
+                        >
+                          Modifier
+                        </Link>
+                      ) : (
+                        <a
+                          href={getStudioUrl(talent)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            backgroundColor: '#6366f1',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            textDecoration: 'none',
+                            display: 'block'
+                          }}
+                        >
+                          Modifier
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -986,27 +1081,47 @@ export default function AdminModelsPage() {
                     >
                       Voir sur le site
                     </a>
-                    <a
-                      href={getStudioUrl(selectedTalent)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        flex: 1,
-                        padding: '12px',
-                        backgroundColor: '#6366f1',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '15px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        display: 'block'
-                      }}
-                    >
-                      Modifier
-                    </a>
+                    {!selectedTalent.isPrisma ? (
+                      <a
+                        href={getStudioUrl(selectedTalent)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          flex: 1,
+                          padding: '12px',
+                          backgroundColor: '#6366f1',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '15px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          textDecoration: 'none',
+                          display: 'block'
+                        }}
+                      >
+                        Modifier dans Sanity
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => handleDeleteModel(selectedTalent._id)}
+                        style={{
+                          flex: 1,
+                          padding: '12px',
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '15px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                        }}
+                      >
+                        Supprimer
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

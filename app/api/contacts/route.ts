@@ -32,18 +32,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
     }
 
-    // Ajouter le type (professional/model) au message si disponible
-    let fullMessage = message || '';
-    if (selectedType) {
-      fullMessage = `Type: ${selectedType === 'professional' ? 'Professionnel' : 'Mannequin'}\n\n${fullMessage}`;
-    }
-
     const contact = await prisma.contact.create({
       data: {
         name,
         email,
         phone,
-        message: fullMessage,
+        message: message || '',
+        type: selectedType || null,
         source: source || 'website',
         status: 'new'
       }
@@ -82,7 +77,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, status, name, email, phone, message } = body;
+    const { id, status, name, email, phone, message, type } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Contact ID is required' }, { status: 400 });
@@ -95,7 +90,8 @@ export async function PATCH(request: NextRequest) {
         ...(name && { name }),
         ...(email && { email }),
         ...(phone !== undefined && { phone }),
-        ...(message !== undefined && { message })
+        ...(message !== undefined && { message }),
+        ...(type !== undefined && { type })
       },
       include: {
         appointments: true

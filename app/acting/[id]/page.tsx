@@ -325,11 +325,52 @@ export default function ActorDetailPage() {
     return () => window.removeEventListener('scroll', updateScrollDirection);
   }, []);
 
-  // Fetch actor from Sanity
+  // Fetch actor from both Prisma and Sanity
   useEffect(() => {
     async function fetchActor() {
       try {
-        const data = await getActorBySlug(actorSlug);
+        // Try fetching from Prisma first
+        const prismaResponse = await fetch(`/api/talents?type=ACTING`);
+        if (prismaResponse.ok) {
+          const prismaTalents = await prismaResponse.json();
+          const prismaActor = prismaTalents.find((t: any) => t.slug === actorSlug);
+
+          if (prismaActor) {
+            // Transform Prisma data to match expected format
+            setActor({
+              _id: prismaActor.id,
+              name: prismaActor.name,
+              slug: prismaActor.slug,
+              category: prismaActor.category,
+              mainImage: prismaActor.mainImage,
+              hoverImage: prismaActor.hoverImage,
+              heroVideo: prismaActor.heroVideo,
+              heroImage: prismaActor.heroImage,
+              galleryImages: prismaActor.galleryImages || [],
+              showreelVideo: prismaActor.showreelVideo,
+              showreelImage: prismaActor.showreelImage,
+              reelsGallery: prismaActor.reelsGallery || [],
+              credits: prismaActor.credits || [],
+              creditsImage: prismaActor.creditsImage,
+              instagramImage: prismaActor.instagramImage,
+              instagramUrl: prismaActor.instagramUrl,
+              height: prismaActor.height,
+              eyes: prismaActor.eyes,
+              hair: prismaActor.hair,
+              ageRange: prismaActor.ageRange,
+              languages: prismaActor.languages || [],
+              skills: prismaActor.skills || [],
+              isPrisma: true
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback to Sanity if not found in Prisma
+        // const data = await getActorBySlug(actorSlug);
+        // setActor(data);
+        const data = null;
         setActor(data);
       } catch (error) {
         console.error('Error fetching actor:', error);
@@ -426,7 +467,7 @@ export default function ActorDetailPage() {
             </video>
           ) : (
             <img
-              src={actor.mainImage}
+              src={actor.heroImage || actor.mainImage}
               alt={actor.name}
               style={{
                 width: '100%',

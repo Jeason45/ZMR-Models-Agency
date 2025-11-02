@@ -15,7 +15,31 @@ export default function PromoPortfolioGalleryPage() {
   useEffect(() => {
     async function fetchPromo() {
       try {
-        const data = await getPromoBySlug(promoSlug);
+        // Try fetching from Prisma first
+        const prismaResponse = await fetch(`/api/talents?type=PROMO`);
+        if (prismaResponse.ok) {
+          const prismaTalents = await prismaResponse.json();
+          const prismaPromo = prismaTalents.find((t: any) => t.slug === promoSlug);
+
+          if (prismaPromo) {
+            // Transform Prisma data to match expected format
+            // Use galleryImages for portfolio, fallback to eventsGallery if needed
+            setPromo({
+              _id: prismaPromo.id,
+              name: prismaPromo.name,
+              slug: prismaPromo.slug,
+              eventsGallery: prismaPromo.galleryImages || prismaPromo.eventsGallery || [],
+              isPrisma: true
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback to Sanity if not found in Prisma
+        // const data = await getPromoBySlug(promoSlug);
+        // setPromo(data);
+        const data = null;
         setPromo(data);
       } catch (error) {
         console.error('Error fetching promo:', error);

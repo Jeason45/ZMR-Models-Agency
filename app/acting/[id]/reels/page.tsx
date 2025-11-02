@@ -16,7 +16,30 @@ export default function ReelsPage() {
   useEffect(() => {
     async function fetchActor() {
       try {
-        const data = await getActorBySlug(actorSlug);
+        // Try fetching from Prisma first
+        const prismaResponse = await fetch(`/api/talents?type=ACTING`);
+        if (prismaResponse.ok) {
+          const prismaTalents = await prismaResponse.json();
+          const prismaActor = prismaTalents.find((t: any) => t.slug === actorSlug);
+
+          if (prismaActor) {
+            // Transform Prisma data to match expected format
+            setActor({
+              _id: prismaActor.id,
+              name: prismaActor.name,
+              slug: prismaActor.slug,
+              reelsGallery: prismaActor.reelsGallery || [],
+              isPrisma: true
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback to Sanity if not found in Prisma
+        // const data = await getActorBySlug(actorSlug);
+        // setActor(data);
+        const data = null;
         setActor(data);
       } catch (error) {
         console.error('Error fetching actor:', error);

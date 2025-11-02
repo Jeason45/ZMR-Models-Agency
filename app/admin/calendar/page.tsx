@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
+import { useSidebar } from '@/components/SidebarContext';
 
 interface Contact {
   id: string;
@@ -27,6 +28,7 @@ interface Appointment {
 type ViewMode = 'month' | 'week';
 
 export default function CalendarPage() {
+  const { sidebarWidth } = useSidebar();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -261,7 +263,7 @@ export default function CalendarPage() {
 
       <div style={{
         flex: 1,
-        marginLeft: '260px',
+        marginLeft: `${sidebarWidth}px`,
         padding: '32px 40px',
         transition: 'margin-left 0.3s ease'
       }}>

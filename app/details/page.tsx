@@ -334,12 +334,33 @@ export default function DetailsPage() {
     };
   }, []);
 
-  // Fetch details from Sanity
+  // Fetch details from both Sanity and Prisma
   useEffect(() => {
     async function fetchDetails() {
       try {
-        const data = await getAllDetails();
-        setDetails(data);
+        // Fetch from Sanity
+        // const sanityData = await getAllDetails();
+        const sanityData: any[] = [];
+
+        // Fetch from Prisma
+        const prismaResponse = await fetch('/api/talents?type=DETAILS');
+        const prismaDetails = prismaResponse.ok ? await prismaResponse.json() : [];
+
+        // Transform Prisma details to match Sanity format
+        const transformedPrismaDetails = prismaDetails.map((detail: any) => ({
+          _id: detail.id,
+          slug: detail.slug,
+          name: detail.name,
+          category: detail.category,
+          mainImage: detail.mainImage,
+          hoverImage: detail.hoverImage,
+          height: detail.height,
+          isPrisma: true
+        }));
+
+        // Merge both sources
+        const allDetails = [...sanityData, ...transformedPrismaDetails];
+        setDetails(allDetails);
       } catch (error) {
         console.error('Error fetching details:', error);
       } finally {

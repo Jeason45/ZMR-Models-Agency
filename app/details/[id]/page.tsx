@@ -373,11 +373,59 @@ export default function DetailDetailPage() {
     return () => window.removeEventListener('scroll', updateScrollDirection);
   }, []);
 
-  // Fetch detail from Sanity
+  // Fetch detail from both Prisma and Sanity
   useEffect(() => {
     async function fetchDetail() {
       try {
-        const data = await getDetailBySlug(detailSlug);
+        // Try fetching from Prisma first
+        const prismaResponse = await fetch(`/api/talents?type=DETAILS`);
+        if (prismaResponse.ok) {
+          const prismaTalents = await prismaResponse.json();
+          const prismaDetail = prismaTalents.find((t: any) => t.slug === detailSlug);
+
+          if (prismaDetail) {
+            // Transform Prisma data to match expected format
+            setDetail({
+              _id: prismaDetail.id,
+              name: prismaDetail.name,
+              slug: prismaDetail.slug,
+              category: prismaDetail.category,
+              mainImage: prismaDetail.mainImage,
+              hoverImage: prismaDetail.hoverImage,
+              heroVideo: prismaDetail.heroVideo,
+              heroImage: prismaDetail.heroImage,
+              galleryImages: prismaDetail.galleryImages || [],
+              portfolioImage: prismaDetail.portfolioImage,
+              portfolioGallery: prismaDetail.portfolioGallery || [],
+              campaigns: prismaDetail.campaigns || [],
+              campaignsImage: prismaDetail.campaignsImage,
+              instagramImage: prismaDetail.instagramImage,
+              instagramUrl: prismaDetail.instagramUrl,
+              height: prismaDetail.height,
+              eyes: prismaDetail.eyes,
+              hair: prismaDetail.hair,
+              handSize: prismaDetail.handSize,
+              ringSize: prismaDetail.ringSize,
+              wristSize: prismaDetail.wristSize,
+              footSize: prismaDetail.footSize,
+              legLength: prismaDetail.legLength,
+              neckSize: prismaDetail.neckSize,
+              waist: prismaDetail.waist,
+              hips: prismaDetail.hips,
+              bust: prismaDetail.bust,
+              skinTone: prismaDetail.skinTone,
+              faceSpecialty: prismaDetail.faceSpecialty || [],
+              isPrisma: true
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback to Sanity if not found in Prisma
+        // const data = await getDetailBySlug(detailSlug);
+        // setDetail(data);
+        const data = null;
         setDetail(data);
       } catch (error) {
         console.error('Error fetching detail:', error);
@@ -498,9 +546,9 @@ export default function DetailDetailPage() {
               flexWrap: 'wrap',
               justifyContent: 'center'
             }}>
-              <a href="#portfolio" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>PORTFOLIO</a>
-              <a href="#campaigns" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>CAMPAIGNS</a>
+              <a href="#portfolio" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>MY WORK</a>
               <a href="#social" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>INSTAGRAM</a>
+              <a href="#campaigns" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>CAMPAIGNS</a>
             </div>
           </div>
         </div>
@@ -531,7 +579,7 @@ export default function DetailDetailPage() {
           </div>
         )}
 
-        {/* 3. PORTFOLIO Zone */}
+        {/* 3. MY WORK Zone */}
         <div id="portfolio" style={{
           position: 'relative',
           width: '100%',
@@ -541,7 +589,7 @@ export default function DetailDetailPage() {
         }}>
           <img
             src={detail.portfolioImage || detail.hoverImage || detail.mainImage}
-            alt="Portfolio"
+            alt="My Work"
             style={{
               width: '100%',
               height: '100%',
@@ -566,7 +614,7 @@ export default function DetailDetailPage() {
               margin: 0,
               textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
             }}>
-              PORTFOLIO
+              MY WORK
             </h2>
             {detail.portfolioGallery && detail.portfolioGallery.length > 0 && (
               <Link
@@ -582,13 +630,13 @@ export default function DetailDetailPage() {
                   paddingBottom: '4px'
                 }}
               >
-                VIEW GALLERY
+                VIEW PORTFOLIO
               </Link>
             )}
           </div>
         </div>
 
-        {/* 4 & 5. CAMPAIGNS and SOCIAL - Side by Side */}
+        {/* 4 & 5. SOCIAL and CAMPAIGNS - Side by Side */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
@@ -596,6 +644,62 @@ export default function DetailDetailPage() {
           marginTop: '40px',
           padding: '0 20px'
         }}>
+          {/* SOCIAL Zone */}
+          <div id="social" style={{
+            position: 'relative',
+            height: '80vh',
+            overflow: 'hidden',
+            cursor: 'pointer'
+          }}>
+            <img
+              src={detail.instagramImage || detail.mainImage}
+              alt="Social"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '60px',
+              left: '0',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                color: 'white',
+                fontSize: 'clamp(40px, 8vw, 80px)',
+                fontWeight: 900,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                margin: 0,
+                textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
+              }}>
+                SOCIAL
+              </h2>
+              <a
+                href={detail.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'white',
+                  fontSize: '14px',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  marginTop: '20px',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid white',
+                  paddingBottom: '4px'
+                }}
+              >
+                VIEW INSTAGRAM
+              </a>
+            </div>
+          </div>
+
           {/* CAMPAIGNS Zone */}
           <div id="campaigns" style={{
             position: 'relative',
@@ -655,62 +759,6 @@ export default function DetailDetailPage() {
                   ))}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* SOCIAL Zone */}
-          <div id="social" style={{
-            position: 'relative',
-            height: '80vh',
-            overflow: 'hidden',
-            cursor: 'pointer'
-          }}>
-            <img
-              src={detail.instagramImage || detail.mainImage}
-              alt="Social"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
-            />
-            <div style={{
-              position: 'absolute',
-              bottom: '60px',
-              left: '0',
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}>
-              <h2 style={{
-                color: 'white',
-                fontSize: 'clamp(40px, 8vw, 80px)',
-                fontWeight: 900,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                margin: 0,
-                textShadow: '2px 2px 8px rgba(0,0,0,0.5)'
-              }}>
-                SOCIAL
-              </h2>
-              <a
-                href={detail.instagramUrl || 'https://www.instagram.com/zmrmodels/'}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: 'white',
-                  fontSize: '14px',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  marginTop: '20px',
-                  textDecoration: 'none',
-                  borderBottom: '1px solid white',
-                  paddingBottom: '4px'
-                }}
-              >
-                VIEW INSTAGRAM
-              </a>
             </div>
           </div>
         </div>

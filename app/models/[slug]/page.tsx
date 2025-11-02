@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getModelBySlug } from '@/lib/sanity';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -301,7 +300,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
 
 export default function ModelDetailPage() {
   const params = useParams();
-  const modelSlug = params.id as string;
+  const modelSlug = params.slug as string;
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
   const [model, setModel] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -325,14 +324,41 @@ export default function ModelDetailPage() {
     return () => window.removeEventListener('scroll', updateScrollDirection);
   }, []);
 
-  // Fetch model from Sanity
+  // Fetch model from Prisma API or Sanity
   useEffect(() => {
     async function fetchModel() {
       try {
-        const data = await getModelBySlug(modelSlug);
-        setModel(data);
+        // 1. D'abord essayer de récupérer depuis Prisma
+        const prismaResponse = await fetch('/api/models?status=active');
+        if (prismaResponse.ok) {
+          const prismaModels = await prismaResponse.json();
+          const foundPrismaModel = prismaModels.find((m: any) => m.slug === modelSlug);
+
+          if (foundPrismaModel) {
+            setModel(foundPrismaModel);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // 2. Si pas trouvé dans Prisma, essayer Sanity
+        try {
+          const { getModelBySlug } = await import('@/lib/sanity');
+          const sanityModel = await getModelBySlug(modelSlug);
+          if (sanityModel) {
+            setModel(sanityModel);
+            setLoading(false);
+            return;
+          }
+        } catch (sanityError) {
+          console.log('Model not found in Sanity:', sanityError);
+        }
+
+        // 3. Pas trouvé du tout
+        setModel(null);
       } catch (error) {
         console.error('Error fetching model:', error);
+        setModel(null);
       } finally {
         setLoading(false);
       }
@@ -426,7 +452,7 @@ export default function ModelDetailPage() {
             </video>
           ) : (
             <img
-              src={model.mainImage}
+              src={model.heroImage || model.mainImage}
               alt={model.name}
               style={{
                 width: '100%',
@@ -464,9 +490,9 @@ export default function ModelDetailPage() {
               flexWrap: 'wrap',
               justifyContent: 'center'
             }}>
-              <a href="#" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>PORTFOLIO</a>
-              <a href="#" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>INSTAGRAM</a>
-              <a href="#" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>SHOWS</a>
+              <a href="#portfolio" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>PORTFOLIO</a>
+              <a href="#social" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>INSTAGRAM</a>
+              <a href="#shows" style={{ color: 'white', fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '4px', transition: 'border-color 0.3s' }} onMouseOver={(e) => e.currentTarget.style.borderBottomColor = 'white'} onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}>SHOWS</a>
             </div>
           </div>
         </div>
@@ -487,19 +513,22 @@ export default function ModelDetailPage() {
             textTransform: 'uppercase',
             letterSpacing: '0.1em'
           }}>
-            <div><span style={{ color: '#999' }}>HEIGHT</span> 6'2'' 1/2</div>
-            <div><span style={{ color: '#999' }}>NECK</span> 15''</div>
-            <div><span style={{ color: '#999' }}>WAIST</span> 28''</div>
-            <div><span style={{ color: '#999' }}>SUIT</span> 37L</div>
-            <div><span style={{ color: '#999' }}>INSEAM</span> 34''</div>
-            <div><span style={{ color: '#999' }}>SHOE</span> 12</div>
-            <div><span style={{ color: '#999' }}>EYES</span> BROWN</div>
-            <div><span style={{ color: '#999' }}>HAIR</span> BLACK</div>
+            {model.height && <div><span style={{ color: '#999' }}>HEIGHT</span> {model.height}</div>}
+            {model.neck && <div><span style={{ color: '#999' }}>NECK</span> {model.neck}</div>}
+            {model.bust && <div><span style={{ color: '#999' }}>BUST</span> {model.bust}</div>}
+            {model.chest && <div><span style={{ color: '#999' }}>CHEST</span> {model.chest}</div>}
+            {model.waist && <div><span style={{ color: '#999' }}>WAIST</span> {model.waist}</div>}
+            {model.hips && <div><span style={{ color: '#999' }}>HIPS</span> {model.hips}</div>}
+            {model.suit && <div><span style={{ color: '#999' }}>SUIT</span> {model.suit}</div>}
+            {model.inseam && <div><span style={{ color: '#999' }}>INSEAM</span> {model.inseam}</div>}
+            {model.shoes && <div><span style={{ color: '#999' }}>SHOE</span> {model.shoes}</div>}
+            {model.eyes && <div><span style={{ color: '#999' }}>EYES</span> {model.eyes}</div>}
+            {model.hair && <div><span style={{ color: '#999' }}>HAIR</span> {model.hair}</div>}
           </div>
         </div>
 
         {/* 3. MY WORK Zone */}
-        <div style={{
+        <div id="portfolio" style={{
           position: 'relative',
           width: '100%',
           height: '80vh',
@@ -562,7 +591,7 @@ export default function ModelDetailPage() {
           padding: '0 20px'
         }}>
           {/* SOCIAL Zone */}
-          <div style={{
+          <div id="social" style={{
             position: 'relative',
             height: '80vh',
             overflow: 'hidden',
@@ -618,7 +647,7 @@ export default function ModelDetailPage() {
           </div>
 
           {/* SHOWS Zone */}
-          <div style={{
+          <div id="shows" style={{
             position: 'relative',
             height: '80vh',
             overflow: 'hidden',

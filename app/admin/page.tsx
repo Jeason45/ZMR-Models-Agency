@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebar from '@/components/AdminSidebar';
+import { useSidebar } from '@/components/SidebarContext';
 import { getAllModels } from '@/lib/sanity';
 
 export default function AdminPage() {
+  const { sidebarWidth } = useSidebar();
   const [models, setModels] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -18,15 +20,17 @@ export default function AdminPage() {
 
   const fetchData = async () => {
     try {
-      const [modelsData, appointmentsData, contactsData] = await Promise.all([
+      const [modelsData, appointmentsData, contactsData, documentsData] = await Promise.all([
         getAllModels(),
         fetch('/api/appointments').then(res => res.json()),
-        fetch('/api/contacts').then(res => res.json())
+        fetch('/api/contacts').then(res => res.json()),
+        fetch('/api/documents').then(res => res.json())
       ]);
 
       setModels(modelsData || []);
       setAppointments(appointmentsData || []);
       setContacts(contactsData || []);
+      setDocuments(documentsData || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -45,7 +49,7 @@ export default function AdminPage() {
       {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: '260px',
+        marginLeft: `${sidebarWidth}px`,
         padding: '32px 40px',
         transition: 'margin-left 0.3s ease'
       }}>
@@ -258,6 +262,68 @@ export default function AdminPage() {
               Gérer les contacts →
             </Link>
           </div>
+
+          {/* Documents Card */}
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '8px',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px'
+            }}>
+              <p style={{
+                fontSize: '13px',
+                color: '#64748b',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                Documents
+              </p>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                backgroundColor: '#f0fdf4',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="9" y1="15" x2="15" y2="15"/>
+                  <path d="M9 18.5c.83.83 2.17.83 3 0"/>
+                </svg>
+              </div>
+            </div>
+            <p style={{
+              fontSize: '32px',
+              fontWeight: 700,
+              color: '#0f172a',
+              marginBottom: '4px',
+              letterSpacing: '-0.02em'
+            }}>
+              {loading ? '...' : documents.length}
+            </p>
+            <Link
+              href="/admin/documents"
+              style={{
+                fontSize: '13px',
+                color: '#10b981',
+                fontWeight: 500,
+                textDecoration: 'none'
+              }}
+            >
+              Voir les documents →
+            </Link>
+          </div>
         </div>
 
         {/* Quick Actions */}
@@ -391,6 +457,42 @@ export default function AdminPage() {
                   <line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
                 Voir le calendrier
+              </div>
+            </Link>
+            <Link href="/admin/documents/generate" style={{ textDecoration: 'none' }}>
+              <div
+                style={{
+                  padding: '16px 20px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: '#475569',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.borderColor = '#6366f1';
+                  e.currentTarget.style.backgroundColor = '#f5f3ff';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="9" y1="15" x2="15" y2="15"/>
+                  <path d="M9 18.5c.83.83 2.17.83 3 0"/>
+                </svg>
+                Générer un document
               </div>
             </Link>
           </div>

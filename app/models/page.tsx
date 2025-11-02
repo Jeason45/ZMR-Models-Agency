@@ -355,13 +355,38 @@ export default function ModelsPage() {
     async function fetchModels() {
       try {
         const fetchStartTime = performance.now();
-        const data = await getAllModels();
-        const fetchEndTime = performance.now();
 
+        // Récupérer les models Sanity et Prisma en parallèle
+        // const [sanityData, prismaResponse] = await Promise.all([
+        //   getAllModels(),
+        //   fetch('/api/models?status=active')
+        // ]);
+        const sanityData: any[] = [];
+        const prismaResponse = await fetch('/api/models?status=active');
+
+        const prismaModels = prismaResponse.ok ? await prismaResponse.json() : [];
+
+        // Transformer les models Prisma au format Sanity
+        const transformedPrismaModels = prismaModels.map((model: any) => ({
+          _id: model.id,
+          _type: 'model',
+          name: model.name,
+          slug: model.slug, // Déjà une string, on la garde telle quelle
+          category: model.category,
+          status: model.status,
+          mainImage: model.mainImage, // Chemin local direct
+          hoverImage: model.hoverImage,
+          isPrisma: true,
+        }));
+
+        // Fusionner les deux sources
+        const allModels = [...sanityData, ...transformedPrismaModels];
+
+        const fetchEndTime = performance.now();
         console.log(`📥 Fetch terminé: ${(fetchEndTime - fetchStartTime).toFixed(2)}ms`);
 
         const renderStartTime = performance.now();
-        setModels(data);
+        setModels(allModels);
 
         requestAnimationFrame(() => {
           const renderEndTime = performance.now();
@@ -497,7 +522,7 @@ export default function ModelsPage() {
         {filteredModels.map((model) => (
           <Link
             key={model._id}
-            href={`/models/${model.slug}`}
+            href={`/models/${typeof model.slug === 'string' ? model.slug : model.slug?.current}`}
             style={{
               textDecoration: 'none'
             }}
@@ -520,7 +545,7 @@ export default function ModelsPage() {
               }}>
                 {/* Main Image */}
                 <img
-                  src={model.mainImage}
+                  src={typeof model.mainImage === 'string' ? model.mainImage : urlFor(model.mainImage).width(800).height(1200).url()}
                   alt={model.name}
                   style={{
                     width: '100%',
@@ -536,7 +561,7 @@ export default function ModelsPage() {
                 {/* Hover Image */}
                 {model.hoverImage && (
                   <img
-                    src={model.hoverImage}
+                    src={typeof model.hoverImage === 'string' ? model.hoverImage : urlFor(model.hoverImage).width(800).height(1200).url()}
                     alt={model.name}
                     style={{
                       width: '100%',

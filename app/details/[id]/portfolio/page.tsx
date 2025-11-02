@@ -3,28 +3,48 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getModelBySlug } from '@/lib/sanity';
 
-export default function PortfolioGalleryPage() {
+export default function DetailPortfolioGalleryPage() {
   const params = useParams();
-  const modelSlug = params.id as string;
-  const [model, setModel] = useState<any>(null);
+  const detailSlug = params.id as string;
+  const [detail, setDetail] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    async function fetchModel() {
+    async function fetchDetail() {
       try {
-        const data = await getModelBySlug(modelSlug);
-        setModel(data);
+        // Try fetching from Prisma first
+        const prismaResponse = await fetch(`/api/talents?type=DETAILS`);
+        if (prismaResponse.ok) {
+          const prismaTalents = await prismaResponse.json();
+          const prismaDetail = prismaTalents.find((t: any) => t.slug === detailSlug);
+
+          if (prismaDetail) {
+            // Transform Prisma data to match expected format
+            setDetail({
+              _id: prismaDetail.id,
+              name: prismaDetail.name,
+              slug: prismaDetail.slug,
+              portfolioGallery: prismaDetail.portfolioGallery || [],
+              isPrisma: true
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback if not found in Prisma
+        const data = null;
+        setDetail(data);
       } catch (error) {
-        console.error('Error fetching model:', error);
+        console.error('Error fetching detail:', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchModel();
-  }, [modelSlug]);
+    fetchDetail();
+  }, [detailSlug]);
 
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
@@ -35,15 +55,15 @@ export default function PortfolioGalleryPage() {
   };
 
   const handleNext = () => {
-    if (selectedImageIndex !== null && model.portfolioGallery) {
-      setSelectedImageIndex((selectedImageIndex + 1) % model.portfolioGallery.length);
+    if (selectedImageIndex !== null && detail.portfolioGallery) {
+      setSelectedImageIndex((selectedImageIndex + 1) % detail.portfolioGallery.length);
     }
   };
 
   const handlePrevious = () => {
-    if (selectedImageIndex !== null && model.portfolioGallery) {
+    if (selectedImageIndex !== null && detail.portfolioGallery) {
       setSelectedImageIndex(
-        selectedImageIndex === 0 ? model.portfolioGallery.length - 1 : selectedImageIndex - 1
+        selectedImageIndex === 0 ? detail.portfolioGallery.length - 1 : selectedImageIndex - 1
       );
     }
   };
@@ -72,12 +92,12 @@ export default function PortfolioGalleryPage() {
         justifyContent: 'center',
         color: 'white'
       }}>
-        <div>Loading portfolio...</div>
+        <div>Loading portfolio gallery...</div>
       </main>
     );
   }
 
-  if (!model || !model.portfolioGallery || model.portfolioGallery.length === 0) {
+  if (!detail || !detail.portfolioGallery || detail.portfolioGallery.length === 0) {
     return (
       <main style={{
         minHeight: '100vh',
@@ -89,8 +109,8 @@ export default function PortfolioGalleryPage() {
         flexDirection: 'column',
         gap: '20px'
       }}>
-        <h1>No portfolio available</h1>
-        <Link href={`/models/${modelSlug}`} style={{ color: 'white' }}>
+        <h1>No portfolio gallery available</h1>
+        <Link href={`/details/${detailSlug}`} style={{ color: 'white' }}>
           ← Back to profile
         </Link>
       </main>
@@ -106,7 +126,7 @@ export default function PortfolioGalleryPage() {
     }}>
       {/* Back button */}
       <Link
-        href={`/models/${modelSlug}`}
+        href={`/details/${detailSlug}`}
         style={{
           position: 'fixed',
           top: '20px',
@@ -137,7 +157,7 @@ export default function PortfolioGalleryPage() {
           textTransform: 'uppercase',
           margin: 0
         }}>
-          {model.name}
+          {detail.name}
         </h1>
         <p style={{
           color: '#999',
@@ -160,7 +180,7 @@ export default function PortfolioGalleryPage() {
         margin: '0 auto',
         paddingBottom: '100px'
       }}>
-        {model.portfolioGallery.map((imageUrl: string, index: number) => (
+        {detail.portfolioGallery.map((imageUrl: string, index: number) => (
           <div
             key={index}
             onClick={() => handleImageClick(index)}
@@ -288,7 +308,7 @@ export default function PortfolioGalleryPage() {
 
           {/* Image */}
           <img
-            src={model.portfolioGallery[selectedImageIndex]}
+            src={detail.portfolioGallery[selectedImageIndex]}
             alt={`Portfolio ${selectedImageIndex + 1}`}
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -349,7 +369,7 @@ export default function PortfolioGalleryPage() {
             fontWeight: 300,
             zIndex: 201
           }}>
-            {selectedImageIndex + 1} / {model.portfolioGallery.length}
+            {selectedImageIndex + 1} / {detail.portfolioGallery.length}
           </div>
         </div>
       )}

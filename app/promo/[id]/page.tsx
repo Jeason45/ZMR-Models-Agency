@@ -325,11 +325,50 @@ export default function PromoDetailPage() {
     return () => window.removeEventListener('scroll', updateScrollDirection);
   }, []);
 
-  // Fetch promo from Sanity
+  // Fetch promo from both Prisma and Sanity
   useEffect(() => {
     async function fetchPromo() {
       try {
-        const data = await getPromoBySlug(promoSlug);
+        // Try fetching from Prisma first
+        const prismaResponse = await fetch(`/api/talents?type=PROMO`);
+        if (prismaResponse.ok) {
+          const prismaTalents = await prismaResponse.json();
+          const prismaPromo = prismaTalents.find((t: any) => t.slug === promoSlug);
+
+          if (prismaPromo) {
+            // Transform Prisma data to match expected format
+            setPromo({
+              _id: prismaPromo.id,
+              name: prismaPromo.name,
+              slug: prismaPromo.slug,
+              categories: prismaPromo.promoCategories || [],
+              mainImage: prismaPromo.mainImage,
+              hoverImage: prismaPromo.hoverImage,
+              heroVideo: prismaPromo.heroVideo,
+              heroImage: prismaPromo.heroImage,
+              galleryImages: prismaPromo.galleryImages || [],
+              portfolioImage: prismaPromo.portfolioImage,
+              showsImage: prismaPromo.showsImage,
+              showsVideo: prismaPromo.showsVideo,
+              instagramImage: prismaPromo.instagramImage,
+              instagramUrl: prismaPromo.instagramUrl,
+              instagramFollowers: prismaPromo.instagramFollowers,
+              tiktokFollowers: prismaPromo.tiktokFollowers,
+              tiktokUrl: prismaPromo.tiktokUrl,
+              height: prismaPromo.height,
+              eyes: prismaPromo.eyes,
+              hair: prismaPromo.hair,
+              isPrisma: true
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback to Sanity if not found in Prisma
+        // const data = await getPromoBySlug(promoSlug);
+        // setPromo(data);
+        const data = null;
         setPromo(data);
       } catch (error) {
         console.error('Error fetching promo:', error);
@@ -433,7 +472,7 @@ export default function PromoDetailPage() {
             </video>
           ) : (
             <img
-              src={promo.mainImage}
+              src={promo.heroImage || promo.mainImage}
               alt={promo.name}
               style={{
                 width: '100%',

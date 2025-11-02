@@ -28,11 +28,13 @@ model Contact {
   email        String
   phone        String?
   message      String?
+  type         String?       // "professional", "model"
   status       String        @default("new") // "new", "contacted", "converted", "archived"
   source       String?       // "website", "referral", etc.
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   appointments Appointment[]
+  documents    Document[]
 
   @@map("contacts")
 }
@@ -64,4 +66,305 @@ model Availability {
   updatedAt DateTime @updatedAt
 
   @@map("availability")
+}
+
+// ============================================
+// TALENTS (Models, Acting, Promo, Details)
+// ============================================
+
+model Talent {
+  id        String   @id @default(cuid())
+
+  // Type de talent
+  type      String   // "MODELS", "ACTING", "PROMO", "DETAILS"
+
+  // Infos de base
+  name      String
+  slug      String   @unique
+  category  String   // Pour MODELS: "woman"/"man", ACTING: "commercial"/"cinema"/"theater", PROMO: array, DETAILS: "hands"/"face"/etc.
+  status    String   @default("active") // "active", "inactive", "archived"
+
+  // Images principales (tous types)
+  mainImage      String?  // Chemin vers l'image principale
+  hoverImage     String?  // Chemin vers l'image au survol
+  heroVideo      String?  // Chemin vers la vidéo hero
+  heroImage      String?  // Pour DETAILS uniquement
+
+  // Gallery Images (array stocké en JSON)
+  galleryImages  Json?    // Array de chemins d'images
+
+  // Portfolio Section (MODELS & DETAILS)
+  portfolioImage   String?
+  portfolioGallery Json?   // Array de chemins d'images
+
+  // Instagram Section (tous types)
+  instagramImage String?
+  instagramUrl   String?
+
+  // Shows Section (MODELS uniquement)
+  showsImage String?
+  showsVideo String?
+
+  // Showreel Section (ACTING uniquement)
+  showreelVideo String?
+  showreelImage String?
+  reelsGallery  Json?    // Array de chemins de vidéos
+
+  // Credits (ACTING uniquement) - Array d'objets {title, role, year, type}
+  credits       Json?
+  creditsImage  String?
+
+  // Collaborations Section (PROMO uniquement) - Array d'objets {brandName, logo, campaignImage}
+  collaborations Json?
+  collaborationsImage String?
+
+  // Events Section (PROMO uniquement)
+  eventsGallery Json?   // Array de chemins d'images
+  eventsImage   String? // Cover image pour la section Events
+
+  // Social Section (PROMO uniquement)
+  socialImage   String?
+
+  // Campaigns Section (DETAILS uniquement) - Array d'objets {brandName, logo, campaignImage}
+  campaigns     Json?
+  campaignsImage String?
+
+  // Mensurations communes
+  height  String?
+  eyes    String?
+  hair    String?
+
+  // Mensurations MODELS
+  neck    String?
+  bust    String?
+  chest   String?
+  waist   String?
+  hips    String?
+  suit    String?
+  inseam  String?
+  shoes   String?
+
+  // Mensurations DETAILS
+  handSize    String?
+  ringSize    String?
+  wristSize   String?
+  footSize    String?
+  legLength   String?
+  neckSize    String?
+  skinTone    String?
+  faceSpecialty Json?  // Array: ["lips", "eyes", "teeth", "skin"]
+
+  // Champs spécifiques ACTING
+  ageRange    String?  // Ex: "25-35"
+  languages   Json?    // Array de langues
+  skills      Json?    // Array de compétences
+
+  // Champs spécifiques PROMO
+  instagramFollowers Int?
+  tiktokFollowers    Int?
+  tiktokUrl          String?
+  promoCategories    Json?  // Array: ["Beauty & Fashion", "Luxury Events", "Lifestyle"]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  documents Document[]
+
+  @@index([type])
+  @@index([slug])
+  @@map("talents")
+}
+
+// ============================================
+// DOCUMENTS SYSTEM
+// ============================================
+
+// Templates de documents (les 22 fichiers DOCX)
+model DocumentTemplate {
+  id          String   @id @default(cuid())
+  name        String   // "Contrat Mannequinat Mode"
+  slug        String   @unique // "contrat-mannequinat-mode"
+  type        String   // "CONTRAT", "FACTURE", "DEVIS", "ADMINISTRATIF"
+  category    String   // "talent", "client", "commercial", "admin"
+  description String?
+
+  // Fichier template
+  fileName    String   // "Contrat_Mannequinat_Mode.docx"
+  filePath    String   // Chemin vers le template DOCX
+
+  // Variables dynamiques dans le template (JSON array)
+  // Ex: ["nom_talent", "date_debut", "tarif_journalier"]
+  variables   Json?
+
+  // Configuration
+  requiresSignature Boolean @default(false)
+  isActive          Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  documents Document[]
+
+  @@map("document_templates")
+}
+
+// Documents générés à partir des templates
+model Document {
+  id              String   @id @default(cuid())
+
+  // Lien vers le template utilisé
+  templateId      String?
+  template        DocumentTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  // Type et catégorie
+  type            String   // "CONTRAT_MODELE", "FACTURE", "DEVIS", etc.
+  category        String   // "contrat", "commercial", "administratif", "talent"
+
+  // Fichiers générés
+  fileName        String   // "Contrat_Camille_Dupont_2025-11-02.pdf"
+  filePath        String   // Chemin relatif dans storage/documents/
+  originalDocx    String?  // Chemin vers le DOCX rempli (avant conversion PDF)
+
+  // Données du document (JSON contenant toutes les valeurs)
+  // Ex: {"nom_talent": "Camille Dupont", "date_debut": "2025-12-01", ...}
+  data            Json?
+
+  // Workflow
+  status          String   @default("draft") // "draft", "sent", "signed", "archived", "cancelled"
+
+  // Numérotation automatique (ex: FACT-2025-001, CONT-2025-042)
+  documentNumber  String?  @unique
+
+  // Relations possibles (un document peut être lié à différents types)
+  talentId        String?
+  talent          Talent?  @relation(fields: [talentId], references: [id], onDelete: Cascade)
+
+  contactId       String?
+  contact         Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  // Montants (pour factures/devis)
+  amountHT        Float?   // Montant HT
+  amountTTC       Float?   // Montant TTC
+  currency        String   @default("EUR")
+
+  // Dates importantes
+  issueDate       DateTime? // Date d'émission
+  dueDate         DateTime? // Date d'échéance (factures)
+  expiresAt       DateTime? // Date d'expiration (contrats)
+
+  // Signature
+  signedAt        DateTime?
+  signedBy        String?  // Nom du signataire
+  signatureImage  String?  // Chemin vers l'image de signature
+
+  // Métadonnées
+  generatedBy     String?  // Admin qui a généré
+  sentAt          DateTime? // Date d'envoi par mail
+  notes           String?
+  tags            Json?    // Array de tags pour filtrage
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  signatures      Signature[]
+  mailLogs        MailLog[]
+
+  @@index([status])
+  @@index([type])
+  @@index([talentId])
+  @@index([contactId])
+  @@map("documents")
+}
+
+// Signatures électroniques avec preuves légales
+model Signature {
+  id            String   @id @default(cuid())
+
+  documentId    String
+  document      Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Informations signataire
+  signerName    String
+  signerEmail   String
+  signerRole    String?  // "talent", "client", "agent", "parent"
+
+  // Signature
+  signatureImage String  // Chemin vers l'image de la signature (canvas PNG)
+  signatureType  String  @default("electronic") // "electronic", "drawn", "typed"
+
+  // Preuves légales (horodatage certifié)
+  signedAt      DateTime @default(now())
+  ipAddress     String
+  userAgent     String?
+  location      String?  // Géolocalisation optionnelle
+
+  // Hash cryptographique du PDF signé (SHA-256)
+  documentHash  String   // Hash du PDF pour vérification d'intégrité
+
+  // Preuve JSON complète (stockée comme backup)
+  proofData     Json?    // Contient: {hash, ip, timestamp, signature, metadata}
+
+  // Validation
+  isValid       Boolean  @default(true)
+  validatedAt   DateTime?
+  validatedBy   String?
+
+  createdAt     DateTime @default(now())
+
+  @@index([documentId])
+  @@index([signerEmail])
+  @@map("signatures")
+}
+
+// Logs de tous les mails envoyés
+model MailLog {
+  id          String   @id @default(cuid())
+
+  // Type de mail
+  type        String   // "document_sent", "signature_request", "confirmation", "reminder"
+  subject     String
+
+  // Destinataire
+  to          String
+  cc          String?
+  bcc         String?
+
+  // Contenu
+  htmlContent String?  @db.Text
+  textContent String?  @db.Text
+
+  // Pièces jointes
+  attachments Json?    // Array: [{filename: "contract.pdf", path: "/storage/..."}]
+
+  // Relations optionnelles
+  documentId  String?
+  document    Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  talentId    String?
+  contactId   String?
+
+  // Tracking
+  sentAt      DateTime  @default(now())
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+
+  // Statut
+  status      String    @default("sent") // "sent", "delivered", "opened", "clicked", "bounced", "failed"
+  error       String?   // Message d'erreur si échec
+
+  // Métadonnées
+  sentBy      String?   // Admin qui a déclenché l'envoi
+
+  createdAt   DateTime  @default(now())
+
+  @@index([type])
+  @@index([to])
+  @@index([documentId])
+  @@index([sentAt])
+  @@map("mail_logs")
 }

@@ -332,12 +332,36 @@ export default function ActingPage() {
     };
   }, []);
 
-  // Fetch actors from Sanity
+  // Fetch actors from both Sanity and Prisma
   useEffect(() => {
     async function fetchActors() {
       try {
-        const data = await getAllActors();
-        setActors(data);
+        // Fetch from Sanity
+        // const sanityData = await getAllActors();
+        const sanityData: any[] = [];
+
+        // Fetch from Prisma
+        const prismaResponse = await fetch('/api/talents?type=ACTING');
+        const prismaActors = prismaResponse.ok ? await prismaResponse.json() : [];
+
+        // Transform Prisma actors to match Sanity format
+        const transformedPrismaActors = prismaActors.map((actor: any) => ({
+          _id: actor.id,
+          slug: actor.slug,
+          name: actor.name,
+          category: actor.category,
+          mainImage: actor.mainImage,
+          hoverImage: actor.hoverImage,
+          ageRange: actor.ageRange,
+          height: actor.height,
+          eyes: actor.eyes,
+          hair: actor.hair,
+          isPrisma: true
+        }));
+
+        // Merge both sources
+        const allActors = [...sanityData, ...transformedPrismaActors];
+        setActors(allActors);
       } catch (error) {
         console.error('Error fetching actors:', error);
       } finally {
