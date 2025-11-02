@@ -6,11 +6,12 @@ const prisma = new PrismaClient();
 // GET /api/document-templates/[id] - Fetch single template by ID
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const template = await prisma.documentTemplate.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!template) {
@@ -33,9 +34,10 @@ export async function GET(
 // PUT /api/document-templates/[id] - Update a template
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     const {
@@ -53,7 +55,7 @@ export async function PUT(
 
     // Check if template exists
     const existing = await prisma.documentTemplate.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -79,7 +81,7 @@ export async function PUT(
 
     // Update template
     const template = await prisma.documentTemplate.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(name && { name }),
         ...(slug && { slug }),
@@ -107,12 +109,13 @@ export async function PUT(
 // DELETE /api/document-templates/[id] - Delete a template
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Check if template exists
     const existing = await prisma.documentTemplate.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -124,7 +127,7 @@ export async function DELETE(
 
     // Delete template
     await prisma.documentTemplate.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Template deleted successfully' });

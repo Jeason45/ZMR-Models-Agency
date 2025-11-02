@@ -6,11 +6,12 @@ const prisma = new PrismaClient();
 // GET /api/documents/[id] - Get single document by ID
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const document = await prisma.document.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         template: true,
         talent: true,
@@ -48,9 +49,10 @@ export async function GET(
 // PUT /api/documents/[id] - Update document
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     const {
@@ -66,7 +68,7 @@ export async function PUT(
 
     // Check if document exists
     const existing = await prisma.document.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -78,7 +80,7 @@ export async function PUT(
 
     // Update document
     const document = await prisma.document.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(status && { status }),
         ...(notes !== undefined && { notes }),
@@ -109,12 +111,13 @@ export async function PUT(
 // DELETE /api/documents/[id] - Delete a document
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Check if document exists
     const existing = await prisma.document.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!existing) {
@@ -126,7 +129,7 @@ export async function DELETE(
 
     // Delete document (cascade will delete signatures and mail logs)
     await prisma.document.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({
