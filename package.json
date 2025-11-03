@@ -10,6 +10,7 @@
   },
   "description": "ZMR Models Agency Website",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.922.0",
     "@prisma/client": "^6.18.0",
     "@types/nodemailer": "^7.0.3",
     "bcryptjs": "^3.0.2",
