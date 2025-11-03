@@ -368,3 +368,50 @@ model MailLog {
   @@index([sentAt])
   @@map("mail_logs")
 }
+
+// ============================================
+// BLOG
+// ============================================
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+
+  // Contenu
+  title       String
+  excerpt     String   @db.Text
+  content     String   @db.Text
+
+  // Media
+  coverImage  String
+
+  // Catégorie
+  category    String   // "Actualités", "Success Stories", "Conseils", "Behind-the-Scenes", "Industrie"
+
+  // Tags (optionnel)
+  tags        Json?    // Array de tags: ["Fashion Week", "Elite", "Shooting"]
+
+  // Auteur
+  author      String   @default("ZMR Models Agency")
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Publication
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+
+  // Stats
+  readTime    Int?     // Temps de lecture estimé en minutes
+  views       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([published])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
