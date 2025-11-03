@@ -153,7 +153,7 @@ export async function POST(request: Request) {
         userAgent,
         location,
         documentHash,
-        proofData: proof,
+        proofData: proof as any,
         isValid: true
       }
     });
