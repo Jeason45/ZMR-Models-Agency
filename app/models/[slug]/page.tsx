@@ -341,20 +341,7 @@ export default function ModelDetailPage() {
           }
         }
 
-        // 2. Si pas trouvé dans Prisma, essayer Sanity
-        try {
-          const { getModelBySlug } = await import('@/lib/sanity');
-          const sanityModel = await getModelBySlug(modelSlug);
-          if (sanityModel) {
-            setModel(sanityModel);
-            setLoading(false);
-            return;
-          }
-        } catch (sanityError) {
-          console.log('Model not found in Sanity:', sanityError);
-        }
-
-        // 3. Pas trouvé du tout
+        // 2. Pas trouvé du tout
         setModel(null);
       } catch (error) {
         console.error('Error fetching model:', error);

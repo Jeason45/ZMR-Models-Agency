@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebar from '@/components/AdminSidebar';
 import { useSidebar } from '@/components/SidebarContext';
-import { getAllModels } from '@/lib/sanity';
 
 export default function AdminPage() {
   const { sidebarWidth } = useSidebar();
@@ -21,7 +20,7 @@ export default function AdminPage() {
   const fetchData = async () => {
     try {
       const [modelsData, appointmentsData, contactsData, documentsData] = await Promise.all([
-        getAllModels(),
+        fetch('/api/talents').then(res => res.json()),
         fetch('/api/appointments').then(res => res.json()),
         fetch('/api/contacts').then(res => res.json()),
         fetch('/api/documents').then(res => res.json())

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { getAllActors } from '@/lib/sanity';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

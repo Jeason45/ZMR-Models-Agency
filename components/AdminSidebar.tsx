@@ -195,39 +195,61 @@ export default function AdminSidebar() {
               alignItems: 'center',
               gap: '12px',
               padding: isCollapsed ? '12px' : '12px 16px',
-              backgroundColor: isActive(item.href) ? `${item.color}15` : 'transparent',
+              backgroundColor: isActive(item.href) ? `${item.color}26` : 'transparent',
               borderLeft: isActive(item.href) ? `3px solid ${item.color}` : '3px solid transparent',
               borderRadius: '6px',
               fontSize: '14px',
-              fontWeight: 500,
+              fontWeight: isActive(item.href) ? 600 : 500,
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
               justifyContent: isCollapsed ? 'center' : 'flex-start'
             }}
             onMouseOver={(e) => {
               if (!isActive(item.href)) {
-                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                e.currentTarget.style.backgroundColor = `${item.color}14`;
               }
-              const icon = e.currentTarget.querySelector('svg');
-              const text = e.currentTarget.querySelector('span');
-              if (icon) icon.style.color = item.color;
-              if (text) text.style.color = item.color;
+              const iconWrapper = e.currentTarget.querySelector('div[data-icon-wrapper]') as HTMLElement;
+              const icon = e.currentTarget.querySelector('svg') as unknown as HTMLElement;
+              const text = e.currentTarget.querySelector('span') as HTMLElement;
+              if (iconWrapper && !isActive(item.href)) iconWrapper.style.transform = 'scale(1.02)';
+              if (icon && !isActive(item.href)) icon.style.opacity = '1';
+              if (text && !isActive(item.href)) text.style.opacity = '1';
             }}
             onMouseOut={(e) => {
               if (!isActive(item.href)) {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                const icon = e.currentTarget.querySelector('svg');
-                const text = e.currentTarget.querySelector('span');
-                if (icon) icon.style.color = '#94a3b8';
-                if (text) text.style.color = '#94a3b8';
+                const iconWrapper = e.currentTarget.querySelector('div[data-icon-wrapper]') as HTMLElement;
+                const icon = e.currentTarget.querySelector('svg') as unknown as HTMLElement;
+                const text = e.currentTarget.querySelector('span') as HTMLElement;
+                if (iconWrapper) iconWrapper.style.transform = 'scale(1)';
+                if (icon) icon.style.opacity = '0.7';
+                if (text) text.style.opacity = '0.7';
               }
             }}
             title={isCollapsed ? item.label : undefined}
             >
-              <div style={{ color: item.color, display: 'flex', alignItems: 'center' }}>
-                {item.icon}
+              <div
+                data-icon-wrapper
+                style={{
+                  color: item.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              >
+                <div style={{ opacity: isActive(item.href) ? 1 : 0.7, transition: 'opacity 200ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                  {item.icon}
+                </div>
               </div>
-              {!isCollapsed && <span style={{ color: item.color }}>{item.label}</span>}
+              {!isCollapsed && (
+                <span style={{
+                  color: item.color,
+                  opacity: isActive(item.href) ? 1 : 0.7,
+                  transition: 'opacity 200ms cubic-bezier(0.4, 0, 0.2, 1)'
+                }}>
+                  {item.label}
+                </span>
+              )}
             </div>
           </Link>
         ))}

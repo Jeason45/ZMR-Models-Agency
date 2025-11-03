@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminSidebar from '@/components/AdminSidebar';
 import { useSidebar } from '@/components/SidebarContext';
-import { getAllTalents, urlFor } from '@/lib/sanity';
 
 type TalentCategory = 'all' | 'models' | 'acting' | 'promo' | 'details';
 type TalentStatus = 'all' | 'active' | 'inactive' | 'archived';
@@ -25,10 +24,6 @@ export default function AdminModelsPage() {
 
   const fetchTalents = async () => {
     try {
-      // Récupérer les talents Sanity - DÉSACTIVÉ (on garde uniquement Prisma)
-      // const sanityData = await getAllTalents();
-      const sanityData: any[] = [];
-
       // Récupérer TOUS les talents Prisma (MODELS, ACTING, PROMO, DETAILS)
       const prismaResponse = await fetch('/api/talents');
       const prismaTalents = prismaResponse.ok ? await prismaResponse.json() : [];
@@ -71,9 +66,8 @@ export default function AdminModelsPage() {
         };
       });
 
-      // Fusionner les deux sources
-      const allTalents = [...sanityData, ...transformedPrismaTalents];
-      setTalents(allTalents);
+      // Utiliser uniquement les talents Prisma
+      setTalents(transformedPrismaTalents);
     } catch (error) {
       console.error('Error fetching talents:', error);
     } finally {
@@ -495,7 +489,7 @@ export default function AdminModelsPage() {
                       backgroundColor: '#f1f5f9'
                     }}>
                       <img
-                        src={typeof talent.mainImage === 'string' ? talent.mainImage : urlFor(talent.mainImage).width(400).height(500).url()}
+                        src={talent.mainImage}
                         alt={talent.name}
                         style={{
                           width: '100%',
@@ -782,7 +776,7 @@ export default function AdminModelsPage() {
                 <div>
                   {selectedTalent.mainImage && (
                     <img
-                      src={typeof selectedTalent.mainImage === 'string' ? selectedTalent.mainImage : urlFor(selectedTalent.mainImage).width(600).height(800).url()}
+                      src={selectedTalent.mainImage}
                       alt={selectedTalent.name}
                       style={{
                         width: '100%',

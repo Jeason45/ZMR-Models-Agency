@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getActorBySlug } from '@/lib/sanity';
 
 export default function ReelsPage() {
   const params = useParams();

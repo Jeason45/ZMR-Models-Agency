@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { getAllModels, urlFor } from '@/lib/sanity';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -545,7 +544,7 @@ export default function ModelsPage() {
               }}>
                 {/* Main Image */}
                 <img
-                  src={typeof model.mainImage === 'string' ? model.mainImage : urlFor(model.mainImage).width(800).height(1200).url()}
+                  src={model.mainImage}
                   alt={model.name}
                   style={{
                     width: '100%',
@@ -561,7 +560,7 @@ export default function ModelsPage() {
                 {/* Hover Image */}
                 {model.hoverImage && (
                   <img
-                    src={typeof model.hoverImage === 'string' ? model.hoverImage : urlFor(model.hoverImage).width(800).height(1200).url()}
+                    src={model.hoverImage}
                     alt={model.name}
                     style={{
                       width: '100%',

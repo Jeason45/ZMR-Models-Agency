@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { getPromoBySlug } from '@/lib/sanity';
 
 export default function PromoPortfolioGalleryPage() {
   const params = useParams();
