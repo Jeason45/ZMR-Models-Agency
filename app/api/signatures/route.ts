@@ -8,6 +8,10 @@ import {
   getClientIP,
   getUserAgent
 } from '@/lib/signatureUtils';
+import {
+  sendEmail,
+  generateSignatureCompletedAdminEmailHTML
+} from '@/lib/emailUtils';
 
 const prisma = new PrismaClient();
 
@@ -186,6 +190,33 @@ export async function POST(request: Request) {
       JSON.stringify(proof, null, 2),
       'utf-8'
     );
+
+    // EMAIL AUTOMATIQUE : Notification admin de signature complétée
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      try {
+        await sendEmail({
+          to: adminEmail,
+          subject: `✅ Document signé: ${document.fileName}`,
+          htmlContent: generateSignatureCompletedAdminEmailHTML({
+            documentName: document.fileName,
+            signerName,
+            signerEmail,
+            signedAt,
+            documentId
+          }),
+          textContent: `Un document vient d'être signé électroniquement:\n\nDocument: ${document.fileName}\nSigné par: ${signerName} (${signerEmail})\nDate: ${signedAt.toLocaleString('fr-FR')}\n\nLe document est disponible dans le CRM.`,
+          type: 'custom',
+          documentId,
+          sentBy: 'System'
+        });
+
+        console.log('✅ Email de notification de signature envoyé à l\'admin');
+      } catch (error) {
+        console.error('❌ Erreur envoi email admin signature:', error);
+        // Ne pas bloquer la signature si l'email échoue
+      }
+    }
 
     return NextResponse.json({
       success: true,

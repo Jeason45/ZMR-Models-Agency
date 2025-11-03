@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import {
+  sendEmail,
+  generateNewContactAdminEmailHTML,
+  generateContactConfirmationEmailHTML
+} from '@/lib/emailUtils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,6 +70,74 @@ export async function POST(request: NextRequest) {
           status: 'scheduled'
         }
       });
+    }
+
+    // EMAILS AUTOMATIQUES
+    const adminEmail = process.env.ADMIN_EMAIL;
+
+    // 1. Email de notification à l'admin
+    if (adminEmail) {
+      try {
+        const callbackDate = selectedDay ? new Date(selectedDay).toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }) : undefined;
+
+        await sendEmail({
+          to: adminEmail,
+          subject: `🔔 Nouveau contact: ${name}`,
+          htmlContent: generateNewContactAdminEmailHTML({
+            contactName: name,
+            contactEmail: email,
+            contactPhone: phone || undefined,
+            contactMessage: message || undefined,
+            contactType: selectedType || undefined,
+            wantsCallback: wantCallback || false,
+            callbackDate,
+            callbackTime: selectedSlot || undefined
+          }),
+          textContent: `Nouveau contact reçu:\n\nNom: ${name}\nEmail: ${email}\nTéléphone: ${phone || 'Non renseigné'}\nMessage: ${message || 'Aucun'}\nRappel demandé: ${wantCallback ? 'Oui' : 'Non'}`,
+          type: 'custom',
+          contactId: contact.id,
+          sentBy: 'System'
+        });
+
+        console.log('✅ Email admin envoyé pour nouveau contact');
+      } catch (error) {
+        console.error('❌ Erreur envoi email admin:', error);
+        // Ne pas bloquer la création du contact si l'email échoue
+      }
+    }
+
+    // 2. Email de confirmation au client
+    try {
+      const callbackDate = selectedDay ? new Date(selectedDay).toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      }) : undefined;
+
+      await sendEmail({
+        to: email,
+        subject: 'Confirmation de votre demande - ZMR Models Agency',
+        htmlContent: generateContactConfirmationEmailHTML({
+          contactName: name,
+          wantsCallback: wantCallback || false,
+          callbackDate,
+          callbackTime: selectedSlot || undefined
+        }),
+        textContent: `Bonjour ${name},\n\nNous avons bien reçu votre demande de contact et vous en remercions.\n\n${wantCallback ? `Votre rappel est programmé le ${callbackDate || 'date à confirmer'} à ${selectedSlot || 'horaire à confirmer'}.\n\nUn membre de notre équipe vous contactera à l'heure convenue.` : 'Notre équipe prendra contact avec vous dans les plus brefs délais.'}\n\nCordialement,\nL'équipe ZMR Models Agency`,
+        type: 'confirmation',
+        contactId: contact.id,
+        sentBy: 'System'
+      });
+
+      console.log('✅ Email de confirmation envoyé au client');
+    } catch (error) {
+      console.error('❌ Erreur envoi email client:', error);
+      // Ne pas bloquer la création du contact si l'email échoue
     }
 
     return NextResponse.json(contact, { status: 201 });

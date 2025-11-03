@@ -323,6 +323,409 @@ Ce message a été envoyé automatiquement, merci de ne pas y répondre.
 }
 
 /**
+ * Generate HTML email for new contact notification (ADMIN)
+ */
+export function generateNewContactAdminEmailHTML(params: {
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string;
+  contactMessage?: string;
+  contactType?: string;
+  wantsCallback: boolean;
+  callbackDate?: string;
+  callbackTime?: string;
+}): string {
+  const { contactName, contactEmail, contactPhone, contactMessage, contactType, wantsCallback, callbackDate, callbackTime } = params;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: #000;
+      color: #fff;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .content {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 0 0 10px 10px;
+    }
+    .info-box {
+      background: #fff;
+      padding: 20px;
+      border-left: 4px solid #000;
+      margin: 20px 0;
+    }
+    .label {
+      font-weight: bold;
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .value {
+      font-size: 16px;
+      color: #000;
+      margin: 5px 0 15px 0;
+    }
+    .urgent {
+      background: #fff3cd;
+      border-left-color: #ffc107;
+      padding: 15px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔔 NOUVEAU CONTACT</h1>
+  </div>
+  <div class="content">
+    <h2>Nouvelle demande de contact reçue</h2>
+
+    <div class="info-box">
+      <div class="label">Nom</div>
+      <div class="value">${contactName}</div>
+
+      <div class="label">Email</div>
+      <div class="value">${contactEmail}</div>
+
+      ${contactPhone ? `
+        <div class="label">Téléphone</div>
+        <div class="value">${contactPhone}</div>
+      ` : ''}
+
+      ${contactType ? `
+        <div class="label">Type</div>
+        <div class="value">${contactType === 'professional' ? '💼 Professionnel' : '⭐ Mannequin'}</div>
+      ` : ''}
+    </div>
+
+    ${wantsCallback ? `
+      <div class="urgent">
+        <strong>⚠️ RAPPEL DEMANDÉ</strong><br>
+        Date : ${callbackDate || 'Non spécifiée'}<br>
+        Créneau : ${callbackTime || 'Non spécifié'}
+      </div>
+    ` : ''}
+
+    ${contactMessage ? `
+      <div class="info-box">
+        <div class="label">Message</div>
+        <div class="value">${contactMessage}</div>
+      </div>
+    ` : ''}
+
+    <p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin/contacts" style="display: inline-block; background: #000; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 5px;">
+        Voir dans le CRM
+      </a>
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Generate HTML email for contact confirmation (CLIENT)
+ */
+export function generateContactConfirmationEmailHTML(params: {
+  contactName: string;
+  wantsCallback: boolean;
+  callbackDate?: string;
+  callbackTime?: string;
+}): string {
+  const { contactName, wantsCallback, callbackDate, callbackTime } = params;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: #000;
+      color: #fff;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .content {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 0 0 10px 10px;
+    }
+    .highlight {
+      background: #fff;
+      padding: 20px;
+      border-left: 4px solid #000;
+      margin: 20px 0;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ZMR MODELS AGENCY</h1>
+  </div>
+  <div class="content">
+    <p>Bonjour ${contactName},</p>
+
+    <p>Nous avons bien reçu votre demande de contact et vous en remercions.</p>
+
+    ${wantsCallback ? `
+      <div class="highlight">
+        <p><strong>Votre rappel est programmé :</strong></p>
+        <p>📅 ${callbackDate || 'Date à confirmer'}<br>
+        🕐 ${callbackTime || 'Horaire à confirmer'}</p>
+      </div>
+      <p>Un membre de notre équipe vous contactera à l'heure convenue.</p>
+    ` : `
+      <p>Notre équipe prendra contact avec vous dans les plus brefs délais.</p>
+    `}
+
+    <p>Si vous avez des questions urgentes, n'hésitez pas à nous contacter directement.</p>
+
+    <p>Cordialement,<br>
+    <strong>L'équipe ZMR Models Agency</strong></p>
+  </div>
+  <div class="footer">
+    <p>ZMR Models Agency - Paris, France</p>
+    <p>Ce message a été envoyé automatiquement, merci de ne pas y répondre.</p>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Generate HTML email for signature completed notification (ADMIN)
+ */
+export function generateSignatureCompletedAdminEmailHTML(params: {
+  documentName: string;
+  signerName: string;
+  signerEmail: string;
+  signedAt: Date;
+  documentId: string;
+}): string {
+  const { documentName, signerName, signerEmail, signedAt, documentId } = params;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: #28a745;
+      color: #fff;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .content {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 0 0 10px 10px;
+    }
+    .success-box {
+      background: #d4edda;
+      border-left: 4px solid #28a745;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .info-box {
+      background: #fff;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .label {
+      font-weight: bold;
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .value {
+      font-size: 16px;
+      color: #000;
+      margin: 5px 0 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>✅ DOCUMENT SIGNÉ</h1>
+  </div>
+  <div class="content">
+    <div class="success-box">
+      <p style="margin: 0; font-size: 18px;"><strong>Un document vient d'être signé électroniquement</strong></p>
+    </div>
+
+    <div class="info-box">
+      <div class="label">Document</div>
+      <div class="value">${documentName}</div>
+
+      <div class="label">Signé par</div>
+      <div class="value">${signerName} (${signerEmail})</div>
+
+      <div class="label">Date et heure</div>
+      <div class="value">${signedAt.toLocaleString('fr-FR', {
+        dateStyle: 'full',
+        timeStyle: 'short'
+      })}</div>
+    </div>
+
+    <p>Le document signé est disponible dans le CRM avec toutes les preuves de signature (hash, IP, timestamp).</p>
+
+    <p style="margin-top: 30px;">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin/documents/${documentId}" style="display: inline-block; background: #28a745; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 5px;">
+        Voir le document
+      </a>
+    </p>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Generate HTML email for appointment reminder
+ */
+export function generateAppointmentReminderEmailHTML(params: {
+  contactName: string;
+  appointmentTitle: string;
+  appointmentDate: Date;
+  appointmentDescription?: string;
+}): string {
+  const { contactName, appointmentTitle, appointmentDate, appointmentDescription } = params;
+
+  const dateStr = appointmentDate.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const timeStr = appointmentDate.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background: #ff9800;
+      color: #fff;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .content {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 0 0 10px 10px;
+    }
+    .reminder-box {
+      background: #fff3cd;
+      border-left: 4px solid #ff9800;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .datetime {
+      background: #fff;
+      padding: 20px;
+      text-align: center;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>⏰ RAPPEL DE RENDEZ-VOUS</h1>
+  </div>
+  <div class="content">
+    <p>Bonjour ${contactName},</p>
+
+    <div class="reminder-box">
+      <p style="margin: 0; font-size: 18px;"><strong>Vous avez un rendez-vous demain avec ZMR Models Agency</strong></p>
+    </div>
+
+    <div class="datetime">
+      <p style="margin: 0; font-size: 14px; color: #666; text-transform: uppercase;">Rendez-vous</p>
+      <p style="margin: 10px 0; font-size: 24px; font-weight: bold;">${appointmentTitle}</p>
+      <p style="margin: 5px 0; font-size: 18px;">📅 ${dateStr}</p>
+      <p style="margin: 5px 0; font-size: 18px;">🕐 ${timeStr}</p>
+      ${appointmentDescription ? `<p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">${appointmentDescription}</p>` : ''}
+    </div>
+
+    <p>Si vous avez un empêchement, merci de nous prévenir au plus tôt.</p>
+
+    <p>À demain,<br>
+    <strong>L'équipe ZMR Models Agency</strong></p>
+  </div>
+  <div class="footer">
+    <p>ZMR Models Agency - Paris, France</p>
+    <p>Ce message a été envoyé automatiquement, merci de ne pas y répondre.</p>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
  * Test SMTP connection
  */
 export async function testEmailConnection(): Promise<boolean> {

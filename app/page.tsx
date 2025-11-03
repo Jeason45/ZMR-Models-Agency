@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -357,6 +358,9 @@ export default function Home() {
           </button>
         </div>
       )}
+
+      {/* Footer - only on homepage */}
+      <Footer />
     </>
   );
 }
