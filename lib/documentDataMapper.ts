@@ -53,7 +53,7 @@ export class DocumentDataMapper {
       throw new Error(`Template ${templateId} not found`);
     }
 
-    const mapping = (template.fieldMapping as Record<string, FieldMappingConfig>) || {};
+    const mapping = (template.fieldMapping as unknown as Record<string, FieldMappingConfig>) || {};
     const data: Record<string, any> = {};
 
     // Charger les sources de données
