@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// Type pour les activités de la timeline
+interface TimelineActivity {
+  id: string;
+  type: 'appointment' | 'email' | 'document';
+  title: string;
+  description: string | null;
+  date: Date;
+  status: string;
+  metadata: Record<string, any>;
+}
+
 // GET /api/contacts/[id] - Récupérer tous les détails d'un contact
 export async function GET(
   request: NextRequest,
@@ -38,7 +49,7 @@ export async function GET(
     }
 
     // Construire une timeline d'activités
-    const activities = [];
+    const activities: TimelineActivity[] = [];
 
     // Ajouter rendez-vous à la timeline
     contact.appointments.forEach(apt => {

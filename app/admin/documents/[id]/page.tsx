@@ -15,6 +15,7 @@ interface Document {
   documentNumber: string | null;
   filePath: string;
   originalDocx: string | null;
+  signedPdfPath: string | null;
   createdAt: string;
   sentAt: string | null;
   signedAt: string | null;
@@ -567,8 +568,45 @@ export default function DocumentDetailPage() {
                 </h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {document.signedPdfPath && (
+                    <a
+                      href={document.signedPdfPath}
+                      download
+                      style={{
+                        padding: '12px 16px',
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #86efac',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        color: '#15803d',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.borderColor = '#4ade80';
+                        e.currentTarget.style.backgroundColor = '#dcfce7';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.borderColor = '#86efac';
+                        e.currentTarget.style.backgroundColor = '#f0fdf4';
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      PDF Signé
+                    </a>
+                  )}
+
                   <a
-                    href={`/${document.filePath}`}
+                    href={document.filePath}
                     download
                     style={{
                       padding: '12px 16px',
@@ -602,12 +640,12 @@ export default function DocumentDetailPage() {
                       <line x1="12" y1="18" x2="12" y2="12"/>
                       <line x1="9" y1="15" x2="15" y2="15"/>
                     </svg>
-                    Télécharger PDF
+                    {document.fileName.endsWith('.pdf') ? 'PDF' : document.fileName.endsWith('.docx') ? 'DOCX' : 'Document'} Original
                   </a>
 
                   {document.originalDocx && (
                     <a
-                      href={`/${document.originalDocx}`}
+                      href={document.originalDocx}
                       download
                       style={{
                         padding: '12px 16px',
@@ -639,7 +677,7 @@ export default function DocumentDetailPage() {
                         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                         <polyline points="14 2 14 8 20 8"/>
                       </svg>
-                      Télécharger DOCX
+                      DOCX Original
                     </a>
                   )}
                 </div>

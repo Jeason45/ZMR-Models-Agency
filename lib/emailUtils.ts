@@ -125,7 +125,8 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
       text: textContent,
       attachments: attachments?.map(att => ({
         filename: att.filename,
-        path: path.join(process.cwd(), att.path)
+        // Si le chemin est déjà absolu, ne pas ajouter process.cwd()
+        path: path.isAbsolute(att.path) ? att.path : path.join(process.cwd(), att.path)
       }))
     };
 
@@ -723,6 +724,638 @@ export function generateAppointmentReminderEmailHTML(params: {
 </body>
 </html>
   `;
+}
+
+/**
+ * Generate HTML email for appointment confirmation
+ */
+export function generateAppointmentConfirmationEmailHTML(params: {
+  contactName: string;
+  appointmentTitle: string;
+  appointmentDescription?: string;
+  formattedDate: string;
+  formattedStartTime: string;
+  formattedEndTime: string;
+  location?: string;
+}): string {
+  const { contactName, appointmentTitle, appointmentDescription, formattedDate, formattedStartTime, formattedEndTime, location } = params;
+
+  return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #0f172a;
+        background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        padding: 40px 32px;
+        text-align: center;
+      }
+      .header h1 {
+        color: #ffffff;
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .check-icon {
+        width: 64px;
+        height: 64px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+      }
+      .content {
+        padding: 40px 32px;
+      }
+      .greeting {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 16px;
+      }
+      .message {
+        font-size: 16px;
+        color: #64748b;
+        margin-bottom: 32px;
+        line-height: 1.8;
+      }
+      .appointment-card {
+        background-color: #f8fafc;
+        border-left: 4px solid #6366f1;
+        border-radius: 8px;
+        padding: 24px;
+        margin: 32px 0;
+      }
+      .appointment-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 16px;
+      }
+      .detail-row {
+        display: flex;
+        align-items: start;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+      .detail-icon {
+        color: #6366f1;
+        margin-right: 12px;
+        min-width: 20px;
+      }
+      .detail-label {
+        font-weight: 600;
+        color: #475569;
+        margin-right: 8px;
+      }
+      .detail-value {
+        color: #0f172a;
+      }
+      .status-badge {
+        display: inline-block;
+        background-color: #dcfce7;
+        color: #15803d;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 8px;
+      }
+      .footer {
+        background-color: #f8fafc;
+        padding: 32px;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+      }
+      .footer-text {
+        font-size: 14px;
+        color: #64748b;
+        margin: 8px 0;
+      }
+      .agency-name {
+        font-weight: 600;
+        color: #6366f1;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      .contact-info {
+        font-size: 13px;
+        color: #94a3b8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="check-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h1>Rendez-vous confirmé !</h1>
+      </div>
+
+      <div class="content">
+        <div class="greeting">
+          Bonjour ${contactName},
+        </div>
+
+        <div class="message">
+          Votre rendez-vous avec <strong>ZMR Models Agency</strong> a été confirmé avec succès.
+          Nous avons hâte de vous rencontrer !
+        </div>
+
+        <div class="appointment-card">
+          <div class="appointment-title">
+            ${appointmentTitle}
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-icon">📅</div>
+            <div>
+              <span class="detail-label">Date :</span>
+              <span class="detail-value">${formattedDate}</span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-icon">🕐</div>
+            <div>
+              <span class="detail-label">Horaire :</span>
+              <span class="detail-value">${formattedStartTime} - ${formattedEndTime}</span>
+            </div>
+          </div>
+
+          ${location ? `
+          <div class="detail-row">
+            <div class="detail-icon">📍</div>
+            <div>
+              <span class="detail-label">Lieu :</span>
+              <span class="detail-value">${location}</span>
+            </div>
+          </div>
+          ` : ''}
+
+          ${appointmentDescription ? `
+          <div class="detail-row">
+            <div class="detail-icon">📝</div>
+            <div>
+              <span class="detail-label">Détails :</span>
+              <div class="detail-value">${appointmentDescription}</div>
+            </div>
+          </div>
+          ` : ''}
+
+          <span class="status-badge">✓ Confirmé</span>
+        </div>
+
+        <div class="message">
+          En cas d'empêchement, merci de nous prévenir au moins 24h à l'avance.
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="agency-name">ZMR Models Agency</div>
+        <div class="footer-text">
+          Agence de mannequins professionnelle
+        </div>
+        <div class="contact-info">
+          Paris, France
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+  `;
+}
+
+/**
+ * Generate text email for appointment confirmation
+ */
+export function generateAppointmentConfirmationEmailText(params: {
+  contactName: string;
+  appointmentTitle: string;
+  appointmentDescription?: string;
+  formattedDate: string;
+  formattedStartTime: string;
+  formattedEndTime: string;
+  location?: string;
+}): string {
+  const { contactName, appointmentTitle, appointmentDescription, formattedDate, formattedStartTime, formattedEndTime, location } = params;
+
+  return `
+Rendez-vous confirmé !
+
+Bonjour ${contactName},
+
+Votre rendez-vous avec ZMR Models Agency a été confirmé avec succès.
+
+Détails du rendez-vous :
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${appointmentTitle}
+
+📅 Date : ${formattedDate}
+🕐 Horaire : ${formattedStartTime} - ${formattedEndTime}
+${location ? `📍 Lieu : ${location}` : ''}
+${appointmentDescription ? `📝 Détails : ${appointmentDescription}` : ''}
+
+✓ Statut : CONFIRMÉ
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+En cas d'empêchement, merci de nous prévenir au moins 24h à l'avance.
+
+Cordialement,
+ZMR Models Agency
+  `.trim();
+}
+
+/**
+ * Generate HTML email for appointment modification
+ */
+export function generateAppointmentModificationEmailHTML(params: {
+  contactName: string;
+  appointmentTitle: string;
+  appointmentDescription?: string;
+  formattedDate: string;
+  formattedStartTime: string;
+  formattedEndTime: string;
+  location?: string;
+}): string {
+  const { contactName, appointmentTitle, appointmentDescription, formattedDate, formattedStartTime, formattedEndTime, location } = params;
+
+  return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #0f172a;
+        background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        padding: 40px 32px;
+        text-align: center;
+      }
+      .header h1 {
+        color: #ffffff;
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .icon {
+        width: 64px;
+        height: 64px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+      }
+      .content {
+        padding: 40px 32px;
+      }
+      .greeting {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 16px;
+      }
+      .message {
+        font-size: 16px;
+        color: #64748b;
+        margin-bottom: 32px;
+        line-height: 1.8;
+      }
+      .appointment-card {
+        background-color: #fffbeb;
+        border-left: 4px solid #f59e0b;
+        border-radius: 8px;
+        padding: 24px;
+        margin: 32px 0;
+      }
+      .appointment-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 16px;
+      }
+      .detail-row {
+        display: flex;
+        align-items: start;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+      .detail-icon {
+        color: #f59e0b;
+        margin-right: 12px;
+        min-width: 20px;
+      }
+      .detail-label {
+        font-weight: 600;
+        color: #475569;
+        margin-right: 8px;
+      }
+      .detail-value {
+        color: #0f172a;
+      }
+      .status-badge {
+        display: inline-block;
+        background-color: #fef3c7;
+        color: #92400e;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 8px;
+      }
+      .footer {
+        background-color: #f8fafc;
+        padding: 32px;
+        text-align: center;
+        border-top: 1px solid #e2e8f0;
+      }
+      .footer-text {
+        font-size: 14px;
+        color: #64748b;
+        margin: 8px 0;
+      }
+      .agency-name {
+        font-weight: 600;
+        color: #f59e0b;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      .contact-info {
+        font-size: 13px;
+        color: #94a3b8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <h1>Rendez-vous modifié</h1>
+      </div>
+
+      <div class="content">
+        <div class="greeting">
+          Bonjour ${contactName},
+        </div>
+
+        <div class="message">
+          Votre rendez-vous avec <strong>ZMR Models Agency</strong> a été modifié.
+          Veuillez noter les nouvelles informations ci-dessous.
+        </div>
+
+        <div class="appointment-card">
+          <div class="appointment-title">
+            ${appointmentTitle}
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-icon">📅</div>
+            <div>
+              <span class="detail-label">Nouvelle date :</span>
+              <span class="detail-value">${formattedDate}</span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-icon">🕐</div>
+            <div>
+              <span class="detail-label">Nouvel horaire :</span>
+              <span class="detail-value">${formattedStartTime} - ${formattedEndTime}</span>
+            </div>
+          </div>
+
+          ${location ? `
+          <div class="detail-row">
+            <div class="detail-icon">📍</div>
+            <div>
+              <span class="detail-label">Lieu :</span>
+              <span class="detail-value">${location}</span>
+            </div>
+          </div>
+          ` : ''}
+
+          ${appointmentDescription ? `
+          <div class="detail-row">
+            <div class="detail-icon">📝</div>
+            <div>
+              <span class="detail-label">Détails :</span>
+              <div class="detail-value">${appointmentDescription}</div>
+            </div>
+          </div>
+          ` : ''}
+
+          <span class="status-badge">⚠ Modifié</span>
+        </div>
+
+        <div class="message">
+          Si ces modifications ne vous conviennent pas, merci de nous contacter rapidement.
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="agency-name">ZMR Models Agency</div>
+        <div class="footer-text">
+          Agence de mannequins professionnelle
+        </div>
+        <div class="contact-info">
+          Paris, France
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+  `;
+}
+
+/**
+ * Generate text email for appointment modification
+ */
+export function generateAppointmentModificationEmailText(params: {
+  contactName: string;
+  appointmentTitle: string;
+  appointmentDescription?: string;
+  formattedDate: string;
+  formattedStartTime: string;
+  formattedEndTime: string;
+  location?: string;
+}): string {
+  const { contactName, appointmentTitle, appointmentDescription, formattedDate, formattedStartTime, formattedEndTime, location } = params;
+
+  return `
+Rendez-vous modifié
+
+Bonjour ${contactName},
+
+Votre rendez-vous avec ZMR Models Agency a été modifié.
+
+Nouvelles informations :
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${appointmentTitle}
+
+📅 Date : ${formattedDate}
+🕐 Horaire : ${formattedStartTime} - ${formattedEndTime}
+${location ? `📍 Lieu : ${location}` : ''}
+${appointmentDescription ? `📝 Détails : ${appointmentDescription}` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si ces modifications ne vous conviennent pas, merci de nous contacter rapidement.
+
+Cordialement,
+ZMR Models Agency
+  `.trim();
+}
+
+/**
+ * Generate HTML email for appointment cancellation
+ */
+export function generateAppointmentCancellationEmailHTML(params: {
+  contactName: string;
+  appointmentTitle: string;
+  formattedDate: string;
+  formattedStartTime: string;
+}): string {
+  const { contactName, appointmentTitle, formattedDate, formattedStartTime } = params;
+
+  return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: #0f172a;
+        background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        padding: 40px 32px;
+        text-align: center;
+        color: white;
+      }
+      .content {
+        padding: 40px 32px;
+      }
+      .message {
+        font-size: 16px;
+        color: #64748b;
+        margin: 16px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Rendez-vous annulé</h1>
+      </div>
+      <div class="content">
+        <p class="message">Bonjour ${contactName},</p>
+        <p class="message">
+          Votre rendez-vous <strong>${appointmentTitle}</strong> prévu le
+          <strong>${formattedDate}</strong> à <strong>${formattedStartTime}</strong>
+          a été annulé.
+        </p>
+        <p class="message">
+          Pour toute question, n'hésitez pas à nous contacter.
+        </p>
+        <p class="message">Cordialement,<br>ZMR Models Agency</p>
+      </div>
+    </div>
+  </body>
+</html>
+  `;
+}
+
+/**
+ * Generate text email for appointment cancellation
+ */
+export function generateAppointmentCancellationEmailText(params: {
+  contactName: string;
+  appointmentTitle: string;
+  formattedDate: string;
+  formattedStartTime: string;
+}): string {
+  const { contactName, appointmentTitle, formattedDate, formattedStartTime } = params;
+
+  return `
+Rendez-vous annulé
+
+Bonjour ${contactName},
+
+Votre rendez-vous "${appointmentTitle}" prévu le ${formattedDate} à ${formattedStartTime} a été annulé.
+
+Pour toute question, n'hésitez pas à nous contacter.
+
+Cordialement,
+ZMR Models Agency
+  `.trim();
 }
 
 /**

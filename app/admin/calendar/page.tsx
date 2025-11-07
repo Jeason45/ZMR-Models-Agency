@@ -38,6 +38,8 @@ export default function CalendarPage() {
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [newAppointment, setNewAppointment] = useState({
     title: '',
     description: '',
@@ -49,6 +51,9 @@ export default function CalendarPage() {
     notes: ''
   });
   const [conflicts, setConflicts] = useState<Appointment[]>([]);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     fetchAppointments();
@@ -111,6 +116,102 @@ export default function CalendarPage() {
 
     setConflicts(conflictingAppointments);
     return conflictingAppointments.length > 0;
+  };
+
+  const handleConfirmAppointment = async (appointmentId: string) => {
+    setConfirmingId(appointmentId);
+
+    try {
+      const response = await fetch(`/api/appointments/${appointmentId}/confirm`, {
+        method: 'POST'
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Rendez-vous confirmé ! Un email de confirmation a été envoyé au contact.');
+        fetchAppointments();
+      } else {
+        alert(`Erreur: ${data.error || 'Impossible de confirmer le rendez-vous'}`);
+      }
+    } catch (error) {
+      console.error('Error confirming appointment:', error);
+      alert('Erreur lors de la confirmation du rendez-vous');
+    } finally {
+      setConfirmingId(null);
+    }
+  };
+
+  const handleEditAppointment = (apt: Appointment) => {
+    setEditingAppointment(apt);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAppointment) return;
+
+    setSavingEdit(true);
+
+    try {
+      const response = await fetch(`/api/appointments/${editingAppointment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: editingAppointment.title,
+          description: editingAppointment.description,
+          startTime: editingAppointment.startTime,
+          endTime: editingAppointment.endTime,
+          location: editingAppointment.location,
+          notes: editingAppointment.notes,
+          contactId: editingAppointment.contact ? (editingAppointment.contact as any).id || editingAppointment.contactId : undefined
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message || 'Rendez-vous modifié avec succès');
+        setShowEditModal(false);
+        setEditingAppointment(null);
+        fetchAppointments();
+      } else {
+        alert(`Erreur: ${data.error || 'Impossible de modifier le rendez-vous'}`);
+      }
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      alert('Erreur lors de la modification du rendez-vous');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDeleteAppointment = async (appointmentId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ? Un email d\'annulation sera envoyé au contact.')) {
+      return;
+    }
+
+    setDeletingId(appointmentId);
+
+    try {
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Rendez-vous supprimé ! Un email d\'annulation a été envoyé au contact.');
+        fetchAppointments();
+      } else {
+        alert(`Erreur: ${data.error || 'Impossible de supprimer le rendez-vous'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      alert('Erreur lors de la suppression du rendez-vous');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const handleCreateAppointment = async (e: React.FormEvent) => {
@@ -694,12 +795,187 @@ export default function CalendarPage() {
                         <strong>Lieu:</strong> {apt.location}
                       </div>
                     )}
+
+                    {/* Action Buttons */}
+                    <div style={{
+                      marginTop: '12px',
+                      display: 'flex',
+                      gap: '8px',
+                      flexWrap: 'wrap'
+                    }}>
+                      {apt.status === 'scheduled' && (
+                        <button
+                          onClick={() => handleConfirmAppointment(apt.id)}
+                          disabled={confirmingId === apt.id}
+                          style={{
+                            padding: '8px 16px',
+                            backgroundColor: confirmingId === apt.id ? '#94a3b8' : '#10b981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: confirmingId === apt.id ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseOver={(e) => {
+                            if (confirmingId !== apt.id) {
+                              e.currentTarget.style.backgroundColor = '#059669';
+                            }
+                          }}
+                          onMouseOut={(e) => {
+                            if (confirmingId !== apt.id) {
+                              e.currentTarget.style.backgroundColor = '#10b981';
+                            }
+                          }}
+                        >
+                          {confirmingId === apt.id ? (
+                            <>
+                              <svg
+                                style={{
+                                  animation: 'spin 1s linear infinite',
+                                  width: '14px',
+                                  height: '14px'
+                                }}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <circle
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                  opacity="0.25"
+                                />
+                                <path
+                                  d="M12 2a10 10 0 0 1 10 10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                  strokeLinecap="round"
+                                />
+                              </svg>
+                              Confirmation...
+                            </>
+                          ) : (
+                            <>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                              Confirmer
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleEditAppointment(apt)}
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: '#6366f1',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Modifier
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteAppointment(apt.id)}
+                        disabled={deletingId === apt.id}
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: deletingId === apt.id ? '#94a3b8' : '#dc2626',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          cursor: deletingId === apt.id ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseOver={(e) => {
+                          if (deletingId !== apt.id) {
+                            e.currentTarget.style.backgroundColor = '#b91c1c';
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          if (deletingId !== apt.id) {
+                            e.currentTarget.style.backgroundColor = '#dc2626';
+                          }
+                        }}
+                      >
+                        {deletingId === apt.id ? (
+                          <>
+                            <svg
+                              style={{
+                                animation: 'spin 1s linear infinite',
+                                width: '14px',
+                                height: '14px'
+                              }}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                opacity="0.25"
+                              />
+                              <path
+                                d="M12 2a10 10 0 0 1 10 10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                            Suppression...
+                          </>
+                        ) : (
+                          <>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="3 6 5 6 21 6"/>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                            Supprimer
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
         )}
+
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
 
         {/* Create Appointment Modal */}
         {showCreateModal && (
@@ -1082,6 +1358,284 @@ export default function CalendarPage() {
                     }}
                   >
                     Créer le rendez-vous
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Appointment Modal */}
+        {showEditModal && editingAppointment && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px'
+            }}
+            onClick={() => {
+              setShowEditModal(false);
+              setEditingAppointment(null);
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                maxWidth: '600px',
+                width: '100%',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{
+                padding: '24px',
+                borderBottom: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <h3 style={{
+                  fontSize: '20px',
+                  fontWeight: 600,
+                  color: '#0f172a'
+                }}>
+                  Modifier le rendez-vous
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingAppointment(null);
+                  }}
+                  style={{
+                    padding: '4px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    color: '#64748b',
+                    lineHeight: 1
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEdit} style={{ padding: '24px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Titre *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editingAppointment.title}
+                      onChange={(e) => setEditingAppointment({...editingAppointment, title: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        color: '#0f172a',
+                        marginBottom: '6px'
+                      }}>
+                        Heure de début *
+                      </label>
+                      <input
+                        type="datetime-local"
+                        required
+                        value={new Date(editingAppointment.startTime).toISOString().slice(0, 16)}
+                        onChange={(e) => setEditingAppointment({...editingAppointment, startTime: e.target.value})}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        color: '#0f172a',
+                        marginBottom: '6px'
+                      }}>
+                        Heure de fin *
+                      </label>
+                      <input
+                        type="datetime-local"
+                        required
+                        value={new Date(editingAppointment.endTime).toISOString().slice(0, 16)}
+                        onChange={(e) => setEditingAppointment({...editingAppointment, endTime: e.target.value})}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Lieu
+                    </label>
+                    <input
+                      type="text"
+                      value={editingAppointment.location || ''}
+                      onChange={(e) => setEditingAppointment({...editingAppointment, location: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Description
+                    </label>
+                    <textarea
+                      value={editingAppointment.description || ''}
+                      onChange={(e) => setEditingAppointment({...editingAppointment, description: e.target.value})}
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#0f172a',
+                      marginBottom: '6px'
+                    }}>
+                      Notes internes
+                    </label>
+                    <textarea
+                      value={editingAppointment.notes || ''}
+                      onChange={(e) => setEditingAppointment({...editingAppointment, notes: e.target.value})}
+                      rows={2}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        outline: 'none',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginTop: '24px',
+                  justifyContent: 'flex-end'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditingAppointment(null);
+                    }}
+                    disabled={savingEdit}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: 'white',
+                      color: '#64748b',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: savingEdit ? 'not-allowed' : 'pointer',
+                      opacity: savingEdit ? 0.5 : 1
+                    }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEdit}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: savingEdit ? '#94a3b8' : '#6366f1',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: savingEdit ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    {savingEdit ? 'Enregistrement...' : 'Enregistrer les modifications'}
                   </button>
                 </div>
               </form>

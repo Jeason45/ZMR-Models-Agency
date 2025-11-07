@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
 import { useSidebar } from '@/components/SidebarContext';
+import LeadDetailModal from '@/components/LeadDetailModal';
 
 type ContactStatus = 'new' | 'contacted' | 'qualified' | 'client' | 'lost';
 
@@ -36,6 +37,7 @@ export default function LeadsV4() {
   const [statusFilter, setStatusFilter] = useState<ContactStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSection, setActiveSection] = useState<'professional' | 'model' | 'all'>('all');
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/contacts')
@@ -63,6 +65,12 @@ export default function LeadsV4() {
     { value: 'professional', label: 'Professionnels', count: contacts.filter(c => c.type === 'professional').length, gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
     { value: 'model', label: 'Mannequins', count: contacts.filter(c => c.type === 'model').length, gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }
   ];
+
+  const handleRefresh = () => {
+    fetch('/api/contacts')
+      .then(res => res.json())
+      .then(data => setContacts(data));
+  };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafbfc' }}>
@@ -283,6 +291,7 @@ export default function LeadsV4() {
                   {filteredContacts.map((contact, index) => (
                     <tr
                       key={contact.id}
+                      onClick={() => setSelectedContactId(contact.id)}
                       style={{
                         borderTop: '1px solid #f1f5f9',
                         cursor: 'pointer',
@@ -337,6 +346,15 @@ export default function LeadsV4() {
           </div>
         </div>
       </div>
+
+      {/* Modal détail du lead */}
+      {selectedContactId && (
+        <LeadDetailModal
+          contactId={selectedContactId}
+          onClose={() => setSelectedContactId(null)}
+          onUpdate={handleRefresh}
+        />
+      )}
     </div>
   );
 }
