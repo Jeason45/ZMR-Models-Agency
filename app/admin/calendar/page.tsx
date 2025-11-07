@@ -164,7 +164,7 @@ export default function CalendarPage() {
           endTime: editingAppointment.endTime,
           location: editingAppointment.location,
           notes: editingAppointment.notes,
-          contactId: editingAppointment.contact ? (editingAppointment.contact as any).id || editingAppointment.contactId : undefined
+          contactId: editingAppointment.contact ? (editingAppointment.contact as any).id : undefined
         })
       });
 
