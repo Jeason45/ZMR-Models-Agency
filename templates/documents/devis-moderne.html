@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Devis {{numero_devis}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      line-height: 1.6;
+      padding: 40px;
+      background: #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* En-tête */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 50px;
+      padding-bottom: 30px;
+      border-bottom: 3px solid #2563eb;
+    }
+
+    .logo-section {
+      flex: 1;
+    }
+
+    .logo-section h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 5px;
+    }
+
+    .logo-section p {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .document-info {
+      text-align: right;
+    }
+
+    .document-info h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+
+    .document-info .ref {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .document-info .date {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* Informations société et client */
+    .parties {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .partie {
+      flex: 1;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .partie h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e40af;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .partie p {
+      font-size: 13px;
+      margin-bottom: 5px;
+      color: #334155;
+    }
+
+    .partie .name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    /* Objet du devis */
+    .objet {
+      margin-bottom: 30px;
+      padding: 15px 20px;
+      background: #eff6ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+    }
+
+    .objet h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e40af;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .objet p {
+      font-size: 14px;
+      color: #334155;
+    }
+
+    /* Tableau des prestations */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    thead {
+      background: #1e40af;
+      color: #fff;
+    }
+
+    thead th {
+      padding: 15px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    thead th:last-child {
+      text-align: right;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    tbody td {
+      padding: 15px 12px;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    tbody td:first-child {
+      font-weight: 500;
+      color: #1e293b;
+    }
+
+    tbody td:last-child {
+      text-align: right;
+      font-weight: 600;
+      color: #1e40af;
+    }
+
+    .quantite, .prix-unitaire {
+      text-align: center !important;
+    }
+
+    /* Totaux */
+    .totaux {
+      margin-left: auto;
+      width: 350px;
+      margin-bottom: 40px;
+    }
+
+    .totaux-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 20px;
+      font-size: 14px;
+    }
+
+    .totaux-row.subtotal {
+      background: #f8fafc;
+      color: #64748b;
+    }
+
+    .totaux-row.tva {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .totaux-row.total {
+      background: #1e40af;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 4px;
+    }
+
+    .totaux-label {
+      font-weight: 500;
+    }
+
+    .totaux-value {
+      font-weight: 700;
+    }
+
+    /* Conditions */
+    .conditions {
+      margin-top: 40px;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      page-break-inside: avoid;
+    }
+
+    .conditions h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 15px;
+    }
+
+    .conditions ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .conditions li {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .conditions li:before {
+      content: "•";
+      position: absolute;
+      left: 5px;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    /* Signature */
+    .signature {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+      gap: 40px;
+    }
+
+    .signature-box {
+      flex: 1;
+      text-align: center;
+    }
+
+    .signature-box h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .signature-line {
+      height: 80px;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 10px;
+    }
+
+    .signature-box p {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    /* Pied de page */
+    .footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 2px solid #e2e8f0;
+      text-align: center;
+    }
+
+    .footer p {
+      font-size: 10px;
+      color: #94a3b8;
+      line-height: 1.8;
+    }
+
+    .footer .company-details {
+      margin-bottom: 10px;
+      font-weight: 500;
+      color: #64748b;
+    }
+
+    /* Styles d'impression */
+    @media print {
+      body {
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- En-tête -->
+    <div class="header">
+      <div class="logo-section">
+        <h1>{{nom_agence}}</h1>
+        <p>{{adresse_agence}}</p>
+        <p>{{telephone_agence}} • {{email_agence}}</p>
+        {{#siret_agence}}
+        <p>SIRET: {{siret_agence}}</p>
+        {{/siret_agence}}
+      </div>
+      <div class="document-info">
+        <h2>DEVIS</h2>
+        <p class="ref">N° {{numero_devis}}</p>
+        <p class="date">Date: {{date_devis}}</p>
+        {{#date_validite}}
+        <p class="date">Valide jusqu'au: {{date_validite}}</p>
+        {{/date_validite}}
+      </div>
+    </div>
+
+    <!-- Informations Société et Client -->
+    <div class="parties">
+      <div class="partie">
+        <h3>Émetteur</h3>
+        <p class="name">{{nom_agence}}</p>
+        <p>{{adresse_agence}}</p>
+        {{#code_postal_agence}}
+        <p>{{code_postal_agence}} {{ville_agence}}</p>
+        {{/code_postal_agence}}
+        <p>Tél: {{telephone_agence}}</p>
+        <p>Email: {{email_agence}}</p>
+      </div>
+
+      <div class="partie">
+        <h3>Client</h3>
+        <p class="name">{{nom_client}}</p>
+        <p>{{adresse_client}}</p>
+        {{#code_postal_client}}
+        <p>{{code_postal_client}} {{ville_client}}</p>
+        {{/code_postal_client}}
+        {{#telephone_client}}
+        <p>Tél: {{telephone_client}}</p>
+        {{/telephone_client}}
+        {{#email_client}}
+        <p>Email: {{email_client}}</p>
+        {{/email_client}}
+      </div>
+    </div>
+
+    <!-- Objet du devis -->
+    {{#objet_devis}}
+    <div class="objet">
+      <h3>Objet</h3>
+      <p>{{objet_devis}}</p>
+    </div>
+    {{/objet_devis}}
+
+    <!-- Tableau des prestations -->
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th class="quantite">Quantité</th>
+          <th class="prix-unitaire">Prix unitaire HT</th>
+          <th>Total HT</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#lignes}}
+        <tr>
+          <td>{{description}}</td>
+          <td class="quantite">{{quantite}} {{unite}}</td>
+          <td class="prix-unitaire">{{prix_unitaire}} €</td>
+          <td>{{total_ht}} €</td>
+        </tr>
+        {{/lignes}}
+      </tbody>
+    </table>
+
+    <!-- Totaux -->
+    <div class="totaux">
+      <div class="totaux-row subtotal">
+        <span class="totaux-label">Sous-total HT</span>
+        <span class="totaux-value">{{sous_total_ht}} €</span>
+      </div>
+      {{#remise_montant}}
+      <div class="totaux-row subtotal">
+        <span class="totaux-label">Remise ({{remise_pourcentage}}%)</span>
+        <span class="totaux-value">-{{remise_montant}} €</span>
+      </div>
+      {{/remise_montant}}
+      <div class="totaux-row tva">
+        <span class="totaux-label">TVA ({{tva_pourcentage}}%)</span>
+        <span class="totaux-value">{{tva_montant}} €</span>
+      </div>
+      <div class="totaux-row total">
+        <span class="totaux-label">TOTAL TTC</span>
+        <span class="totaux-value">{{total_ttc}} €</span>
+      </div>
+    </div>
+
+    <!-- Conditions -->
+    <div class="conditions">
+      <h3>Conditions</h3>
+      <ul>
+        {{#conditions_reglement}}
+        <li>Conditions de règlement: {{conditions_reglement}}</li>
+        {{/conditions_reglement}}
+        {{#mode_reglement}}
+        <li>Mode de règlement: {{mode_reglement}}</li>
+        {{/mode_reglement}}
+        {{#acompte_montant}}
+        <li>Acompte à la commande: {{acompte_montant}} € ({{acompte_pourcentage}}%)</li>
+        {{/acompte_montant}}
+        {{#delai_livraison}}
+        <li>Délai de livraison: {{delai_livraison}}</li>
+        {{/delai_livraison}}
+        {{#validite_jours}}
+        <li>Validité de l'offre: {{validite_jours}} jours</li>
+        {{/validite_jours}}
+        <li>Devis valable sous réserve de disponibilité</li>
+        <li>TVA non applicable - Article 293 B du CGI</li>
+      </ul>
+    </div>
+
+    <!-- Signatures -->
+    <div class="signature">
+      <div class="signature-box">
+        <h4>Bon pour accord - Le Client</h4>
+        <div class="signature-line"></div>
+        <p>Date et signature</p>
+      </div>
+      <div class="signature-box">
+        <h4>{{nom_agence}}</h4>
+        <div class="signature-line"></div>
+        <p>Cachet et signature</p>
+      </div>
+    </div>
+
+    <!-- Pied de page -->
+    <div class="footer">
+      <p class="company-details">
+        {{nom_agence}} • {{adresse_agence}} • {{telephone_agence}} • {{email_agence}}
+      </p>
+      {{#siret_agence}}
+      <p>SIRET: {{siret_agence}} {{#tva_agence}}• TVA: {{tva_agence}}{{/tva_agence}}</p>
+      {{/siret_agence}}
+    </div>
+  </div>
+</body>
+</html>

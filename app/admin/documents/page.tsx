@@ -160,7 +160,7 @@ export default function DocumentsManagementPage() {
           </div>
 
           <Link
-            href="/admin/documents/generate"
+            href="/admin/documents/create"
             style={{
               padding: '12px 24px',
               backgroundColor: '#6366f1',
@@ -183,7 +183,7 @@ export default function DocumentsManagementPage() {
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Générer un document
+            Créer un Document
           </Link>
         </div>
 
@@ -284,7 +284,7 @@ export default function DocumentsManagementPage() {
           }}>
             <p style={{ fontSize: '16px', marginBottom: '20px', color: '#64748b' }}>Aucun document trouvé</p>
             <Link
-              href="/admin/documents/generate"
+              href="/admin/documents/create"
               style={{
                 padding: '12px 24px',
                 backgroundColor: '#6366f1',

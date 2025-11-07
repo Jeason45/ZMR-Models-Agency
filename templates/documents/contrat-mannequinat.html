@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contrat {{numero_contrat}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      line-height: 1.7;
+      padding: 40px;
+      background: #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* En-tête */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 25px;
+      border-bottom: 3px solid #8b5cf6;
+    }
+
+    .header h1 {
+      font-size: 30px;
+      font-weight: 700;
+      color: #7c3aed;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .header .ref {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .header .date {
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* Parties */
+    .parties {
+      margin-bottom: 35px;
+    }
+
+    .partie {
+      padding: 20px;
+      background: #faf5ff;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #8b5cf6;
+    }
+
+    .partie h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #7c3aed;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    .partie p {
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .partie .name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    /* Articles */
+    .article {
+      margin-bottom: 30px;
+      page-break-inside: avoid;
+    }
+
+    .article h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .article p {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+
+    .article ul {
+      margin: 10px 0 10px 25px;
+    }
+
+    .article li {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    /* Info box */
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 18px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+    }
+
+    .info-box h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 10px;
+    }
+
+    .info-box p {
+      font-size: 13px;
+      color: #1e40af;
+      margin-bottom: 5px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    table th {
+      background: #f3f4f6;
+      padding: 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+      border: 1px solid #e5e7eb;
+    }
+
+    table td {
+      padding: 12px;
+      font-size: 14px;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Signatures */
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+      gap: 40px;
+      page-break-inside: avoid;
+    }
+
+    .signature-box {
+      flex: 1;
+      text-align: center;
+      padding: 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+    }
+
+    .signature-box h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    .signature-line {
+      height: 80px;
+      border-bottom: 2px solid #d1d5db;
+      margin-bottom: 15px;
+    }
+
+    .signature-box p {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .signature-box .name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-top: 10px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 2px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .footer p {
+      font-size: 10px;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    @media print {
+      body {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- En-tête -->
+    <div class="header">
+      <h1>Contrat de Mannequinat</h1>
+      <p class="ref">N° {{numero_contrat}}</p>
+      <p class="date">Date: {{date_contrat}}</p>
+    </div>
+
+    <!-- Parties -->
+    <div class="parties">
+      <div class="partie">
+        <h2>Entre les soussignés</h2>
+        <p class="name">{{nom_agence}}</p>
+        <p>{{adresse_agence}}</p>
+        <p>{{code_postal_agence}} {{ville_agence}}</p>
+        <p>SIRET: {{siret_agence}}</p>
+        <p>Représenté(e) par {{representant_nom}}, {{representant_qualite}}</p>
+        <p style="margin-top: 10px;"><strong>Ci-après dénommé(e) "L'AGENCE"</strong></p>
+      </div>
+
+      <div class="partie">
+        <h2>Et</h2>
+        <p class="name">{{nom_mannequin}}</p>
+        <p>{{adresse_mannequin}}</p>
+        {{#code_postal_mannequin}}
+        <p>{{code_postal_mannequin}} {{ville_mannequin}}</p>
+        {{/code_postal_mannequin}}
+        <p>Téléphone: {{telephone_mannequin}}</p>
+        <p>Email: {{email_mannequin}}</p>
+        {{#date_naissance}}
+        <p>Né(e) le: {{date_naissance}}</p>
+        {{/date_naissance}}
+        <p style="margin-top: 10px;"><strong>Ci-après dénommé(e) "LE MANNEQUIN"</strong></p>
+      </div>
+    </div>
+
+    <!-- Préambule -->
+    <div class="info-box">
+      <h4>Préambule</h4>
+      <p>Le présent contrat a pour objet de définir les conditions dans lesquelles le MANNEQUIN confie à l'AGENCE le soin de rechercher et de négocier des contrats de mannequinat.</p>
+    </div>
+
+    <!-- Articles -->
+    <div class="article">
+      <h3>Article 1 - Objet du contrat</h3>
+      <p>{{objet_contrat}}</p>
+    </div>
+
+    <div class="article">
+      <h3>Article 2 - Durée du contrat</h3>
+      <p><strong>Date de début :</strong> {{date_debut}}</p>
+      {{#date_fin}}
+      <p><strong>Date de fin :</strong> {{date_fin}}</p>
+      {{/date_fin}}
+      {{^date_fin}}
+      <p>Le présent contrat est conclu pour une durée indéterminée.</p>
+      {{/date_fin}}
+      <p>Il pourra être résilié par l'une ou l'autre des parties moyennant un préavis de {{preavis}} jours par lettre recommandée avec accusé de réception.</p>
+    </div>
+
+    <div class="article">
+      <h3>Article 3 - Prestations confiées à l'agence</h3>
+      <p>L'AGENCE s'engage à :</p>
+      <ul>
+        <li>Rechercher des opportunités professionnelles correspondant au profil du MANNEQUIN</li>
+        <li>Négocier les conditions des contrats de mannequinat</li>
+        <li>Assurer la promotion du MANNEQUIN auprès des clients potentiels</li>
+        <li>Gérer les aspects administratifs et contractuels des missions</li>
+        <li>Conseiller le MANNEQUIN dans le développement de sa carrière</li>
+      </ul>
+    </div>
+
+    <div class="article">
+      <h3>Article 4 - Rémunération et commission</h3>
+      <table>
+        <tr>
+          <th>Type de prestation</th>
+          <th>Tarif indicatif</th>
+          <th>Commission agence</th>
+        </tr>
+        <tr>
+          <td>Shooting photo</td>
+          <td>{{tarif_shooting}} € / jour</td>
+          <td>{{commission_agence}}%</td>
+        </tr>
+        <tr>
+          <td>Défilé mode</td>
+          <td>{{tarif_defile}} € / défilé</td>
+          <td>{{commission_agence}}%</td>
+        </tr>
+      </table>
+      <p style="margin-top: 15px;">La commission de l'agence est de <strong>{{commission_agence}}%</strong> sur le montant brut des cachets perçus par le MANNEQUIN.</p>
+      <p>Les frais suivants sont à la charge du client : frais de déplacement, d'hébergement et de restauration.</p>
+    </div>
+
+    <div class="article">
+      <h3>Article 5 - Obligations du mannequin</h3>
+      <p>Le MANNEQUIN s'engage à :</p>
+      <ul>
+        <li>Informer l'AGENCE de toute proposition de travail reçue directement</li>
+        <li>Se présenter à l'heure aux rendez-vous fixés</li>
+        <li>Maintenir une présentation professionnelle</li>
+        <li>Respecter les consignes du client pendant les prestations</li>
+        <li>Informer l'AGENCE de tout changement dans ses coordonnées ou sa disponibilité</li>
+      </ul>
+    </div>
+
+    <div class="article">
+      <h3>Article 6 - Exclusivité</h3>
+      {{#exclusivite}}
+      <p>Le présent contrat est conclu à titre <strong>exclusif</strong>. Le MANNEQUIN s'engage à ne travailler qu'avec l'AGENCE pendant toute la durée du contrat.</p>
+      {{/exclusivite}}
+      {{^exclusivite}}
+      <p>Le présent contrat est conclu <strong>sans exclusivité</strong>. Le MANNEQUIN est libre de travailler avec d'autres agences.</p>
+      {{/exclusivite}}
+    </div>
+
+    <div class="article">
+      <h3>Article 7 - Droit à l'image</h3>
+      <p>Le MANNEQUIN autorise l'AGENCE à utiliser son image (photos, vidéos) dans le cadre de la promotion de ses services, notamment sur son site internet, ses réseaux sociaux et ses supports de communication.</p>
+      <p>Cette autorisation est accordée pour la durée du contrat et peut être révoquée à tout moment par lettre recommandée.</p>
+    </div>
+
+    <div class="article">
+      <h3>Article 8 - Confidentialité</h3>
+      <p>Les parties s'engagent à respecter la confidentialité des informations échangées dans le cadre de leur collaboration.</p>
+    </div>
+
+    <div class="article">
+      <h3>Article 9 - Résiliation</h3>
+      <p>En cas de manquement grave aux obligations contractuelles, le présent contrat pourra être résilié de plein droit par la partie lésée, après mise en demeure restée sans effet pendant 15 jours.</p>
+    </div>
+
+    <div class="article">
+      <h3>Article 10 - Litiges</h3>
+      <p>En cas de litige relatif à l'interprétation ou à l'exécution du présent contrat, les parties s'engagent à rechercher une solution amiable avant toute action judiciaire.</p>
+      <p>À défaut d'accord amiable, le litige sera porté devant les tribunaux compétents.</p>
+    </div>
+
+    <!-- Fait à -->
+    <div style="margin-top: 40px; margin-bottom: 30px;">
+      <p style="font-size: 14px; color: #374151;">
+        Fait à {{ville_signature}}, le {{date_signature}}, en deux exemplaires originaux.
+      </p>
+      <p style="font-size: 13px; color: #6b7280; margin-top: 8px;">
+        Chaque partie reconnaît avoir pris connaissance de l'intégralité du présent contrat et l'accepte sans réserve.
+      </p>
+    </div>
+
+    <!-- Signatures -->
+    <div class="signatures">
+      <div class="signature-box">
+        <h4>Pour l'Agence</h4>
+        <div class="signature-line"></div>
+        <p>Signature et cachet</p>
+        <p class="name">{{nom_agence}}</p>
+        <p>{{representant_nom}}, {{representant_qualite}}</p>
+      </div>
+
+      <div class="signature-box">
+        <h4>Le Mannequin</h4>
+        <div class="signature-line"></div>
+        <p>Lu et approuvé<br>Signature précédée de la mention</p>
+        <p class="name">{{nom_mannequin}}</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>{{nom_agence}} • {{adresse_agence}} • SIRET: {{siret_agence}}</p>
+      <p>{{telephone_agence}} • {{email_agence}}</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -6,6 +6,8 @@ import {
   generateDocumentEmailText
 } from '@/lib/emailUtils';
 import crypto from 'crypto';
+import path from 'path';
+import { existsSync } from 'fs';
 
 const prisma = new PrismaClient();
 
@@ -91,12 +93,46 @@ export async function POST(request: Request) {
     // Prepare attachments
     const attachments = [];
 
-    // Add PDF if available, otherwise DOCX
+    // Add PDF if available
     if (document.filePath) {
-      attachments.push({
-        filename: document.fileName,
-        path: document.filePath
-      });
+      // Check if it's an R2 URL (new system) or local path (old system)
+      if (document.filePath.startsWith('http://') || document.filePath.startsWith('https://')) {
+        // R2 URL: use directly
+        attachments.push({
+          filename: document.fileName,
+          path: document.filePath // URL R2 directe
+        });
+        console.log('✅ Attachment added from R2:', document.filePath);
+      } else {
+        // Local file (old system): convert to absolute path
+        let absolutePath: string;
+
+        if (document.filePath.startsWith('/storage/')) {
+          absolutePath = path.join(process.cwd(), 'public', document.filePath);
+        } else {
+          absolutePath = document.filePath.startsWith('/')
+            ? document.filePath
+            : path.join(process.cwd(), document.filePath);
+        }
+
+        // Verify file exists before adding
+        if (existsSync(absolutePath)) {
+          attachments.push({
+            filename: document.fileName,
+            path: absolutePath
+          });
+          console.log('✅ Attachment added from local:', absolutePath);
+        } else {
+          console.error('❌ File not found:', absolutePath);
+          return NextResponse.json(
+            {
+              error: 'Document file not found on server',
+              details: `Path: ${absolutePath}`
+            },
+            { status: 404 }
+          );
+        }
+      }
     }
 
     // Send email
