@@ -1,10 +1,12 @@
 /**
  * Document Generator Utility
  * Handles DOCX template filling, PDF conversion, and document numbering
+ *
+ * NOTE: Migrated from docxtemplater to docx-templates
+ * docx-templates automatically handles XML fragmentation issues
  */
 
-import Docxtemplater from 'docxtemplater';
-import PizZip from 'pizzip';
+import { createReport } from 'docx-templates';
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
@@ -27,6 +29,7 @@ interface GenerateDocumentResult {
 
 /**
  * Fill DOCX template with data and generate PDF
+ * Uses docx-templates which handles XML fragmentation automatically
  */
 export async function generateDocument({
   templatePath,
@@ -42,24 +45,14 @@ export async function generateDocument({
     }
 
     // Read template file
-    const templateContent = fs.readFileSync(templatePath, 'binary');
+    const template = fs.readFileSync(templatePath);
 
-    // Load template with PizZip
-    const zip = new PizZip(templateContent);
-
-    // Create Docxtemplater instance
-    const doc = new Docxtemplater(zip, {
-      paragraphLoop: true,
-      linebreaks: true,
-    });
-
-    // Fill template with data
-    doc.render(data);
-
-    // Generate filled DOCX as buffer
-    const filledDocx = doc.getZip().generate({
-      type: 'nodebuffer',
-      compression: 'DEFLATE',
+    // Generate filled DOCX using docx-templates
+    // This library automatically handles fragmented {{variables}}
+    const filledDocx = await createReport({
+      template,
+      data,
+      cmdDelimiter: ['{{', '}}'],
     });
 
     // Save filled DOCX
