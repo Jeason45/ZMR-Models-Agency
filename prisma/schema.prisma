@@ -22,19 +22,83 @@ model User {
   @@map("users")
 }
 
+// ============================================
+// AGENCY SETTINGS (Configuration de l'agence)
+// ============================================
+
+model AgencySettings {
+  id        String   @id @default(cuid())
+
+  // Informations de base
+  nom_agence        String
+  adresse_agence    String
+  telephone_agence  String
+  email_agence      String
+  site_web_agence   String?
+
+  // Informations juridiques
+  siret_agence      String
+  forme_juridique   String   // SARL, SAS, EURL, etc.
+  capital           String   // "10 000 EUR"
+  ville_rcs         String   // Ville d'immatriculation RCS
+  numero_rcs        String   // Numéro RCS
+
+  // Représentant légal
+  representant_nom      String
+  representant_qualite  String  // Président, Gérant, Directeur, etc.
+
+  // Médias
+  logo_path         String?
+  signature_path    String?
+
+  // Paramètres par défaut pour documents
+  tva_par_defaut    Float    @default(20.0)  // TVA en %
+  delai_paiement_defaut String @default("30 jours")
+  validite_devis_defaut Int    @default(30)  // En jours
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("agency_settings")
+}
+
 model Contact {
   id           String        @id @default(cuid())
   name         String
   email        String
   phone        String?
-  message      String?
+  message      String?       @db.Text
   type         String?       // "professional", "model"
-  status       String        @default("new") // "new", "contacted", "converted", "archived"
+  status       String        @default("new") // "new", "contacted", "qualified", "client", "lost"
   source       String?       // "website", "referral", etc.
+  notes        String?       @db.Text // Notes internes sur le lead
+
+  // Type de contact (pour distinguer particulier/entreprise)
+  contactType  String?       // "particulier", "entreprise", "agence"
+
+  // Informations complètes client (pour DEVIS/FACTURES)
+  adresse_client    String?
+  ville             String?
+  code_postal       String?
+  site_web_client   String?
+
+  // Informations juridiques (pour entreprises)
+  siret             String?
+  forme_juridique   String?  // SARL, SAS, etc.
+
+  // Destinataire (personne de contact si différente du client)
+  nom_destinataire       String?
+  adresse_destinataire   String?
+  telephone_destinataire String?
+  email_destinataire     String?
+
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  appointments Appointment[]
-  documents    Document[]
+
+  // Relations
+  appointments       Appointment[]
+  documents          Document[]
+  mailLogs           MailLog[]
 
   @@map("contacts")
 }
@@ -165,6 +229,17 @@ model Talent {
   tiktokUrl          String?
   promoCategories    Json?  // Array: ["Beauty & Fashion", "Luxury Events", "Lifestyle"]
 
+  // Informations personnelles complètes (pour CONTRATS)
+  prenom_talent      String?
+  nom_talent         String?
+  date_naissance     DateTime?
+  lieu_naissance     String?
+  nationalite        String?
+  adresse_talent     String?
+  numero_ss_talent   String?  // Numéro sécurité sociale
+  telephone_talent   String?
+  email_talent       String?
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -184,23 +259,41 @@ model Talent {
 // Templates de documents (les 22 fichiers DOCX)
 model DocumentTemplate {
   id          String   @id @default(cuid())
-  name        String   // "Contrat Mannequinat Mode"
-  slug        String   @unique // "contrat-mannequinat-mode"
+  name        String   // "Contrat Mannequinat Mode", "Devis Moderne"
+  slug        String   @unique // "contrat-mannequinat-mode", "devis-moderne"
   type        String   // "CONTRAT", "FACTURE", "DEVIS", "ADMINISTRATIF"
   category    String   // "talent", "client", "commercial", "admin"
   description String?
 
-  // Fichier template
-  fileName    String   // "Contrat_Mannequinat_Mode.docx"
-  filePath    String   // Chemin vers le template DOCX
+  // Format du template (NOUVEAU)
+  format      String   @default("docx") // "docx" (ancien système) ou "html" (nouveau système Puppeteer)
+
+  // Fichier template DOCX (ancien système)
+  fileName    String?  // "Contrat_Mannequinat_Mode.docx"
+  filePath    String?  // Chemin vers le template DOCX
+
+  // Template HTML (nouveau système)
+  htmlContent String?  @db.Text // HTML complet pour génération Puppeteer
 
   // Variables dynamiques dans le template (JSON array)
   // Ex: ["nom_talent", "date_debut", "tarif_journalier"]
   variables   Json?
 
+  // Mapping des champs dynamiques (configuration de l'auto-remplissage)
+  // Ex: {"nom_client": {"source": "contact", "field": "name", "autoFill": true}}
+  fieldMapping Json?
+
+  // Champs éditables par le client (pour édition PDF)
+  // Ex: [{name: "nom_complet", label: "Nom complet", type: "text", required: true, defaultValue: ""}]
+  editableFields Json?
+
   // Configuration
   requiresSignature Boolean @default(false)
   isActive          Boolean @default(true)
+  isDefault         Boolean @default(false) // Template par défaut pour ce type
+
+  // Aperçu (optionnel)
+  thumbnailUrl      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -208,6 +301,9 @@ model DocumentTemplate {
   // Relations
   documents Document[]
 
+  @@index([format])
+  @@index([type])
+  @@index([isDefault])
   @@map("document_templates")
 }
 
@@ -227,13 +323,18 @@ model Document {
   fileName        String   // "Contrat_Camille_Dupont_2025-11-02.pdf"
   filePath        String   // Chemin relatif dans storage/documents/
   originalDocx    String?  // Chemin vers le DOCX rempli (avant conversion PDF)
+  signedPdfPath   String?  // Chemin vers le PDF signé avec signature intégrée
 
   // Données du document (JSON contenant toutes les valeurs)
   // Ex: {"nom_talent": "Camille Dupont", "date_debut": "2025-12-01", ...}
   data            Json?
 
+  // Données remplies par le client (édition PDF)
+  // Ex: {"nom_complet": "Jean Dupont", "adresse": "123 rue...", ...}
+  formData        Json?
+
   // Workflow
-  status          String   @default("draft") // "draft", "sent", "signed", "archived", "cancelled"
+  status          String   @default("draft") // "draft", "sent", "pending_edit", "edited", "pending_signature", "signed", "archived", "cancelled"
 
   // Numérotation automatique (ex: FACT-2025-001, CONT-2025-042)
   documentNumber  String?  @unique
@@ -270,8 +371,9 @@ model Document {
   updatedAt       DateTime @updatedAt
 
   // Relations
-  signatures      Signature[]
-  mailLogs        MailLog[]
+  signatures         Signature[]
+  signatureRequests  SignatureRequest[]
+  mailLogs           MailLog[]
 
   @@index([status])
   @@index([type])
@@ -315,9 +417,56 @@ model Signature {
 
   createdAt     DateTime @default(now())
 
+  // Relation inverse avec SignatureRequest (optionnelle)
+  signatureRequest SignatureRequest?
+
   @@index([documentId])
   @@index([signerEmail])
   @@map("signatures")
+}
+
+// Demandes de signature avec tokens sécurisés
+model SignatureRequest {
+  id            String   @id @default(cuid())
+
+  // Document à signer
+  documentId    String
+  document      Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Token unique pour le lien de signature
+  token         String   @unique // Token sécurisé (crypto.randomBytes)
+
+  // Informations du destinataire
+  recipientEmail String
+  recipientName  String?
+
+  // Expiration du lien (généralement 30 jours)
+  expiresAt     DateTime
+
+  // Statut
+  status        String   @default("pending") // "pending", "completed", "expired", "cancelled"
+
+  // Une fois signée, référence vers la signature
+  signatureId   String?  @unique
+  signature     Signature? @relation(fields: [signatureId], references: [id], onDelete: SetNull)
+
+  // Tracking
+  sentAt        DateTime @default(now())
+  viewedAt      DateTime? // Première fois que le lien est ouvert
+  completedAt   DateTime? // Quand la signature est effectuée
+
+  // Métadonnées
+  reminders     Int      @default(0) // Nombre de relances envoyées
+  lastReminderAt DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([token])
+  @@index([documentId])
+  @@index([recipientEmail])
+  @@index([status])
+  @@map("signature_requests")
 }
 
 // Logs de tous les mails envoyés
@@ -345,7 +494,9 @@ model MailLog {
   document    Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
 
   talentId    String?
+
   contactId   String?
+  contact     Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
   // Tracking
   sentAt      DateTime  @default(now())
@@ -415,3 +566,4 @@ model BlogPost {
   @@index([publishedAt])
   @@map("blog_posts")
 }
+
