@@ -24,11 +24,14 @@ interface GeneratePdfRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🚀 [PDF] Starting PDF generation...');
     const body: GeneratePdfRequest = await request.json();
     const { templateName, data, options = {} } = body;
+    console.log('📝 [PDF] Template:', templateName);
 
     // Valider les données
     if (!templateName || !data) {
+      console.error('❌ [PDF] Missing required fields');
       return NextResponse.json(
         { error: 'templateName et data sont requis' },
         { status: 400 }
@@ -36,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Charger le template HTML
+    console.log('📄 [PDF] Loading template...');
     const templatePath = path.join(
       process.cwd(),
       'templates',
@@ -46,7 +50,9 @@ export async function POST(request: NextRequest) {
     let templateHtml: string;
     try {
       templateHtml = await fs.readFile(templatePath, 'utf-8');
+      console.log('✅ [PDF] Template loaded successfully');
     } catch (error) {
+      console.error('❌ [PDF] Template not found:', templatePath);
       return NextResponse.json(
         { error: `Template "${templateName}" non trouvé` },
         { status: 404 }
@@ -54,22 +60,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Injecter les données avec Mustache
+    console.log('🔧 [PDF] Rendering template with Mustache...');
     const html = Mustache.render(templateHtml, data);
+    console.log('✅ [PDF] Template rendered');
 
     // Configuration Puppeteer pour Vercel (serverless)
+    console.log('🌐 [PDF] Launching browser...');
+
     const browser = await puppeteer.launch({
-      args: chromium.args,
+      args: [...chromium.args, '--disable-gpu', '--single-process'],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: true,
+      ignoreHTTPSErrors: true,
     });
+    console.log('✅ [PDF] Browser launched');
 
     const page = await browser.newPage();
+    console.log('✅ [PDF] New page created');
 
     // Charger le HTML
+    console.log('📝 [PDF] Setting page content...');
     await page.setContent(html, {
       waitUntil: 'networkidle0'
     });
+    console.log('✅ [PDF] Content loaded');
 
     // Options de génération PDF
     const pdfOptions: any = {
@@ -85,11 +100,15 @@ export async function POST(request: NextRequest) {
     };
 
     // Générer le PDF
+    console.log('🖨️  [PDF] Generating PDF...');
     const pdfBuffer = await page.pdf(pdfOptions);
+    console.log('✅ [PDF] PDF generated, size:', pdfBuffer.length, 'bytes');
 
     await browser.close();
+    console.log('✅ [PDF] Browser closed');
 
     // Retourner le PDF
+    console.log('📤 [PDF] Sending PDF response');
     return new NextResponse(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
@@ -99,11 +118,15 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Erreur génération PDF:', error);
+    console.error('❌❌❌ [PDF] CRITICAL ERROR:', error);
+    console.error('❌ [PDF] Error stack:', error.stack);
+    console.error('❌ [PDF] Error message:', error.message);
+    console.error('❌ [PDF] Error name:', error.name);
     return NextResponse.json(
       {
         error: 'Erreur lors de la génération du PDF',
-        details: error.message
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       },
       { status: 500 }
     );
