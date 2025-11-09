@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
 import Mustache from 'mustache';
 import fs from 'fs/promises';
 import path from 'path';
@@ -67,13 +65,27 @@ export async function POST(request: NextRequest) {
     // Configuration Puppeteer pour Vercel (serverless)
     console.log('🌐 [PDF] Launching browser...');
 
-    const browser = await puppeteer.launch({
-      args: [...chromium.args, '--disable-gpu', '--single-process'],
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: true,
-      ignoreHTTPSErrors: true,
-    });
+    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+
+    // Import dynamique selon l'environnement
+    let browser;
+    if (isProduction) {
+      const puppeteerCore = (await import('puppeteer-core')).default;
+      const chromium = (await import('@sparticuz/chromium')).default;
+      browser = await puppeteerCore.launch({
+        args: [...chromium.args, '--disable-gpu', '--single-process'],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: true,
+        ignoreHTTPSErrors: true,
+      });
+    } else {
+      const puppeteer = (await import('puppeteer')).default;
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+    }
     console.log('✅ [PDF] Browser launched');
 
     const page = await browser.newPage();
