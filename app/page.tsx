@@ -8,7 +8,10 @@ export default function Home() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastScrollY = useRef(0);
+  const scrollDirectionRef = useRef<'up' | 'down'>('up');
 
   const videos = [
     '/videos/hero.mp4',
@@ -42,6 +45,24 @@ export default function Home() {
       }
     }
   }, [currentVideoIndex]);
+
+  // Scroll detection effect
+  useEffect(() => {
+    const updateScrollDirection = () => {
+      const scrollY = window.pageYOffset;
+      const direction = scrollY > lastScrollY.current ? 'down' : 'up';
+
+      if (direction !== scrollDirectionRef.current && Math.abs(scrollY - lastScrollY.current) > 10) {
+        scrollDirectionRef.current = direction;
+        setScrollDirection(direction);
+      }
+
+      lastScrollY.current = scrollY > 0 ? scrollY : 0;
+    };
+
+    window.addEventListener('scroll', updateScrollDirection);
+    return () => window.removeEventListener('scroll', updateScrollDirection);
+  }, []);
 
   return (
     <>
@@ -81,13 +102,14 @@ export default function Home() {
           <Link
             href="/"
             style={{
-              position: 'absolute',
-              top: '20px',
+              position: 'fixed',
+              top: scrollDirection === 'down' ? '-300px' : '20px',
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 10,
               textDecoration: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'top 0.5s ease-in-out'
             }}
           >
             <div style={{ textAlign: 'center' }}>
@@ -123,12 +145,13 @@ export default function Home() {
         {!isMenuOpen && (
           <div style={{
             position: 'fixed',
-            top: '32px',
+            top: scrollDirection === 'down' ? '-300px' : '32px',
             right: '32px',
             zIndex: 50,
             display: 'flex',
             alignItems: 'center',
-            gap: '24px'
+            gap: '24px',
+            transition: 'top 0.5s ease-in-out'
           }}>
           {/* Search Icon */}
           <button
