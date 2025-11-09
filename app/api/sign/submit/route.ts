@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
         const signedFileName = signatureRequest.document.fileName.replace('.pdf', '_SIGNED.pdf');
         const uploadResult = await uploadToR2(signedPdfBuffer, `documents/${signedFileName}`);
 
-        if (!uploadResult.success) {
+        if (!uploadResult.success || !uploadResult.url) {
           throw new Error('Failed to upload signed PDF to R2');
         }
 
