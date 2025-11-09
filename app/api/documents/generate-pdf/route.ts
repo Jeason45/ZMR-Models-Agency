@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import Mustache from 'mustache';
 import fs from 'fs/promises';
 import path from 'path';
@@ -55,15 +56,12 @@ export async function POST(request: NextRequest) {
     // Injecter les données avec Mustache
     const html = Mustache.render(templateHtml, data);
 
-    // Configuration Puppeteer
+    // Configuration Puppeteer pour Vercel (serverless)
     const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu'
-      ]
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
