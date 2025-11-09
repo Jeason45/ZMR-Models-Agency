@@ -249,7 +249,7 @@ export function generateDocumentEmailHTML(params: {
     }
     .button {
       display: inline-block;
-      background: #000;
+      background: #22c55e;
       color: #fff !important;
       padding: 12px 30px;
       text-decoration: none;
