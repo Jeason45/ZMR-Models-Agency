@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { generateSignedPDF } from '@/lib/signedPdfGenerator';
 import { sendEmail } from '@/lib/emailUtils';
+import { uploadToR2 } from '@/lib/r2Storage';
 
 interface SignatureProofData {
   timestamp: string;
@@ -71,23 +72,50 @@ export async function POST(request: NextRequest) {
 
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    // Calculer le hash du document PDF pour intégrité
-    const documentPath = path.join(
-      process.cwd(),
-      'public',
-      signatureRequest.document.filePath.startsWith('/')
-        ? signatureRequest.document.filePath.substring(1)
-        : signatureRequest.document.filePath
-    );
+    // Gérer le téléchargement du document (R2 ou local)
+    let documentPath: string;
+    let documentBuffer: Buffer;
+    let isR2Document = false;
 
-    let documentHash = '';
-    if (fs.existsSync(documentPath)) {
-      const fileBuffer = fs.readFileSync(documentPath);
-      documentHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+    if (signatureRequest.document.filePath.startsWith('http://') ||
+        signatureRequest.document.filePath.startsWith('https://')) {
+      // Document sur R2 - télécharger
+      console.log('📥 Téléchargement du PDF depuis R2:', signatureRequest.document.filePath);
+      isR2Document = true;
+
+      const response = await fetch(signatureRequest.document.filePath);
+      if (!response.ok) {
+        throw new Error('Failed to download PDF from R2');
+      }
+      documentBuffer = Buffer.from(await response.arrayBuffer());
+
+      // Créer un fichier temporaire
+      const tempDir = path.join(process.cwd(), 'tmp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+      documentPath = path.join(tempDir, `temp_${Date.now()}.pdf`);
+      fs.writeFileSync(documentPath, documentBuffer);
+
+      console.log('✅ PDF téléchargé depuis R2:', documentPath);
     } else {
-      console.warn('Document file not found for hashing:', documentPath);
-      documentHash = 'file-not-found';
+      // Document local
+      documentPath = path.join(
+        process.cwd(),
+        'public',
+        signatureRequest.document.filePath.startsWith('/')
+          ? signatureRequest.document.filePath.substring(1)
+          : signatureRequest.document.filePath
+      );
+
+      if (!fs.existsSync(documentPath)) {
+        throw new Error('Document file not found: ' + documentPath);
+      }
+      documentBuffer = fs.readFileSync(documentPath);
     }
+
+    // Calculer le hash du document PDF pour intégrité
+    const documentHash = crypto.createHash('sha256').update(documentBuffer).digest('hex');
 
     // Sauvegarder l'image de signature
     const signatureFileName = `signature_${signatureRequest.id}_${Date.now()}.png`;
@@ -162,26 +190,68 @@ export async function POST(request: NextRequest) {
 
       console.log('✅ PDF signé généré:', signedPdfPath);
 
-      // Mettre à jour le document avec le chemin du PDF signé et les données du formulaire
-      await prisma.document.update({
-        where: { id: signatureRequest.documentId },
-        data: {
-          status: 'signed',
-          signedAt: new Date(),
-          signedBy: signerName,
-          signedPdfPath: signedPdfPath,
-          formData: formData as any // Store client-filled data
+      // Si le document original était sur R2, uploader le PDF signé sur R2 aussi
+      let signedPdfUrl: string;
+      let signedPdfAbsolutePath: string;
+
+      if (isR2Document) {
+        console.log('📤 Upload du PDF signé sur R2...');
+
+        // Lire le PDF signé
+        const signedPdfAbsPath = path.join(
+          process.cwd(),
+          'public',
+          signedPdfPath.startsWith('/') ? signedPdfPath.substring(1) : signedPdfPath
+        );
+        const signedPdfBuffer = fs.readFileSync(signedPdfAbsPath);
+
+        // Upload sur R2
+        const signedFileName = signatureRequest.document.fileName.replace('.pdf', '_SIGNED.pdf');
+        const uploadResult = await uploadToR2(signedPdfBuffer, `documents/${signedFileName}`);
+
+        if (!uploadResult.success) {
+          throw new Error('Failed to upload signed PDF to R2');
         }
-      });
+
+        signedPdfUrl = uploadResult.url;
+        console.log('✅ PDF signé uploadé sur R2:', signedPdfUrl);
+
+        // Pour l'email, on peut soit utiliser l'URL R2, soit le fichier local temporaire
+        // Utilisons le fichier local pour l'attachement email
+        signedPdfAbsolutePath = signedPdfAbsPath;
+
+        // Mettre à jour le document avec l'URL R2
+        await prisma.document.update({
+          where: { id: signatureRequest.documentId },
+          data: {
+            status: 'signed',
+            signedAt: new Date(),
+            signedBy: signerName,
+            signedPdfPath: signedPdfUrl, // URL R2 du PDF signé
+            formData: formData as any
+          }
+        });
+      } else {
+        // Document local - garder le chemin local
+        signedPdfAbsolutePath = path.join(
+          process.cwd(),
+          'public',
+          signedPdfPath.startsWith('/') ? signedPdfPath.substring(1) : signedPdfPath
+        );
+
+        await prisma.document.update({
+          where: { id: signatureRequest.documentId },
+          data: {
+            status: 'signed',
+            signedAt: new Date(),
+            signedBy: signerName,
+            signedPdfPath: signedPdfPath,
+            formData: formData as any
+          }
+        });
+      }
 
       // ========== ENVOYER LE PDF SIGNÉ PAR EMAIL ==========
-
-      // Chemin absolu du PDF signé
-      const signedPdfAbsolutePath = path.join(
-        process.cwd(),
-        'public',
-        signedPdfPath.startsWith('/') ? signedPdfPath.substring(1) : signedPdfPath
-      );
 
       // Email au client
       const clientEmailHTML = `
@@ -298,6 +368,16 @@ Cette signature électronique est conforme à la réglementation eIDAS.
           formData: formData as any // Store client-filled data even if PDF generation fails
         }
       });
+    } finally {
+      // Nettoyer les fichiers temporaires si c'était un document R2
+      if (isR2Document && documentPath && fs.existsSync(documentPath)) {
+        try {
+          fs.unlinkSync(documentPath);
+          console.log('🗑️  Fichier temporaire supprimé:', documentPath);
+        } catch (cleanupError) {
+          console.warn('Erreur lors du nettoyage du fichier temporaire:', cleanupError);
+        }
+      }
     }
 
     return NextResponse.json({

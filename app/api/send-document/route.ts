@@ -65,12 +65,24 @@ export async function POST(request: Request) {
       // Generate unique signature token
       const signatureToken = crypto.randomBytes(32).toString('hex');
 
-      // Store token in database (you might want to create a SignatureRequest model)
-      // For now, we'll just generate the URL
+      // Calculate expiration (30 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
+      // Store token in database
+      await prisma.signatureRequest.create({
+        data: {
+          token: signatureToken,
+          documentId: document.id,
+          recipientEmail: to,
+          recipientName: recipientName,
+          expiresAt,
+          status: 'pending'
+        }
+      });
+
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
       signatureUrl = `${baseUrl}/sign/${signatureToken}?documentId=${documentId}`;
-
-      // TODO: Store signature token with expiration in database
     }
 
     // Generate email content
@@ -97,10 +109,10 @@ export async function POST(request: Request) {
     if (document.filePath) {
       // Check if it's an R2 URL (new system) or local path (old system)
       if (document.filePath.startsWith('http://') || document.filePath.startsWith('https://')) {
-        // R2 URL: use directly
+        // R2 URL: use href instead of path for remote files
         attachments.push({
           filename: document.fileName,
-          path: document.filePath // URL R2 directe
+          href: document.filePath // Use href for URLs (nodemailer requirement)
         });
         console.log('✅ Attachment added from R2:', document.filePath);
       } else {

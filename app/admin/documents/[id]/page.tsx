@@ -105,7 +105,7 @@ export default function DocumentDetailPage() {
           documentId,
           to: sendEmail,
           message: sendMessage,
-          requiresSignature: document?.template?.type === 'CONTRAT',
+          requiresSignature: true, // Signature activée pour tous les types de documents
           sentBy: 'Admin'
         })
       });

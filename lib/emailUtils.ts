@@ -45,10 +45,10 @@ export interface SendEmailParams {
   subject: string;
   htmlContent?: string;
   textContent?: string;
-  attachments?: {
-    filename: string;
-    path: string;
-  }[];
+  attachments?: Array<
+    | { filename: string; path: string }  // Local file
+    | { filename: string; href: string }   // Remote file (URL)
+  >;
   documentId?: string;
   talentId?: string;
   contactId?: string;
@@ -123,11 +123,22 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
       subject,
       html: htmlContent,
       text: textContent,
-      attachments: attachments?.map(att => ({
-        filename: att.filename,
-        // Si le chemin est déjà absolu, ne pas ajouter process.cwd()
-        path: path.isAbsolute(att.path) ? att.path : path.join(process.cwd(), att.path)
-      }))
+      attachments: attachments?.map(att => {
+        // Handle both href (URLs) and path (local files)
+        if ('href' in att) {
+          // Remote file (R2, etc.)
+          return {
+            filename: att.filename,
+            href: att.href
+          };
+        } else {
+          // Local file
+          return {
+            filename: att.filename,
+            path: path.isAbsolute(att.path) ? att.path : path.join(process.cwd(), att.path)
+          };
+        }
+      })
     };
 
     // Send email

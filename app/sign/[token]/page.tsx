@@ -136,7 +136,7 @@ export default function SignDocumentPage() {
 
   // Canvas signature functions
   const initCanvas = (canvas: HTMLCanvasElement | null) => {
-    if (!canvas) return;
+    if (!canvas || canvasRef.current) return; // Don't reinitialize if already set
     canvasRef.current = canvas;
 
     const ctx = canvas.getContext('2d');
