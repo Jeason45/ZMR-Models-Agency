@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import imageCompression from 'browser-image-compression';
 
 type ImageUploadProps = {
   onImageUploaded: (url: string) => void;
@@ -22,8 +23,20 @@ export default function ImageUpload({ onImageUploaded, currentImage, category = 
     setUploading(true);
 
     try {
+      // Compresser l'image avant l'upload
+      const options = {
+        maxSizeMB: 2, // Taille max 2MB
+        maxWidthOrHeight: 1920, // Dimension max
+        useWebWorker: true,
+        fileType: file.type,
+      };
+
+      console.log('Compression de l\'image...', file.size / 1024 / 1024, 'MB');
+      const compressedFile = await imageCompression(file, options);
+      console.log('Image compressée:', compressedFile.size / 1024 / 1024, 'MB');
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressedFile);
       formData.append('type', 'image');
       formData.append('category', category);
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminSidebar from '@/components/AdminSidebar';
 import { useSidebar } from '@/components/SidebarContext';
+import imageCompression from 'browser-image-compression';
 
 export default function EditModelPage() {
   const router = useRouter();
@@ -360,8 +361,23 @@ export default function EditModelPage() {
       throw new Error(`Le fichier "${file.name}" n'est pas une vidéo. Type: ${file.type}`);
     }
 
+    let fileToUpload = file;
+
+    // Compresser les images avant l'upload
+    if (type === 'image') {
+      const options = {
+        maxSizeMB: 2, // Taille max 2MB
+        maxWidthOrHeight: 1920, // Dimension max
+        useWebWorker: true,
+        fileType: file.type,
+      };
+      console.log('Compression de l\'image...', file.size / 1024 / 1024, 'MB');
+      fileToUpload = await imageCompression(file, options);
+      console.log('Image compressée:', fileToUpload.size / 1024 / 1024, 'MB');
+    }
+
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', fileToUpload);
     formData.append('type', type);
     formData.append('category', 'models');
 
