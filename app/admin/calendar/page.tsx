@@ -63,10 +63,11 @@ export default function CalendarPage() {
   const fetchContacts = async () => {
     try {
       const response = await fetch('/api/contacts');
-      const data = await response.json();
-      setContacts(data);
+      const data = response.ok ? await response.json() : [];
+      setContacts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching contacts:', error);
+      setContacts([]);
     }
   };
 
@@ -89,10 +90,11 @@ export default function CalendarPage() {
       const response = await fetch(
         `/api/appointments?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
       );
-      const data = await response.json();
-      setAppointments(data);
+      const data = response.ok ? await response.json() : [];
+      setAppointments(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching appointments:', error);
+      setAppointments([]);
     } finally {
       setLoading(false);
     }

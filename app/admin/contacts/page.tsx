@@ -41,8 +41,12 @@ export default function LeadsV4() {
 
   useEffect(() => {
     fetch('/api/contacts')
-      .then(res => res.json())
-      .then(data => { setContacts(data); setLoading(false); });
+      .then(res => res.ok ? res.json() : [])
+      .catch(() => [])
+      .then(data => {
+        setContacts(Array.isArray(data) ? data : []);
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -68,8 +72,9 @@ export default function LeadsV4() {
 
   const handleRefresh = () => {
     fetch('/api/contacts')
-      .then(res => res.json())
-      .then(data => setContacts(data));
+      .then(res => res.ok ? res.json() : [])
+      .catch(() => [])
+      .then(data => setContacts(Array.isArray(data) ? data : []));
   };
 
   return (

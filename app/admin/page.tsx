@@ -20,16 +20,16 @@ export default function AdminPage() {
   const fetchData = async () => {
     try {
       const [modelsData, appointmentsData, contactsData, documentsData] = await Promise.all([
-        fetch('/api/talents').then(res => res.json()),
-        fetch('/api/appointments').then(res => res.json()),
-        fetch('/api/contacts').then(res => res.json()),
-        fetch('/api/documents').then(res => res.json())
+        fetch('/api/talents').then(res => res.ok ? res.json() : []).catch(() => []),
+        fetch('/api/appointments').then(res => res.ok ? res.json() : []).catch(() => []),
+        fetch('/api/contacts').then(res => res.ok ? res.json() : []).catch(() => []),
+        fetch('/api/documents').then(res => res.ok ? res.json() : []).catch(() => [])
       ]);
 
-      setModels(modelsData || []);
-      setAppointments(appointmentsData || []);
-      setContacts(contactsData || []);
-      setDocuments(documentsData || []);
+      setModels(Array.isArray(modelsData) ? modelsData : []);
+      setAppointments(Array.isArray(appointmentsData) ? appointmentsData : []);
+      setContacts(Array.isArray(contactsData) ? contactsData : []);
+      setDocuments(Array.isArray(documentsData) ? documentsData : []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {

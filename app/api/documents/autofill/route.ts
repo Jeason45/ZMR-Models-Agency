@@ -43,6 +43,19 @@ export async function POST(request: NextRequest) {
     // 3. Auto-remplir selon le mapping
     const fieldMapping = template.fieldMapping as Record<string, any>;
 
+    // Fonction helper pour mapper les noms de champs contact
+    const mapContactField = (fieldName: string): string => {
+      const fieldMap: Record<string, string> = {
+        'nom_client': 'name',
+        'email_client': 'email',
+        'telephone_client': 'phone',
+        'adresse_client': 'adresse_client',
+        'ville_client': 'ville',
+        'code_postal_client': 'code_postal',
+      };
+      return fieldMap[fieldName] || fieldName;
+    };
+
     if (fieldMapping) {
       for (const [fieldName, mapping] of Object.entries(fieldMapping)) {
         if (mapping.autoFill) {
@@ -53,8 +66,9 @@ export async function POST(request: NextRequest) {
               autoFilledData[fieldName] = value;
             }
           } else if (mapping.source === 'contact' && contact) {
-            // Remplir depuis le contact
-            const value = (contact as any)[mapping.field];
+            // Remplir depuis le contact avec mapping des noms de champs
+            const mappedField = mapContactField(mapping.field);
+            const value = (contact as any)[mappedField];
             if (value) {
               autoFilledData[fieldName] = value;
             }
