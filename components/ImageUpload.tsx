@@ -35,24 +35,42 @@ export default function ImageUpload({ onImageUploaded, currentImage, category = 
       const compressedFile = await imageCompression(file, options);
       console.log('Image compressée:', compressedFile.size / 1024 / 1024, 'MB');
 
-      const formData = new FormData();
-      formData.append('file', compressedFile);
-      formData.append('type', 'image');
-      formData.append('category', category);
-
-      const response = await fetch('/api/upload', {
+      // 1. Demander une URL signée
+      const presignedResponse = await fetch('/api/upload/presigned', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: compressedFile.type,
+          category,
+          type: 'image',
+        }),
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        setPreview(data.filePath);
-        onImageUploaded(data.filePath);
-      } else {
-        alert('Erreur lors de l\'upload: ' + data.error);
+      if (!presignedResponse.ok) {
+        throw new Error('Failed to get presigned URL');
       }
+
+      const { presignedUrl, publicUrl } = await presignedResponse.json();
+
+      // 2. Upload direct vers R2
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: compressedFile,
+        headers: {
+          'Content-Type': compressedFile.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload to R2');
+      }
+
+      console.log('✓ Image uploadée directement vers R2:', publicUrl);
+
+      // 3. Utiliser l'URL publique
+      setPreview(publicUrl);
+      onImageUploaded(publicUrl);
     } catch (error) {
       console.error('Upload error:', error);
       alert('Erreur lors de l\'upload');

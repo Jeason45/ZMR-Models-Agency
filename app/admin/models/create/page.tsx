@@ -162,22 +162,39 @@ export default function CreateModelPage() {
       console.log('Image compressée:', fileToUpload.size / 1024 / 1024, 'MB');
     }
 
-    const formData = new FormData();
-    formData.append('file', fileToUpload);
-    formData.append('type', type);
-    formData.append('category', 'models');
-
-    const response = await fetch('/api/upload', {
+    // 1. Demander une URL signée
+    const presignedResponse = await fetch('/api/upload/presigned', {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: fileToUpload.type,
+        category: 'models',
+        type,
+      }),
     });
 
-    if (!response.ok) {
+    if (!presignedResponse.ok) {
+      throw new Error('Failed to get presigned URL');
+    }
+
+    const { presignedUrl, publicUrl } = await presignedResponse.json();
+
+    // 2. Upload direct vers R2
+    const uploadResponse = await fetch(presignedUrl, {
+      method: 'PUT',
+      body: fileToUpload,
+      headers: {
+        'Content-Type': fileToUpload.type,
+      },
+    });
+
+    if (!uploadResponse.ok) {
       throw new Error('Upload failed');
     }
 
-    const data = await response.json();
-    return data.filePath;
+    console.log(`✓ ${type} uploadé directement vers R2:`, publicUrl);
+    return publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
