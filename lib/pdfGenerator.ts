@@ -55,7 +55,7 @@ export async function generatePDF(params: {
     });
 
     // Générer le PDF en Buffer
-    const pdfBuffer = await page.pdf({
+    const pdfData = await page.pdf({
       format: 'A4',
       printBackground: true,
       margin: {
@@ -65,6 +65,9 @@ export async function generatePDF(params: {
         left: '15mm',
       },
     });
+
+    // Convertir en Buffer si nécessaire (Puppeteer peut retourner Uint8Array ou Buffer)
+    const pdfBuffer = Buffer.isBuffer(pdfData) ? pdfData : Buffer.from(pdfData);
 
     // Si un outputPath est fourni, sauvegarder sur le disque
     if (outputPath) {
