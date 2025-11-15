@@ -76,8 +76,7 @@ export async function POST(request: NextRequest) {
       // Configuration optimisée pour Vercel
       browser = await puppeteerCore.launch({
         args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath('/tmp'),
+        executablePath: await chromium.executablePath(),
         headless: true,
         ignoreHTTPSErrors: true,
       });
