@@ -33,7 +33,6 @@ export async function generatePDF(params: {
           '--no-sandbox',
           '--disable-setuid-sandbox'
         ],
-        defaultViewport: chromium.defaultViewport,
         executablePath: await chromium.executablePath(),
         headless: true,
       });
