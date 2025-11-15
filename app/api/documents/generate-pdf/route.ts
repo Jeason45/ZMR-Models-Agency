@@ -152,11 +152,20 @@ export async function POST(request: NextRequest) {
     console.error('❌ [PDF] Error stack:', error.stack);
     console.error('❌ [PDF] Error message:', error.message);
     console.error('❌ [PDF] Error name:', error.name);
+    console.error('❌ [PDF] Error code:', error.code);
+    console.error('❌ [PDF] Full error:', JSON.stringify(error, null, 2));
+
     return NextResponse.json(
       {
         error: 'Erreur lors de la génération du PDF',
         details: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        errorName: error.name,
+        errorCode: error.code,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        // Ajout d'infos de debug pour Vercel
+        isProduction: process.env.VERCEL || process.env.NODE_ENV === 'production',
+        hasDatabase: !!process.env.DATABASE_URL,
+        databaseHost: process.env.DATABASE_URL?.includes('supabase') ? 'supabase' : 'unknown'
       },
       { status: 500 }
     );
