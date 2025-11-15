@@ -17,7 +17,7 @@
     "@pdfme/schemas": "^5.4.6",
     "@pdfme/ui": "^5.4.6",
     "@prisma/client": "^6.18.0",
-    "@sparticuz/chromium": "^127.0.0",
+    "@sparticuz/chromium": "^141.0.0",
     "@types/adm-zip": "^0.5.7",
     "@types/nodemailer": "^7.0.3",
     "adm-zip": "^0.5.16",
@@ -33,7 +33,7 @@
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.17.2",
     "prisma": "^6.18.0",
-    "puppeteer-core": "^21.11.0",
+    "puppeteer-core": "^24.29.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "swr": "^2.3.6"
