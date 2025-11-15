@@ -25,6 +25,16 @@ export async function generatePDF(params: {
       const puppeteerCore = (await import('puppeteer-core')).default;
       const chromium = (await import('@sparticuz/chromium')).default;
 
+      // Forcer le téléchargement depuis AWS si les binaires locaux n'existent pas
+      let executablePath: string;
+      try {
+        executablePath = await chromium.executablePath('/tmp');
+      } catch (error) {
+        console.log('⚠️ Binaires Chromium locaux non trouvés, téléchargement depuis AWS...');
+        // Utiliser chromium-min pour Vercel (plus léger)
+        executablePath = await chromium.executablePath();
+      }
+
       browser = await puppeteerCore.launch({
         args: [
           ...chromium.args,
@@ -33,7 +43,7 @@ export async function generatePDF(params: {
           '--no-sandbox',
           '--disable-setuid-sandbox'
         ],
-        executablePath: await chromium.executablePath(),
+        executablePath,
         headless: true,
       });
     } else {
