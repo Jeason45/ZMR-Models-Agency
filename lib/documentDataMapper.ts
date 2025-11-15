@@ -363,7 +363,7 @@ export class DocumentDataMapper {
     // Charger le mapping ou créer un mapping par défaut
     let mapping: FieldMapping;
     if (template.fieldMapping && typeof template.fieldMapping === 'object') {
-      mapping = template.fieldMapping as FieldMapping;
+      mapping = template.fieldMapping as unknown as FieldMapping;
     } else {
       const variables = (template.variables as string[]) || [];
       mapping = this.createDefaultMapping(variables, template.type, template.category);
