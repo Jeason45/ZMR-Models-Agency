@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     };
 
     // Check 1: Verify proof integrity
-    const proof = signature.proofData as unknown as SignatureProofData;
+    const proof = signature.proofData as any;
     if (proof) {
       verificationResults.checks.proofIntegrity = verifySignatureProof(proof);
     }
