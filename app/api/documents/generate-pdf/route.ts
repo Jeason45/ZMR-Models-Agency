@@ -1,145 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Mustache from 'mustache';
-import fs from 'fs/promises';
-import path from 'path';
 import { prisma } from '@/lib/prisma';
+import { generatePDF } from '@/lib/pdfGenerator';
 
 export const maxDuration = 60; // 60 secondes pour Puppeteer
 
-interface GeneratePdfRequest {
-  templateName: string; // ex: 'devis-moderne', 'facture-professionnelle'
-  data: Record<string, any>; // Les données à injecter
-  options?: {
-    format?: 'A4' | 'Letter';
-    landscape?: boolean;
-    margin?: {
-      top?: string;
-      right?: string;
-      bottom?: string;
-      left?: string;
-    };
-  };
-}
-
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json();
+    const { templateName, data } = body;
+
     console.log('🚀 [PDF] Starting PDF generation...');
-    const body: GeneratePdfRequest = await request.json();
-    const { templateName, data, options = {} } = body;
     console.log('📝 [PDF] Template:', templateName);
 
-    // Valider les données
-    if (!templateName || !data) {
-      console.error('❌ [PDF] Missing required fields');
+    if (!templateName) {
       return NextResponse.json(
-        { error: 'templateName et data sont requis' },
+        { error: 'templateName is required' },
         { status: 400 }
       );
     }
 
-    // Charger le template HTML depuis la base de données
+    // Charger le template depuis la base de données
     console.log('📄 [PDF] Loading template from database...');
-
-    let templateHtml: string;
-    try {
-      // Essayer de charger depuis la base de données d'abord
-      const template = await prisma.documentTemplate.findFirst({
-        where: {
-          slug: templateName,
-          isActive: true
-        }
-      });
-
-      if (template && template.htmlContent) {
-        templateHtml = template.htmlContent;
-        console.log('✅ [PDF] Template loaded from database');
-      } else {
-        // Fallback: charger depuis les fichiers si pas trouvé en DB
-        console.log('⚠️  [PDF] Template not in DB, trying file system...');
-        const templatePath = path.join(
-          process.cwd(),
-          'templates',
-          'documents',
-          `${templateName}.html`
-        );
-        templateHtml = await fs.readFile(templatePath, 'utf-8');
-        console.log('✅ [PDF] Template loaded from file system');
+    const template = await prisma.documentTemplate.findFirst({
+      where: {
+        slug: templateName,
+        isActive: true
       }
-    } catch (error) {
+    });
+
+    if (!template) {
       console.error('❌ [PDF] Template not found:', templateName);
       return NextResponse.json(
-        { error: `Template "${templateName}" non trouvé` },
+        { error: `Template "${templateName}" not found` },
         { status: 404 }
       );
     }
 
-    // Injecter les données avec Mustache
-    console.log('🔧 [PDF] Rendering template with Mustache...');
-    const html = Mustache.render(templateHtml, data);
-    console.log('✅ [PDF] Template rendered');
-
-    // Configuration Puppeteer pour Vercel (serverless)
-    console.log('🌐 [PDF] Launching browser...');
-
-    const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
-
-    // Import dynamique selon l'environnement
-    let browser;
-    if (isProduction) {
-      const puppeteerCore = (await import('puppeteer-core')).default;
-      const chromium = (await import('@sparticuz/chromium')).default;
-
-      // Configuration optimisée pour Vercel
-      browser = await puppeteerCore.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath('/tmp'),
-        headless: true,
-        ignoreHTTPSErrors: true,
-      });
-    } else {
-      const puppeteer = (await import('puppeteer')).default;
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
+    if (!template.htmlContent) {
+      console.error('❌ [PDF] Template has no HTML content');
+      return NextResponse.json(
+        { error: 'Template has no HTML content' },
+        { status: 400 }
+      );
     }
-    console.log('✅ [PDF] Browser launched');
 
-    const page = await browser.newPage();
-    console.log('✅ [PDF] New page created');
+    console.log('✅ [PDF] Template loaded from database');
 
-    // Charger le HTML
-    console.log('📝 [PDF] Setting page content...');
-    await page.setContent(html, {
-      waitUntil: 'networkidle0'
+    // Générer le PDF avec le nouveau système optimisé Vercel
+    console.log('🖨️  [PDF] Generating PDF with pdfGenerator...');
+    const pdfBuffer = await generatePDF({
+      htmlContent: template.htmlContent,
+      data
     });
-    console.log('✅ [PDF] Content loaded');
 
-    // Options de génération PDF
-    const pdfOptions: any = {
-      format: options.format || 'A4',
-      landscape: options.landscape || false,
-      printBackground: true,
-      margin: options.margin || {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
-    };
-
-    // Générer le PDF
-    console.log('🖨️  [PDF] Generating PDF...');
-    const pdfBuffer = await page.pdf(pdfOptions);
-    console.log('✅ [PDF] PDF generated, size:', pdfBuffer.length, 'bytes');
-
-    await browser.close();
-    console.log('✅ [PDF] Browser closed');
+    console.log('✅ [PDF] PDF generated successfully, size:', pdfBuffer.length, 'bytes');
 
     // Retourner le PDF
-    console.log('📤 [PDF] Sending PDF response');
-    return new NextResponse(Buffer.from(pdfBuffer), {
+    return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
@@ -151,50 +68,12 @@ export async function POST(request: NextRequest) {
     console.error('❌❌❌ [PDF] CRITICAL ERROR:', error);
     console.error('❌ [PDF] Error stack:', error.stack);
     console.error('❌ [PDF] Error message:', error.message);
-    console.error('❌ [PDF] Error name:', error.name);
-    console.error('❌ [PDF] Error code:', error.code);
-    console.error('❌ [PDF] Full error:', JSON.stringify(error, null, 2));
 
     return NextResponse.json(
       {
-        error: 'Erreur lors de la génération du PDF',
+        error: 'Error generating PDF',
         details: error.message,
-        errorName: error.name,
-        errorCode: error.code,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-        // Ajout d'infos de debug pour Vercel
-        isProduction: process.env.VERCEL || process.env.NODE_ENV === 'production',
-        hasDatabase: !!process.env.DATABASE_URL,
-        databaseHost: process.env.DATABASE_URL?.includes('supabase') ? 'supabase' : 'unknown'
-      },
-      { status: 500 }
-    );
-  }
-}
-
-// Endpoint GET pour lister les templates disponibles
-export async function GET() {
-  try {
-    const templatesDir = path.join(process.cwd(), 'templates', 'documents');
-    const files = await fs.readdir(templatesDir);
-
-    const templates = files
-      .filter(file => file.endsWith('.html'))
-      .map(file => ({
-        name: file.replace('.html', ''),
-        filename: file
-      }));
-
-    return NextResponse.json({
-      success: true,
-      templates
-    });
-
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: 'Erreur lors de la récupération des templates',
-        details: error.message
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       },
       { status: 500 }
     );
