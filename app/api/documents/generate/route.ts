@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generatePDF } from '@/lib/docxGenerator';
+import { generatePDFFromTemplate } from '@/lib/mustachePdfGenerator';
 
 // POST /api/documents/generate - Générer un document à partir d'un template
 export async function POST(request: NextRequest) {
@@ -83,23 +83,23 @@ export async function POST(request: NextRequest) {
       .replace(/^_|_$/g, '');           // Enlever underscores début/fin
     const fileName = `${cleanName}_${documentNumber}.pdf`;
 
-    // Générer le PDF/DOCX physiquement
-    let generatedFilePath: string;
+    // Générer le PDF avec Puppeteer + Mustache et uploader sur R2
+    let pdfUrl: string;
     try {
-      generatedFilePath = await generatePDF(
-        {
-          name: template.name,
-          type: template.type,
-          category: template.category,
-          fileName: template.fileName || undefined
-        },
-        data,
-        fileName
-      );
+      const result = await generatePDFFromTemplate({
+        templateSlug: template.slug,
+        data: data,
+        fileName: fileName
+      });
 
-      console.log('Document généré avec succès:', generatedFilePath);
+      if (!result.success || !result.url) {
+        throw new Error(result.error || 'Failed to generate PDF');
+      }
+
+      pdfUrl = result.url;
+      console.log('✅ Document généré et uploadé sur R2:', pdfUrl);
     } catch (pdfError) {
-      console.error('Erreur lors de la génération du PDF:', pdfError);
+      console.error('❌ Erreur lors de la génération du PDF:', pdfError);
       return NextResponse.json(
         {
           error: 'Failed to generate PDF file',
@@ -109,14 +109,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Créer l'entrée en base de données avec le vrai filePath généré
+    // Créer l'entrée en base de données avec l'URL R2
     const document = await prisma.document.create({
       data: {
         templateId,
         type: template.type,
         category: template.category,
-        fileName: generatedFilePath.split('/').pop() || fileName, // Extraire le nom du fichier du chemin
-        filePath: generatedFilePath, // Utiliser le vrai chemin retourné par le générateur
+        fileName: fileName,
+        filePath: pdfUrl, // URL R2 du fichier
         data: data as any,
         status: 'draft',
         documentNumber,
