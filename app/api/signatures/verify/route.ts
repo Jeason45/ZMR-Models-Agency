@@ -3,8 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import {
   generateFileHash,
-  verifySignatureProof,
-  SignatureProofData
+  verifySignatureProof
 } from '@/lib/signatureUtils';
 
 const prisma = new PrismaClient();
