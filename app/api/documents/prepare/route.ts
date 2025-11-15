@@ -19,14 +19,14 @@ export async function POST(request: NextRequest) {
     console.log('📋 Préparation du document:', { templateId, contactId, talentId });
 
     // Utiliser le DocumentDataMapper pour auto-remplir les champs
-    const result = await DocumentDataMapper.populateFields(templateId, contactId, talentId);
+    // Note: talentId n'est pas supporté dans cette version de DocumentDataMapper
+    const result = await DocumentDataMapper.populateFields(templateId, contactId);
 
     console.log('✅ Données préparées:', {
       autoFieldsGenerated: result.metadata.autoFieldsGenerated,
       manualFieldsRequired: result.metadata.manualFieldsRequired,
       agencyLoaded: result.metadata.agencyLoaded,
-      contactLoaded: result.metadata.contactLoaded,
-      talentLoaded: result.metadata.talentLoaded
+      contactLoaded: result.metadata.contactLoaded
     });
 
     return NextResponse.json(result);
