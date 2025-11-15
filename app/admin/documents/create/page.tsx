@@ -238,81 +238,49 @@ export default function CreateDocumentPage() {
         }))
       };
 
-      const response = await fetch('/api/documents/generate-pdf', {
+      const response = await fetch('/api/documents/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          templateName: selectedTemplate?.slug,
-          data: finalData,
-          options: { format: 'A4' }
+          templateId: selectedTemplate?.id,
+          contactId: selectedContact?.id,
+          data: finalData
         })
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors de la génération');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la génération');
       }
 
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur lors de la génération');
+      }
+
+      // Le document a été généré ET sauvegardé en base par l'API
+      console.log('✅ Document généré:', result.document);
+
+      const message = saveToContact && selectedContact
+        ? '✅ PDF généré, sauvegardé et fiche client mise à jour !'
+        : '✅ PDF généré et sauvegardé avec succès !';
+
+      alert(message);
+
       // Télécharger le PDF pour l'utilisateur
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const pdfPath = result.document.filePath;
       const a = document.createElement('a');
-      a.href = url;
-      const downloadFileName = `${selectedTemplate?.slug}-${Date.now()}.pdf`;
-      a.download = downloadFileName;
+      a.href = pdfPath;
+      a.download = result.document.fileName;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      window.URL.revokeObjectURL(url);
 
-      // Sauvegarder le document en base de données
-      try {
-        // Convertir le blob en base64 pour l'envoyer à l'API (compatible navigateur)
-        const arrayBuffer = await blob.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        const pdfBase64 = btoa(binary);
-
-        const saveResponse = await fetch('/api/documents/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            pdfBase64,
-            fileName: downloadFileName,
-            type: documentType,
-            templateId: selectedTemplate?.id,
-            contactId: selectedContact?.id,
-            documentNumber: formData.numero_devis || formData.numero_facture || formData.numero_contrat,
-            data: finalData,
-            amountHT: formData.sous_total_ht,
-            amountTTC: formData.total_ttc
-          })
-        });
-
-        if (saveResponse.ok) {
-          const saveResult = await saveResponse.json();
-          console.log('✅ Document sauvegardé en base:', saveResult.document);
-
-          const message = saveToContact && selectedContact
-            ? '✅ PDF généré, sauvegardé et fiche client mise à jour !'
-            : '✅ PDF généré et sauvegardé avec succès !';
-
-          alert(message);
-
-          // Rediriger vers la page des documents après 1 seconde
-          setTimeout(() => {
-            window.location.href = '/admin/documents';
-          }, 1500);
-        } else {
-          console.error('Erreur lors de la sauvegarde en base');
-          alert('⚠️ PDF généré mais erreur lors de la sauvegarde en base de données');
-        }
-      } catch (saveError) {
-        console.error('Erreur lors de la sauvegarde:', saveError);
-        alert('⚠️ PDF généré mais erreur lors de la sauvegarde en base de données');
-      }
+      // Rediriger vers la page des documents après 1 seconde
+      setTimeout(() => {
+        window.location.href = '/admin/documents';
+      }, 1500);
 
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la génération du PDF');
