@@ -367,7 +367,7 @@ export default function ModelsPage() {
     : models.filter((m: any) => m.category === (selectedCategory === 'women' ? 'woman' : 'man'));
 
   // Filter by search query
-  const filteredModels = categoryFiltered.filter((model) =>
+  const filteredModels = categoryFiltered.filter((model: any) =>
     model.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
