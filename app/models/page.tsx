@@ -476,7 +476,7 @@ export default function ModelsPage() {
         maxWidth: '1800px',
         margin: '0 auto'
       }}>
-        {filteredModels.map((model) => (
+        {filteredModels.map((model: any) => (
           <Link
             key={model._id}
             href={`/models/${typeof model.slug === 'string' ? model.slug : model.slug?.current}`}
