@@ -72,11 +72,13 @@ export async function POST(request: NextRequest) {
     if (isProduction) {
       const puppeteerCore = (await import('puppeteer-core')).default;
       const chromium = (await import('@sparticuz/chromium')).default;
+
+      // Configuration optimisée pour Vercel
       browser = await puppeteerCore.launch({
-        args: [...chromium.args, '--disable-gpu', '--single-process'],
+        args: chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: true,
+        executablePath: await chromium.executablePath('/tmp'),
+        headless: chromium.headless,
         ignoreHTTPSErrors: true,
       });
     } else {
