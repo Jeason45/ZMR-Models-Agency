@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-interface FieldMappingConfig {
+export interface FieldMappingConfig {
   source: 'agency' | 'contact' | 'auto' | 'manual' | 'calculated' | 'fixed';
   field?: string;
   autoFill: boolean;
