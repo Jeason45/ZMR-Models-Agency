@@ -364,7 +364,7 @@ export default function ModelsPage() {
   // Filter by category
   const categoryFiltered = selectedCategory === 'all'
     ? models
-    : models.filter(m => m.category === (selectedCategory === 'women' ? 'woman' : 'man'));
+    : models.filter((m: any) => m.category === (selectedCategory === 'women' ? 'woman' : 'man'));
 
   // Filter by search query
   const filteredModels = categoryFiltered.filter((model) =>
