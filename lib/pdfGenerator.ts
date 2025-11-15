@@ -25,15 +25,17 @@ export async function generatePDF(params: {
       const puppeteerCore = (await import('puppeteer-core')).default;
       const chromium = (await import('@sparticuz/chromium')).default;
 
-      // Désactiver le mode graphique pour réduire les dépendances
-      chromium.setGraphicsMode = false;
-
       browser = await puppeteerCore.launch({
-        args: chromium.args,
+        args: [
+          ...chromium.args,
+          '--disable-gpu',
+          '--single-process',
+          '--no-sandbox',
+          '--disable-setuid-sandbox'
+        ],
         defaultViewport: chromium.defaultViewport,
         executablePath: await chromium.executablePath(),
         headless: true,
-        ignoreHTTPSErrors: true,
       });
     } else {
       // Développement: Utiliser Puppeteer local
