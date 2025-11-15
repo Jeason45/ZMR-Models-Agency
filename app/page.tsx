@@ -64,6 +64,43 @@ export default function Home() {
     return () => window.removeEventListener('scroll', updateScrollDirection);
   }, []);
 
+  // Block body scroll when menu or search is open
+  useEffect(() => {
+    if (isMenuOpen || isSearchOpen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+
+      // Store it in a ref or data attribute to access in cleanup
+      document.body.setAttribute('data-scroll-position', scrollY.toString());
+
+      // Lock body scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        // Get saved scroll position
+        const savedScrollY = parseInt(document.body.getAttribute('data-scroll-position') || '0', 10);
+
+        // Restore body scroll
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.overflow = '';
+        document.body.removeAttribute('data-scroll-position');
+
+        // Restore scroll position
+        window.scrollTo(0, savedScrollY);
+
+        // Update lastScrollY ref to prevent navbar jump
+        lastScrollY.current = savedScrollY;
+      };
+    }
+  }, [isMenuOpen, isSearchOpen]);
+
   return (
     <>
       <main style={{
@@ -145,12 +182,12 @@ export default function Home() {
         {!isMenuOpen && (
           <div style={{
             position: 'fixed',
-            top: scrollDirection === 'down' ? '-300px' : '32px',
-            right: '32px',
+            top: scrollDirection === 'down' ? '-300px' : 'clamp(20px, 4vh, 32px)',
+            right: 'clamp(16px, 4vw, 32px)',
             zIndex: 50,
             display: 'flex',
             alignItems: 'center',
-            gap: '24px',
+            gap: 'clamp(16px, 3vw, 24px)',
             transition: 'top 0.5s ease-in-out'
           }}>
           {/* Search Icon */}
@@ -237,13 +274,15 @@ export default function Home() {
           top: 0,
           left: 0,
           width: '100%',
-          height: '100%',
+          height: '100vh',
           backgroundColor: 'white',
           zIndex: 45,
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'center',
-          paddingTop: '150px'
+          paddingTop: '150px',
+          overflowY: 'auto',
+          overscrollBehavior: 'contain'
         }}>
           <div style={{ width: '100%', maxWidth: '600px', padding: '0 32px' }}>
             <input
@@ -308,13 +347,15 @@ export default function Home() {
           top: 0,
           left: 0,
           width: '100%',
-          height: '100%',
+          height: '100vh',
           backgroundColor: "black",
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '20px'
+          padding: '20px',
+          overflowY: 'auto',
+          overscrollBehavior: 'contain'
         }}>
           <nav style={{
             display: 'flex',

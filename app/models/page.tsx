@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useModels } from '@/lib/hooks/useModels';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -322,10 +323,24 @@ export default function ModelsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredModelId, setHoveredModelId] = useState<string | null>(null);
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
-  const [models, setModels] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const lastScrollY = useRef(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('up');
+
+  // Use SWR for data fetching with cache
+  const { models: prismaModels, isLoading, error } = useModels();
+
+  // Transform Prisma models to match the expected format
+  const models = prismaModels.map((model: any) => ({
+    _id: model.id,
+    _type: 'model',
+    name: model.name,
+    slug: model.slug,
+    category: model.category,
+    status: model.status,
+    mainImage: model.mainImage,
+    hoverImage: model.hoverImage,
+    isPrisma: true,
+  }));
 
   useEffect(() => {
     const updateScrollDirection = () => {
@@ -346,63 +361,6 @@ export default function ModelsPage() {
     };
   }, []);
 
-  // Fetch models from Sanity
-  useEffect(() => {
-    const pageStartTime = performance.now();
-    console.log('🚀 DIAGNOSTIC: Page Models - Début chargement');
-
-    async function fetchModels() {
-      try {
-        const fetchStartTime = performance.now();
-
-        // Récupérer les models Sanity et Prisma en parallèle
-        // const [sanityData, prismaResponse] = await Promise.all([
-        //   getAllModels(),
-        //   fetch('/api/models?status=active')
-        // ]);
-        const sanityData: any[] = [];
-        const prismaResponse = await fetch('/api/models?status=active');
-
-        const prismaModels = prismaResponse.ok ? await prismaResponse.json() : [];
-
-        // Transformer les models Prisma au format Sanity
-        const transformedPrismaModels = prismaModels.map((model: any) => ({
-          _id: model.id,
-          _type: 'model',
-          name: model.name,
-          slug: model.slug, // Déjà une string, on la garde telle quelle
-          category: model.category,
-          status: model.status,
-          mainImage: model.mainImage, // Chemin local direct
-          hoverImage: model.hoverImage,
-          isPrisma: true,
-        }));
-
-        // Fusionner les deux sources
-        const allModels = [...sanityData, ...transformedPrismaModels];
-
-        const fetchEndTime = performance.now();
-        console.log(`📥 Fetch terminé: ${(fetchEndTime - fetchStartTime).toFixed(2)}ms`);
-
-        const renderStartTime = performance.now();
-        setModels(allModels);
-
-        requestAnimationFrame(() => {
-          const renderEndTime = performance.now();
-          const totalTime = renderEndTime - pageStartTime;
-          console.log(`🎨 Rendu terminé: ${(renderEndTime - renderStartTime).toFixed(2)}ms`);
-          console.log(`⏱️  TOTAL (Fetch + Rendu): ${totalTime.toFixed(2)}ms`);
-          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        });
-      } catch (error) {
-        console.error('Error fetching models:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchModels();
-  }, []);
-
   // Filter by category
   const categoryFiltered = selectedCategory === 'all'
     ? models
@@ -413,7 +371,7 @@ export default function ModelsPage() {
     model.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
+  if (isLoading) {
     return null;
   }
 
