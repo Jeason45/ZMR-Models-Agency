@@ -34,8 +34,8 @@ export async function generateSignedPDF(
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    // Couleurs JL Digital Studio
-    const primaryColor = rgb(0.4, 0.42, 0.95); // #6366f1 (indigo)
+    // Couleurs
+    const primaryColor = rgb(0.4, 0.42, 0.95); // #6366f1
     const darkColor = rgb(0.06, 0.09, 0.16); // #0f172a
     const grayColor = rgb(0.39, 0.46, 0.55); // #64748b
     const greenColor = rgb(0.13, 0.6, 0.33); // #22c55e
@@ -82,14 +82,14 @@ export async function generateSignedPDF(
     });
 
     // Ajouter la date de signature
-    const dateStr = signatureData.signedAt.toLocaleDateString('fr-FR', {
+    const dateStr = signatureData.signedAt.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
-    lastPage.drawText(`Signé le ${dateStr}`, {
+    lastPage.drawText(`Signe le ${dateStr}`, {
       x: signatureX,
       y: signatureY,
       size: 8,
@@ -215,7 +215,7 @@ export async function generateSignedPDF(
       color: darkColor
     });
 
-    const legalText = `Signature conforme eIDAS - Hash SHA-256: ${signatureData.documentHash.substring(0, 32)}... - JL Digital Studio`;
+    const legalText = `Signature conforme eIDAS - Hash SHA-256: ${signatureData.documentHash.substring(0, 32)}...`;
     const legalTextWidth = helvetica.widthOfTextAtSize(legalText, 7);
     lastPage.drawText(legalText, {
       x: (width - legalTextWidth) / 2,

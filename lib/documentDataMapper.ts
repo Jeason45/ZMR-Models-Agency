@@ -1,11 +1,17 @@
-import { prisma } from "@/lib/prisma";
+/**
+ * Document Data Mapper
+ * Service intelligent pour l'auto-remplissage des champs de documents
+ */
+
+import { prisma } from './prisma';
+import { formatDateFrench, formatCurrencyEuro } from './documentGenerator';
 
 export interface FieldMappingConfig {
-  source: 'agency' | 'contact' | 'auto' | 'manual' | 'calculated' | 'fixed';
+  source: 'agency' | 'contact' | 'talent' | 'auto' | 'manual' | 'calculated' | 'fixed';
   field?: string;
   autoFill: boolean;
   required?: boolean;
-  type?: 'text' | 'number' | 'date' | 'textarea' | 'select' | 'currency';
+  type?: 'text' | 'number' | 'date' | 'textarea' | 'select';
   formula?: string;
   format?: string;
   defaultValue?: any;
@@ -17,116 +23,383 @@ export interface FieldMappingConfig {
   sensitive?: boolean;
 }
 
-type FieldMapping = Record<string, FieldMappingConfig>;
+export interface DocumentDataMapperResult {
+  data: Record<string, any>;
+  mapping: Record<string, FieldMappingConfig>;
+  metadata: {
+    agencyLoaded: boolean;
+    contactLoaded: boolean;
+    talentLoaded: boolean;
+    autoFieldsGenerated: number;
+    manualFieldsRequired: number;
+  };
+}
 
 export class DocumentDataMapper {
   /**
-   * Crée un mapping par défaut basé sur les noms de variables
+   * Remplit automatiquement les champs d'un document selon le mapping du template
+   */
+  async populateFields(
+    templateId: string,
+    contactId?: string,
+    talentId?: string
+  ): Promise<DocumentDataMapperResult> {
+    // Charger le template
+    const template = await prisma.documentTemplate.findUnique({
+      where: { id: templateId },
+    });
+
+    if (!template) {
+      throw new Error(`Template ${templateId} not found`);
+    }
+
+    const mapping = (template.fieldMapping as unknown as Record<string, FieldMappingConfig>) || {};
+    const data: Record<string, any> = {};
+
+    // Charger les sources de données
+    const agency = await this.getAgencySettings();
+    const contact = contactId
+      ? await prisma.contact.findUnique({ where: { id: contactId } })
+      : null;
+    const talent = talentId
+      ? await prisma.talent.findUnique({ where: { id: talentId } })
+      : null;
+
+    let autoFieldsGenerated = 0;
+    let manualFieldsRequired = 0;
+
+    // Remplir chaque champ selon son mapping
+    for (const [fieldName, config] of Object.entries(mapping)) {
+      if (!config.autoFill) {
+        // Champ manuel : initialiser avec valeur par défaut
+        data[fieldName] = config.defaultValue !== undefined ? config.defaultValue : '';
+        if (config.required) manualFieldsRequired++;
+        continue;
+      }
+
+      // Champ auto-rempli
+      autoFieldsGenerated++;
+
+      switch (config.source) {
+        case 'agency':
+          data[fieldName] = await this.getAgencyField(agency, config);
+          break;
+
+        case 'contact':
+          data[fieldName] = await this.getContactField(contact, config);
+          break;
+
+        case 'talent':
+          data[fieldName] = await this.getTalentField(talent, config);
+          break;
+
+        case 'auto':
+          data[fieldName] = await this.generateAutoValue(config, template.type);
+          break;
+
+        case 'fixed':
+          data[fieldName] = config.defaultValue;
+          break;
+
+        case 'calculated':
+          // Sera calculé côté client après saisie manuelle
+          data[fieldName] = '';
+          break;
+
+        default:
+          data[fieldName] = '';
+      }
+    }
+
+    return {
+      data,
+      mapping,
+      metadata: {
+        agencyLoaded: !!agency,
+        contactLoaded: !!contact,
+        talentLoaded: !!talent,
+        autoFieldsGenerated,
+        manualFieldsRequired,
+      },
+    };
+  }
+
+  /**
+   * Récupère les paramètres de l'agence (singleton)
+   */
+  private async getAgencySettings() {
+    const settings = await prisma.agencySettings.findFirst();
+    return settings;
+  }
+
+  /**
+   * Map les noms de variables vers les vrais champs Prisma AgencySettings
+   */
+  private mapAgencyField(fieldName: string): string {
+    const fieldMap: Record<string, string> = {
+      'validite_devis_defaut': 'validite_devis_defaut',
+      'delai_paiement_defaut': 'delai_paiement_defaut',
+    };
+    return fieldMap[fieldName] || fieldName;
+  }
+
+  /**
+   * Extrait un champ de l'agence selon la config
+   */
+  private async getAgencyField(
+    agency: any,
+    config: FieldMappingConfig
+  ): Promise<string> {
+    if (!agency || !config.field) return '';
+
+    const mappedField = this.mapAgencyField(config.field);
+    const value = agency[mappedField];
+    return this.formatValue(value, config);
+  }
+
+  /**
+   * Map les noms de variables vers les vrais champs Prisma Contact
+   */
+  private mapContactField(fieldName: string): string {
+    const fieldMap: Record<string, string> = {
+      'nom_client': 'name',
+      'email_client': 'email',
+      'telephone_client': 'phone',
+      'adresse_client': 'adresse_client',
+      'ville_client': 'ville',
+      'code_postal_client': 'code_postal',
+      'site_web_client': 'site_web_client',
+      'nom_destinataire': 'nom_destinataire',
+      'email_destinataire': 'email_destinataire',
+      'telephone_destinataire': 'telephone_destinataire',
+      'adresse_destinataire': 'adresse_destinataire',
+    };
+    return fieldMap[fieldName] || fieldName;
+  }
+
+  /**
+   * Extrait un champ du contact selon la config
+   */
+  private async getContactField(
+    contact: any,
+    config: FieldMappingConfig
+  ): Promise<string> {
+    if (!contact) return '';
+
+    let value: any;
+    const mappedField = config.field ? this.mapContactField(config.field) : '';
+
+    // Gérer les fallbacks (ex: destinataire → client si vide)
+    if (config.fallback && !contact[mappedField]) {
+      const mappedFallback = this.mapContactField(config.fallback);
+      value = contact[mappedFallback];
+    } else {
+      value = mappedField ? contact[mappedField] : '';
+    }
+
+    return this.formatValue(value, config);
+  }
+
+  /**
+   * Map les noms de variables vers les vrais champs Prisma Talent
+   */
+  private mapTalentField(fieldName: string): string {
+    // Les champs talent correspondent déjà (prenom_talent, nom_talent, etc.)
+    return fieldName;
+  }
+
+  /**
+   * Extrait un champ du talent selon la config
+   */
+  private async getTalentField(
+    talent: any,
+    config: FieldMappingConfig
+  ): Promise<string> {
+    if (!talent || !config.field) return '';
+
+    let value: any;
+    const mappedField = this.mapTalentField(config.field);
+
+    // Gérer les fallbacks spéciaux (split du name)
+    if (config.fallback === 'name_split_first') {
+      // Extraire le prénom depuis "Prénom Nom"
+      const nameParts = talent.name?.split(' ') || [];
+      value = talent.prenom_talent || nameParts.slice(0, -1).join(' ');
+    } else if (config.fallback === 'name_split_last') {
+      // Extraire le nom depuis "Prénom Nom"
+      const nameParts = talent.name?.split(' ') || [];
+      value = talent.nom_talent || nameParts[nameParts.length - 1];
+    } else {
+      value = talent[mappedField];
+    }
+
+    return this.formatValue(value, config);
+  }
+
+  /**
+   * Génère une valeur automatique (date, numéro de document, etc.)
+   */
+  private async generateAutoValue(
+    config: FieldMappingConfig,
+    documentType: string
+  ): Promise<string> {
+    if (!config.field) return '';
+
+    switch (config.field) {
+      case 'today':
+        return formatDateFrench(new Date());
+
+      case 'documentNumber':
+        // Sera généré lors de la sauvegarde finale
+        return '[AUTO-GÉNÉRÉ]';
+
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Formate une valeur selon la config
+   */
+  private formatValue(value: any, config: FieldMappingConfig): string {
+    if (value === null || value === undefined) return '';
+
+    // Format date
+    if (config.format === 'DD/MM/YYYY' && value instanceof Date) {
+      return value.toLocaleDateString('fr-FR');
+    }
+
+    if (config.format?.includes('MMMM')) {
+      // Format date français long
+      if (value instanceof Date) {
+        return formatDateFrench(value);
+      }
+    }
+
+    // Format currency
+    if (config.format === 'currency' && typeof value === 'number') {
+      return formatCurrencyEuro(value);
+    }
+
+    // Valeur par défaut : conversion en string
+    return String(value);
+  }
+
+  /**
+   * Crée le mapping par défaut pour un template selon les champs détectés
    */
   static createDefaultMapping(
     variables: string[],
     templateType: string,
     templateCategory: string
-  ): FieldMapping {
-    const mapping: FieldMapping = {};
+  ): Record<string, FieldMappingConfig> {
+    const mapping: Record<string, FieldMappingConfig> = {};
 
     for (const variable of variables) {
-      const varLower = variable.toLowerCase();
+      // Déterminer automatiquement la source selon le nom du champ
 
-      // Champs agence
-      if (
-        varLower.includes('_agence') ||
-        varLower === 'capital' ||
-        varLower === 'siret_agence' ||
-        varLower === 'forme_juridique' ||
-        varLower === 'ville_rcs' ||
-        varLower === 'numero_rcs' ||
-        varLower === 'representant_nom' ||
-        varLower === 'representant_qualite'
-      ) {
+      // Champs agence (finissant par _agence OU champs juridiques sans suffix)
+      if (variable.includes('_agence') ||
+          variable === 'capital' ||
+          variable === 'ville_rcs' ||
+          variable === 'numero_rcs' ||
+          variable === 'forme_juridique') {
         mapping[variable] = {
           source: 'agency',
           field: variable,
           autoFill: true,
           required: true,
-          type: 'text',
-          label: this.generateLabel(variable)
+          label: this.formatLabel(variable),
         };
-      }
-      // Champs client/contact
-      else if (
-        varLower.includes('_client') ||
-        varLower === 'nom_client' ||
-        varLower === 'email_client' ||
-        varLower === 'telephone_client' ||
-        varLower === 'adresse_client' ||
-        varLower === 'code_postal_client' ||
-        varLower === 'ville_client'
-      ) {
+      } else if (variable.includes('_client') || variable.includes('_destinataire')) {
         mapping[variable] = {
           source: 'contact',
           field: variable,
           autoFill: true,
-          required: varLower.includes('nom_') || varLower.includes('email_'),
-          type: 'text',
-          label: this.generateLabel(variable)
+          required: variable.includes('nom_') || variable.includes('email_'),
+          label: this.formatLabel(variable),
         };
-      }
-      // Champs date
-      else if (varLower.includes('date_')) {
+      } else if (variable.includes('_talent')) {
         mapping[variable] = {
-          source: 'auto',
-          field: 'today',
+          source: 'talent',
+          field: variable,
           autoFill: true,
+          required: true,
+          label: this.formatLabel(variable),
+        };
+      } else if (variable.includes('date_')) {
+        mapping[variable] = {
+          source: variable === 'date_devis' || variable === 'date_signature' ? 'auto' : 'manual',
+          field: variable === 'date_devis' || variable === 'date_signature' ? 'today' : undefined,
+          autoFill: variable === 'date_devis' || variable === 'date_signature',
           type: 'date',
           format: 'DD MMMM YYYY',
-          label: this.generateLabel(variable)
+          label: this.formatLabel(variable),
         };
-      }
-      // Numéros de document
-      else if (varLower.includes('numero_')) {
+      } else if (variable.includes('numero_')) {
         mapping[variable] = {
           source: 'auto',
           field: 'documentNumber',
           autoFill: true,
-          type: 'text',
-          label: this.generateLabel(variable)
+          label: this.formatLabel(variable),
         };
-      }
-      // Totaux et montants
-      else if (
-        varLower.includes('_total') ||
-        varLower.includes('tva_montant') ||
-        varLower.includes('sous_total') ||
-        varLower.includes('montant_')
-      ) {
+      } else if (variable.includes('_total') || variable.includes('sous_total') || variable.includes('tva_montant')) {
         mapping[variable] = {
           source: 'calculated',
           autoFill: true,
-          type: 'currency',
           format: 'currency',
-          label: this.generateLabel(variable)
+          label: this.formatLabel(variable),
         };
-      }
-      // Pourcentages
-      else if (varLower.includes('_pourcentage') || varLower === 'tva_pourcentage') {
+      } else if (variable === 'tva_pourcentage') {
         mapping[variable] = {
           source: 'fixed',
+          defaultValue: 20,
+          autoFill: true,
+          label: 'TVA (%)',
+        };
+      } else if (variable === 'validite_jours') {
+        mapping[variable] = {
+          source: 'agency',
+          field: 'validite_devis_defaut',
           autoFill: true,
           type: 'number',
-          defaultValue: 20,
-          suffix: '%',
-          label: this.generateLabel(variable)
+          label: 'Validité (jours)',
+          suffix: 'jours'
         };
-      }
-      // Champs manuels
-      else {
+      } else if (variable === 'delai_paiement') {
+        mapping[variable] = {
+          source: 'agency',
+          field: 'delai_paiement_defaut',
+          autoFill: true,
+          type: 'text',
+          label: 'Délai de paiement'
+        };
+      } else if (variable === 'acompte_pourcentage') {
+        mapping[variable] = {
+          source: 'fixed',
+          defaultValue: 30,
+          autoFill: true,
+          type: 'number',
+          label: 'Acompte (%)',
+          suffix: '%'
+        };
+      } else if (variable.includes('ligne_') && (variable.includes('_description') || variable.includes('_prix') || variable.includes('_quantite'))) {
+        mapping[variable] = {
+          source: 'manual',
+          autoFill: false,
+          required: variable.includes('ligne_1_'), // Première ligne obligatoire
+          type: variable.includes('_description') ? 'textarea' : 'number',
+          defaultValue: variable.includes('_quantite') ? 1 : undefined,
+          label: this.formatLabel(variable),
+        };
+      } else {
+        // Champ manuel par défaut
         mapping[variable] = {
           source: 'manual',
           autoFill: false,
           required: false,
-          type: this.guessFieldType(variable),
-          label: this.generateLabel(variable)
+          type: 'text',
+          label: this.formatLabel(variable),
         };
       }
     }
@@ -135,304 +408,13 @@ export class DocumentDataMapper {
   }
 
   /**
-   * Génère un label lisible à partir d'un nom de variable
+   * Formate un nom de variable en label lisible
    */
-  static generateLabel(variable: string): string {
+  private static formatLabel(variable: string): string {
     return variable
       .replace(/_/g, ' ')
-      .replace(/\b\w/g, (l) => l.toUpperCase());
-  }
-
-  /**
-   * Devine le type de champ basé sur le nom de variable
-   */
-  static guessFieldType(variable: string): FieldMappingConfig['type'] {
-    const varLower = variable.toLowerCase();
-
-    if (varLower.includes('description') || varLower.includes('objet') || varLower.includes('conditions')) {
-      return 'textarea';
-    }
-    if (varLower.includes('prix') || varLower.includes('tarif') || varLower.includes('montant')) {
-      return 'currency';
-    }
-    if (varLower.includes('quantite') || varLower.includes('nombre')) {
-      return 'number';
-    }
-    if (varLower.includes('date')) {
-      return 'date';
-    }
-
-    return 'text';
-  }
-
-  /**
-   * Récupère les paramètres de l'agence
-   */
-  static async getAgencySettings() {
-    const agency = await prisma.agencySettings.findFirst();
-    return agency;
-  }
-
-  /**
-   * Récupère un champ de l'agence
-   */
-  static async getAgencyField(
-    agency: any,
-    config: FieldMappingConfig
-  ): Promise<string> {
-    if (!agency || !config.field) return config.defaultValue || '';
-
-    // Le champ existe directement dans la table agency_settings
-    const value = agency[config.field];
-    if (value !== undefined && value !== null) {
-      return String(value);
-    }
-
-    // Fallback
-    if (config.fallback && agency[config.fallback]) {
-      return String(agency[config.fallback]);
-    }
-
-    return config.defaultValue || '';
-  }
-
-  /**
-   * Récupère un champ du contact
-   */
-  static async getContactField(
-    contact: any,
-    config: FieldMappingConfig
-  ): Promise<string> {
-    if (!contact || !config.field) return config.defaultValue || '';
-
-    // Mapping des noms de champs template → contact
-    const fieldMappings: Record<string, { primary: string; fallback?: string }> = {
-      'nom_client': { primary: 'name' },
-      'email_client': { primary: 'email' },
-      'telephone_client': { primary: 'phone' },
-      'adresse_client': { primary: 'adresse_client' },
-      'code_postal_client': { primary: 'code_postal' },
-      'ville_client': { primary: 'ville' },
-      'siret': { primary: 'siret' }
-    };
-
-    const mapping = fieldMappings[config.field];
-
-    console.log('[getContactField]', {
-      field: config.field,
-      mapping,
-      contactFields: Object.keys(contact)
-    });
-
-    if (mapping) {
-      // Essayer le champ principal
-      let value = contact[mapping.primary];
-      console.log('[getContactField] Primary value:', mapping.primary, '=', value);
-
-      // Si vide, essayer le fallback
-      if ((!value || value === '') && mapping.fallback) {
-        value = contact[mapping.fallback];
-        console.log('[getContactField] Fallback value:', mapping.fallback, '=', value);
-      }
-
-      if (value !== undefined && value !== null && value !== '') {
-        console.log('[getContactField] Returning:', value);
-        return String(value);
-      }
-    } else {
-      // Utiliser le nom de champ tel quel
-      const value = contact[config.field];
-      if (value !== undefined && value !== null && value !== '') {
-        return String(value);
-      }
-    }
-
-    // Fallback depuis la config
-    if (config.fallback && contact[config.fallback]) {
-      return String(contact[config.fallback]);
-    }
-
-    console.log('[getContactField] Returning default:', config.defaultValue || '');
-    return config.defaultValue || '';
-  }
-
-  /**
-   * Génère une valeur automatique
-   */
-  static async generateAutoValue(
-    config: FieldMappingConfig,
-    documentType: string
-  ): Promise<string> {
-    if (config.field === 'today') {
-      return this.formatDate(new Date(), config.format || 'DD MMMM YYYY');
-    }
-
-    if (config.field === 'documentNumber') {
-      return await this.generateDocumentNumber(documentType);
-    }
-
-    return config.defaultValue || '';
-  }
-
-  /**
-   * Formate une date
-   */
-  static formatDate(date: Date, format: string): string {
-    const months = [
-      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
-    ];
-
-    const days = [
-      'dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'
-    ];
-
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    const weekday = days[date.getDay()];
-
-    let result = format;
-    result = result.replace('DD', String(day).padStart(2, '0'));
-    result = result.replace('D', String(day));
-    result = result.replace('MMMM', month);
-    result = result.replace('YYYY', String(year));
-    result = result.replace('dddd', weekday);
-
-    return result;
-  }
-
-  /**
-   * Génère un numéro de document unique
-   */
-  static async generateDocumentNumber(documentType: string): Promise<string> {
-    const year = new Date().getFullYear();
-    const prefix = documentType === 'FACTURE' ? 'FACT' :
-                   documentType === 'DEVIS' ? 'DEV' :
-                   documentType === 'CONTRAT' ? 'CONT' : 'DOC';
-
-    // Trouver le dernier numéro
-    const lastDoc = await prisma.document.findFirst({
-      where: {
-        documentNumber: {
-          startsWith: `${prefix}-${year}-`
-        }
-      },
-      orderBy: {
-        documentNumber: 'desc'
-      }
-    });
-
-    let lastNumber = 0;
-    if (lastDoc && lastDoc.documentNumber) {
-      const match = lastDoc.documentNumber.match(/\-(\d+)$/);
-      if (match) {
-        lastNumber = parseInt(match[1], 10);
-      }
-    }
-
-    const nextNumber = lastNumber + 1;
-    return `${prefix}-${year}-${String(nextNumber).padStart(3, '0')}`;
-  }
-
-  /**
-   * Remplit automatiquement les champs du document
-   */
-  static async populateFields(
-    templateId: string,
-    contactId?: string
-  ): Promise<{
-    data: Record<string, any>;
-    mapping: FieldMapping;
-    metadata: {
-      autoFieldsGenerated: number;
-      manualFieldsRequired: number;
-      agencyLoaded: boolean;
-      contactLoaded: boolean;
-    };
-  }> {
-    // Charger le template
-    const template = await prisma.documentTemplate.findUnique({
-      where: { id: templateId }
-    });
-
-    if (!template) {
-      throw new Error('Template not found');
-    }
-
-    // Charger le mapping ou créer un mapping par défaut
-    let mapping: FieldMapping;
-    if (template.fieldMapping && typeof template.fieldMapping === 'object') {
-      mapping = template.fieldMapping as unknown as FieldMapping;
-    } else {
-      const variables = (template.variables as string[]) || [];
-      mapping = this.createDefaultMapping(variables, template.type, template.category);
-    }
-
-    // Charger les données sources
-    const agency = await this.getAgencySettings();
-    const contact = contactId ? await prisma.contact.findUnique({
-      where: { id: contactId }
-    }) : null;
-
-    // Remplir les champs
-    const data: Record<string, any> = {};
-    let autoFieldsGenerated = 0;
-    let manualFieldsRequired = 0;
-
-    for (const [fieldName, config] of Object.entries(mapping)) {
-      console.log(`[populateFields] Processing field: ${fieldName}`, { source: config.source, autoFill: config.autoFill });
-
-      if (!config.autoFill) {
-        data[fieldName] = config.defaultValue || '';
-        if (config.required) {
-          manualFieldsRequired++;
-        }
-        continue;
-      }
-
-      switch (config.source) {
-        case 'agency':
-          data[fieldName] = await this.getAgencyField(agency, config);
-          autoFieldsGenerated++;
-          break;
-
-        case 'contact':
-          console.log(`[populateFields] Calling getContactField for ${fieldName}`);
-          data[fieldName] = await this.getContactField(contact, config);
-          console.log(`[populateFields] Result for ${fieldName}:`, data[fieldName]);
-          autoFieldsGenerated++;
-          break;
-
-        case 'auto':
-          data[fieldName] = await this.generateAutoValue(config, template.type);
-          autoFieldsGenerated++;
-          break;
-
-        case 'fixed':
-          data[fieldName] = config.defaultValue || '';
-          autoFieldsGenerated++;
-          break;
-
-        case 'calculated':
-          // Les champs calculés sont remplis côté client
-          data[fieldName] = '';
-          break;
-
-        default:
-          data[fieldName] = config.defaultValue || '';
-      }
-    }
-
-    return {
-      data,
-      mapping,
-      metadata: {
-        autoFieldsGenerated,
-        manualFieldsRequired,
-        agencyLoaded: !!agency,
-        contactLoaded: !!contact
-      }
-    };
+      .replace(/\b\w/g, (c) => c.toUpperCase());
   }
 }
+
+export default DocumentDataMapper;

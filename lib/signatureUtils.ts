@@ -1,9 +1,13 @@
+/**
+ * Signature Utilities
+ * Handles cryptographic operations for electronic signatures
+ */
+
 import crypto from 'crypto';
 import fs from 'fs';
-import path from 'path';
 
 /**
- * Génère un hash SHA-256 d'un fichier
+ * Generate SHA-256 hash of a file
  */
 export function generateFileHash(filePath: string): string {
   const fileBuffer = fs.readFileSync(filePath);
@@ -13,7 +17,7 @@ export function generateFileHash(filePath: string): string {
 }
 
 /**
- * Génère un hash SHA-256 d'une chaîne de caractères
+ * Generate SHA-256 hash of a string
  */
 export function generateStringHash(data: string): string {
   const hashSum = crypto.createHash('sha256');
@@ -22,69 +26,132 @@ export function generateStringHash(data: string): string {
 }
 
 /**
- * Sauvegarde une image de signature (base64 → PNG)
+ * Create complete signature proof data
+ * This creates a verifiable proof that can be used for legal purposes
+ */
+export interface SignatureProofData {
+  documentId: string;
+  documentHash: string;
+  signerName: string;
+  signerEmail: string;
+  signerRole: string;
+  signatureType: string;
+  signedAt: string;
+  ipAddress: string;
+  userAgent: string;
+  location?: string;
+  proofHash: string;  // Hash of all the proof data
+}
+
+export function createSignatureProof(data: {
+  documentId: string;
+  documentHash: string;
+  signerName: string;
+  signerEmail: string;
+  signerRole: string;
+  signatureType: string;
+  signedAt: Date;
+  ipAddress: string;
+  userAgent: string;
+  location?: string;
+}): SignatureProofData {
+  const signedAtISO = data.signedAt.toISOString();
+
+  // Create canonical proof string
+  const proofString = [
+    data.documentId,
+    data.documentHash,
+    data.signerName,
+    data.signerEmail,
+    data.signerRole,
+    data.signatureType,
+    signedAtISO,
+    data.ipAddress,
+    data.userAgent,
+    data.location || ''
+  ].join('|');
+
+  // Hash the proof string
+  const proofHash = generateStringHash(proofString);
+
+  return {
+    documentId: data.documentId,
+    documentHash: data.documentHash,
+    signerName: data.signerName,
+    signerEmail: data.signerEmail,
+    signerRole: data.signerRole,
+    signatureType: data.signatureType,
+    signedAt: signedAtISO,
+    ipAddress: data.ipAddress,
+    userAgent: data.userAgent,
+    location: data.location,
+    proofHash
+  };
+}
+
+/**
+ * Verify signature proof integrity
+ */
+export function verifySignatureProof(proof: SignatureProofData): boolean {
+  const proofString = [
+    proof.documentId,
+    proof.documentHash,
+    proof.signerName,
+    proof.signerEmail,
+    proof.signerRole,
+    proof.signatureType,
+    proof.signedAt,
+    proof.ipAddress,
+    proof.userAgent,
+    proof.location || ''
+  ].join('|');
+
+  const calculatedHash = generateStringHash(proofString);
+
+  return calculatedHash === proof.proofHash;
+}
+
+/**
+ * Save signature image from base64 data
  */
 export function saveSignatureImage(
   base64Data: string,
   documentId: string,
   signerEmail: string
 ): string {
-  // Retirer le préfixe data:image/png;base64,
+  // Remove data:image prefix if present
   const base64Image = base64Data.replace(/^data:image\/\w+;base64,/, '');
+
+  // Create buffer from base64
   const imageBuffer = Buffer.from(base64Image, 'base64');
 
-  // Créer un nom de fichier unique
+  // Generate filename
   const timestamp = Date.now();
   const emailHash = generateStringHash(signerEmail).substring(0, 8);
   const fileName = `signature_${documentId}_${emailHash}_${timestamp}.png`;
+  const filePath = `storage/signatures/${fileName}`;
 
-  // Chemin de stockage
-  const storageDir = path.join(process.cwd(), 'public', 'storage', 'signatures');
+  // Ensure directory exists
+  const fs = require('fs');
+  const path = require('path');
+  const dirPath = path.join(process.cwd(), 'storage', 'signatures');
 
-  // Créer le répertoire si nécessaire
-  if (!fs.existsSync(storageDir)) {
-    fs.mkdirSync(storageDir, { recursive: true });
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
   }
 
-  const filePath = path.join(storageDir, fileName);
+  // Save file
+  const fullPath = path.join(process.cwd(), filePath);
+  fs.writeFileSync(fullPath, imageBuffer);
 
-  // Sauvegarder l'image
-  fs.writeFileSync(filePath, imageBuffer);
-
-  // Retourner le chemin relatif
-  return `/storage/signatures/${fileName}`;
+  return filePath;
 }
 
 /**
- * Sauvegarde les preuves de signature en JSON
- */
-export function saveSignatureProof(
-  proofData: any,
-  documentId: string,
-  signatureId: string
-): string {
-  const fileName = `proof_${documentId}_${signatureId}.json`;
-  const storageDir = path.join(process.cwd(), 'public', 'storage', 'proofs');
-
-  // Créer le répertoire si nécessaire
-  if (!fs.existsSync(storageDir)) {
-    fs.mkdirSync(storageDir, { recursive: true });
-  }
-
-  const filePath = path.join(storageDir, fileName);
-
-  // Sauvegarder les preuves
-  fs.writeFileSync(filePath, JSON.stringify(proofData, null, 2));
-
-  // Retourner le chemin relatif
-  return `/storage/proofs/${fileName}`;
-}
-
-/**
- * Récupère l'adresse IP du client
+ * Get client IP address from request headers
  */
 export function getClientIP(request: Request): string {
-  // Vérifier les headers de proxy
+  // Check common proxy headers
   const forwardedFor = request.headers.get('x-forwarded-for');
   if (forwardedFor) {
     return forwardedFor.split(',')[0].trim();
@@ -100,112 +167,8 @@ export function getClientIP(request: Request): string {
 }
 
 /**
- * Récupère le User Agent du client
+ * Get user agent from request
  */
 export function getUserAgent(request: Request): string {
   return request.headers.get('user-agent') || 'unknown';
-}
-
-/**
- * Génère un token sécurisé pour les liens de signature
- */
-export function generateSecureToken(): string {
-  return crypto.randomBytes(32).toString('hex');
-}
-
-/**
- * Calcule la date d'expiration (30 jours par défaut)
- */
-export function calculateExpirationDate(days: number = 30): Date {
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + days);
-  return expiresAt;
-}
-
-/**
- * Vérifie si un token est expiré
- */
-export function isTokenExpired(expiresAt: Date): boolean {
-  return new Date() > expiresAt;
-}
-
-/**
- * Crée les données de preuve cryptographique
- */
-export function createSignatureProofData(params: {
-  documentId: string;
-  documentHash: string;
-  signerName: string;
-  signerEmail: string;
-  signerRole: string;
-  signatureType: string;
-  signedAt: Date;
-  ipAddress: string;
-  userAgent: string;
-  location?: string;
-}): any {
-  const signedAtISO = params.signedAt.toISOString();
-
-  // Créer la chaîne de preuve
-  const proofString = [
-    params.documentId,
-    params.documentHash,
-    params.signerName,
-    params.signerEmail,
-    params.signerRole,
-    params.signatureType,
-    signedAtISO,
-    params.ipAddress,
-    params.userAgent,
-    params.location || ''
-  ].join('|');
-
-  // Générer le hash de la preuve
-  const proofHash = generateStringHash(proofString);
-
-  return {
-    documentId: params.documentId,
-    documentHash: params.documentHash,
-    signerName: params.signerName,
-    signerEmail: params.signerEmail,
-    signerRole: params.signerRole,
-    signatureType: params.signatureType,
-    signedAt: signedAtISO,
-    ipAddress: params.ipAddress,
-    userAgent: params.userAgent,
-    location: params.location,
-    proofHash,
-    proofString, // Pour debugging
-    verificationInstructions: 'Recalculer le hash avec les données ci-dessus pour vérifier l\'intégrité'
-  };
-}
-
-/**
- * Vérifie l'intégrité d'une preuve de signature
- */
-export function verifySignatureProof(proofData: any): boolean {
-  try {
-    // Recréer la chaîne de preuve
-    const proofString = [
-      proofData.documentId,
-      proofData.documentHash,
-      proofData.signerName,
-      proofData.signerEmail,
-      proofData.signerRole,
-      proofData.signatureType,
-      proofData.signedAt,
-      proofData.ipAddress,
-      proofData.userAgent,
-      proofData.location || ''
-    ].join('|');
-
-    // Recalculer le hash
-    const calculatedHash = generateStringHash(proofString);
-
-    // Comparer avec le hash stocké
-    return calculatedHash === proofData.proofHash;
-  } catch (error) {
-    console.error('Error verifying signature proof:', error);
-    return false;
-  }
 }

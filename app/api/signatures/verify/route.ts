@@ -3,7 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import {
   generateFileHash,
-  verifySignatureProof
+  verifySignatureProof,
+  SignatureProofData
 } from '@/lib/signatureUtils';
 
 const prisma = new PrismaClient();
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     };
 
     // Check 1: Verify proof integrity
-    const proof = signature.proofData as any;
+    const proof = signature.proofData as unknown as SignatureProofData;
     if (proof) {
       verificationResults.checks.proofIntegrity = verifySignatureProof(proof);
     }
