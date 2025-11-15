@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Mustache from 'mustache';
 import fs from 'fs/promises';
 import path from 'path';
+import { prisma } from '@/lib/prisma';
 
 export const maxDuration = 60; // 60 secondes pour Puppeteer
 
@@ -36,21 +37,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Charger le template HTML
-    console.log('📄 [PDF] Loading template...');
-    const templatePath = path.join(
-      process.cwd(),
-      'templates',
-      'documents',
-      `${templateName}.html`
-    );
+    // Charger le template HTML depuis la base de données
+    console.log('📄 [PDF] Loading template from database...');
 
     let templateHtml: string;
     try {
-      templateHtml = await fs.readFile(templatePath, 'utf-8');
-      console.log('✅ [PDF] Template loaded successfully');
+      // Essayer de charger depuis la base de données d'abord
+      const template = await prisma.documentTemplate.findFirst({
+        where: {
+          slug: templateName,
+          isActive: true
+        }
+      });
+
+      if (template && template.htmlContent) {
+        templateHtml = template.htmlContent;
+        console.log('✅ [PDF] Template loaded from database');
+      } else {
+        // Fallback: charger depuis les fichiers si pas trouvé en DB
+        console.log('⚠️  [PDF] Template not in DB, trying file system...');
+        const templatePath = path.join(
+          process.cwd(),
+          'templates',
+          'documents',
+          `${templateName}.html`
+        );
+        templateHtml = await fs.readFile(templatePath, 'utf-8');
+        console.log('✅ [PDF] Template loaded from file system');
+      }
     } catch (error) {
-      console.error('❌ [PDF] Template not found:', templatePath);
+      console.error('❌ [PDF] Template not found:', templateName);
       return NextResponse.json(
         { error: `Template "${templateName}" non trouvé` },
         { status: 404 }
