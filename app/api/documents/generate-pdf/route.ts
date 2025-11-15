@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [PDF] PDF generated successfully, size:', pdfBuffer.length, 'bytes');
 
-    // Retourner le PDF
-    return new NextResponse(pdfBuffer, {
+    // Retourner le PDF (convertir Buffer en Uint8Array pour NextResponse)
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
