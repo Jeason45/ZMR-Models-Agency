@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import {
   generateFileHash,
-  createSignatureProof,
+  createSignatureProofData,
   saveSignatureImage,
   getClientIP,
   getUserAgent
@@ -130,7 +130,7 @@ export async function POST(request: Request) {
 
     // Create signature proof
     const signedAt = new Date();
-    const proof = createSignatureProof({
+    const proof = createSignatureProofData({
       documentId,
       documentHash,
       signerName,
