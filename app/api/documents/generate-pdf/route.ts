@@ -78,7 +78,6 @@ export async function POST(request: NextRequest) {
         args: chromium.args,
         executablePath: await chromium.executablePath(),
         headless: true,
-        ignoreHTTPSErrors: true,
       });
     } else {
       const puppeteer = (await import('puppeteer')).default;
