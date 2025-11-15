@@ -26,16 +26,11 @@ export async function generatePDF(params: {
       const chromium = (await import('@sparticuz/chromium')).default;
 
       browser = await puppeteerCore.launch({
-        args: [
-          ...chromium.args,
-          '--disable-gpu',
-          '--single-process',
-          '--no-sandbox',
-          '--disable-setuid-sandbox'
-        ],
+        args: chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: true,
+        executablePath: await chromium.executablePath('/tmp'),
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
       });
     } else {
       // Développement: Utiliser Puppeteer local
