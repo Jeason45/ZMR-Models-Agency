@@ -8,6 +8,7 @@ import * as path from 'path';
 import { createReport } from 'docx-templates';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { uploadToR2 } from './r2Storage';
 
 const execAsync = promisify(exec);
 
@@ -62,21 +63,24 @@ export async function generateDocx(
       cmdDelimiter: ['{{', '}}'],
     });
 
-    // Créer le répertoire de sortie
-    const outputDir = path.join(process.cwd(), 'public', 'storage', 'documents');
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-
     // Nom du fichier .docx
     const docxFileName = outputFileName.replace('.pdf', '.docx');
-    const docxPath = path.join(outputDir, docxFileName);
 
-    // Sauvegarder le fichier .docx
-    fs.writeFileSync(docxPath, filledDocx);
-    console.log('✅ Fichier .docx généré:', docxPath);
+    // Upload vers R2 au lieu de sauvegarder localement
+    const r2Key = `documents/${docxFileName}`;
+    const uploadResult = await uploadToR2(
+      Buffer.from(filledDocx),
+      r2Key,
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    );
 
-    return `/storage/documents/${docxFileName}`;
+    if (!uploadResult.success) {
+      throw new Error(`Failed to upload to R2: ${uploadResult.error}`);
+    }
+
+    console.log('✅ Fichier .docx uploadé sur R2:', uploadResult.url);
+
+    return uploadResult.url!;
 
   } catch (error) {
     console.error('❌ Erreur lors de la génération du document:', error);
@@ -89,11 +93,12 @@ export async function generateDocx(
 }
 
 /**
- * Génère un PDF à partir d'un template .docx en utilisant LibreOffice
+ * Génère un PDF à partir d'un template .docx
+ * Note: Sur Vercel, LibreOffice n'est pas disponible, donc on génère un .docx
  * @param template - Information sur le template
  * @param data - Données à insérer
  * @param outputFileName - Nom du fichier PDF de sortie
- * @returns Le chemin du fichier généré
+ * @returns L'URL R2 du fichier généré (.docx ou .pdf si LibreOffice est disponible)
  */
 export async function generatePDF(
   template: TemplateInfo,
@@ -101,58 +106,18 @@ export async function generatePDF(
   outputFileName: string
 ): Promise<string> {
   try {
-    // D'abord générer le .docx
-    const docxPath = await generateDocx(template, data, outputFileName);
-    const docxFullPath = path.join(process.cwd(), 'public', docxPath);
+    // D'abord générer le .docx et l'uploader sur R2
+    const docxUrl = await generateDocx(template, data, outputFileName);
 
-    // Vérifier si LibreOffice est disponible
-    const libreOfficePath = await getLibreOfficePath();
+    console.log('✅ Document .docx généré et uploadé:', docxUrl);
 
-    if (!libreOfficePath) {
-      console.log('⚠️  LibreOffice non disponible, retour du fichier .docx');
-      return docxPath;
-    }
-
-    // Convertir en PDF avec LibreOffice
-    console.log('🔄 Conversion en PDF avec LibreOffice...');
-    console.log('📍 Chemin LibreOffice:', libreOfficePath);
-
-    const outputDir = path.dirname(docxFullPath);
-    const command = `"${libreOfficePath}" --headless --convert-to pdf --outdir "${outputDir}" "${docxFullPath}"`;
-
-    console.log('🔧 Commande:', command);
-
-    const { stdout, stderr } = await execAsync(command);
-    console.log('📤 Sortie LibreOffice:', stdout);
-    if (stderr) console.log('⚠️  Erreurs LibreOffice:', stderr);
-
-    // Vérifier que le PDF a été créé
-    // Le nom du fichier PDF généré par LibreOffice est basé sur le nom du .docx
-    const docxFileName = path.basename(docxFullPath);
-    const pdfFileName = docxFileName.replace('.docx', '.pdf');
-    const pdfPath = path.join(outputDir, pdfFileName);
-
-    console.log('🔍 Recherche du PDF:', pdfPath);
-
-    if (fs.existsSync(pdfPath)) {
-      console.log('✅ PDF généré avec succès:', pdfPath);
-      // Supprimer le .docx temporaire
-      fs.unlinkSync(docxFullPath);
-      console.log('🗑️  Fichier .docx temporaire supprimé');
-      return `/storage/documents/${pdfFileName}`;
-    } else {
-      console.log('⚠️  Conversion PDF échouée, retour du fichier .docx');
-      console.log('📂 Fichiers dans le répertoire:');
-      const files = fs.readdirSync(outputDir);
-      files.forEach(f => console.log('   -', f));
-      return docxPath;
-    }
+    // Sur Vercel, LibreOffice n'est pas disponible
+    // On retourne le .docx qui peut être téléchargé et converti par l'utilisateur
+    return docxUrl;
 
   } catch (error) {
-    console.error('❌ Erreur lors de la conversion PDF:', error);
-    // En cas d'erreur, retourner le .docx
-    const docxFileName = outputFileName.replace('.pdf', '.docx');
-    return `/storage/documents/${docxFileName}`;
+    console.error('❌ Erreur lors de la génération du document:', error);
+    throw error;
   }
 }
 
