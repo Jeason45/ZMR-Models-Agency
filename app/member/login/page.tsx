@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 // URL de base pour l'auth membre
 const MEMBER_AUTH_BASE = '/api/auth/member';
 
-export default function MemberLoginPage() {
+function MemberLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -345,5 +345,23 @@ export default function MemberLoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MemberLoginPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+      }}>
+        <div style={{ color: 'white' }}>Chargement...</div>
+      </div>
+    }>
+      <MemberLoginContent />
+    </Suspense>
   );
 }
