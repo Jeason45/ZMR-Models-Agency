@@ -65,6 +65,9 @@ export async function PUT(
       if (booking.paymentStatus === 'paid' && booking.stripePaymentIntentId) {
         // Optionnel: Créer un remboursement Stripe
         if (body.refund) {
+          if (!stripe) {
+            return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
+          }
           try {
             await stripe.refunds.create({
               payment_intent: booking.stripePaymentIntentId,
