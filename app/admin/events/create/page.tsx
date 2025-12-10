@@ -16,7 +16,7 @@ interface TicketType {
 
 export default function CreateEventPage() {
   const router = useRouter();
-  const { sidebarWidth } = useSidebar();
+  const { sidebarWidth, isMobile } = useSidebar();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
@@ -237,10 +237,11 @@ export default function CreateEventPage() {
   const inputStyle = {
     width: '100%',
     padding: '12px 16px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
     borderRadius: '8px',
     fontSize: '15px',
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    color: 'white',
     outline: 'none',
     transition: 'border-color 0.2s'
   };
@@ -249,41 +250,89 @@ export default function CreateEventPage() {
     display: 'block',
     fontSize: '14px',
     fontWeight: 600,
-    color: '#374151',
+    color: 'rgba(255, 255, 255, 0.7)',
     marginBottom: '8px'
+  };
+
+  const sectionStyle = {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    padding: '28px',
+    borderRadius: '12px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(10px)'
+  };
+
+  const sectionTitleStyle = {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: 'white',
+    marginBottom: '24px'
   };
 
   return (
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f8fafc'
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
     }}>
       <AdminSidebar />
 
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
-        padding: '40px',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px',
         transition: 'margin-left 0.3s ease'
       }}>
+        {/* Decorative line with title */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+          }} />
+          <div style={{
+            flex: 1,
+            height: '1px',
+            background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+          }} />
+          <span style={{
+            fontSize: '10px',
+            color: 'rgba(255,255,255,0.4)',
+            fontWeight: 600,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase'
+          }}>
+            Nouvel Événement
+          </span>
+        </div>
+
         {/* Header */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '16px',
-          marginBottom: '32px'
+          marginBottom: '32px',
+          flexWrap: 'wrap'
         }}>
           <Link
             href="/admin/events"
             style={{
               padding: '8px 12px',
-              backgroundColor: '#f1f5f9',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
               textDecoration: 'none',
-              color: '#64748b',
+              color: 'rgba(255, 255, 255, 0.6)',
               fontSize: '14px',
-              fontWeight: 500
+              fontWeight: 500,
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }}
           >
             ← Retour
@@ -292,12 +341,12 @@ export default function CreateEventPage() {
             <h2 style={{
               fontSize: '28px',
               fontWeight: 700,
-              color: '#0f172a',
+              color: 'white',
               marginBottom: '4px'
             }}>
               Créer un événement
             </h2>
-            <p style={{ fontSize: '14px', color: '#64748b' }}>
+            <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
               Remplissez les informations de votre événement
             </p>
           </div>
@@ -306,11 +355,12 @@ export default function CreateEventPage() {
         {error && (
           <div style={{
             padding: '16px',
-            backgroundColor: '#fee2e2',
-            color: '#dc2626',
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            color: '#f87171',
             borderRadius: '8px',
             marginBottom: '24px',
-            fontSize: '14px'
+            fontSize: '14px',
+            border: '1px solid rgba(239, 68, 68, 0.3)'
           }}>
             {error}
           </div>
@@ -319,24 +369,14 @@ export default function CreateEventPage() {
         <form onSubmit={handleSubmit}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '2fr 1fr',
+            gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr',
             gap: '32px'
           }}>
             {/* Main Content */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Basic Info */}
-              <div style={{
-                backgroundColor: 'white',
-                padding: '28px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 600,
-                  color: '#0f172a',
-                  marginBottom: '24px'
-                }}>
+              <div style={sectionStyle}>
+                <h3 style={sectionTitleStyle}>
                   Informations générales
                 </h3>
 
@@ -378,7 +418,7 @@ export default function CreateEventPage() {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
                     <div>
                       <label style={labelStyle}>Date et heure de début *</label>
                       <input
@@ -405,18 +445,8 @@ export default function CreateEventPage() {
               </div>
 
               {/* Location */}
-              <div style={{
-                backgroundColor: 'white',
-                padding: '28px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 600,
-                  color: '#0f172a',
-                  marginBottom: '24px'
-                }}>
+              <div style={sectionStyle}>
+                <h3 style={sectionTitleStyle}>
                   Lieu
                 </h3>
 
@@ -461,12 +491,7 @@ export default function CreateEventPage() {
               </div>
 
               {/* Tickets */}
-              <div style={{
-                backgroundColor: 'white',
-                padding: '28px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
+              <div style={sectionStyle}>
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -476,7 +501,7 @@ export default function CreateEventPage() {
                   <h3 style={{
                     fontSize: '18px',
                     fontWeight: 600,
-                    color: '#0f172a'
+                    color: 'white'
                   }}>
                     Billetterie
                   </h3>
@@ -492,9 +517,9 @@ export default function CreateEventPage() {
                       name="isFree"
                       checked={formData.isFree}
                       onChange={handleChange}
-                      style={{ width: '18px', height: '18px' }}
+                      style={{ width: '18px', height: '18px', accentColor: '#D4AF37' }}
                     />
-                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
                       Événement gratuit
                     </span>
                   </label>
@@ -507,9 +532,9 @@ export default function CreateEventPage() {
                         key={index}
                         style={{
                           padding: '20px',
-                          backgroundColor: '#f8fafc',
+                          backgroundColor: 'rgba(255, 255, 255, 0.03)',
                           borderRadius: '8px',
-                          border: '1px solid #e2e8f0'
+                          border: '1px solid rgba(255, 255, 255, 0.1)'
                         }}
                       >
                         <div style={{
@@ -518,7 +543,7 @@ export default function CreateEventPage() {
                           alignItems: 'center',
                           marginBottom: '16px'
                         }}>
-                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}>
                             Type de billet #{index + 1}
                           </span>
                           {ticketTypes.length > 1 && (
@@ -527,9 +552,9 @@ export default function CreateEventPage() {
                               onClick={() => removeTicketType(index)}
                               style={{
                                 padding: '4px 8px',
-                                backgroundColor: '#fee2e2',
-                                color: '#dc2626',
-                                border: 'none',
+                                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                                color: '#f87171',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
                                 borderRadius: '4px',
                                 fontSize: '12px',
                                 cursor: 'pointer'
@@ -540,7 +565,7 @@ export default function CreateEventPage() {
                           )}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr', gap: '12px' }}>
                           <div>
                             <label style={{ ...labelStyle, fontSize: '12px' }}>Nom</label>
                             <input
@@ -592,9 +617,9 @@ export default function CreateEventPage() {
                       onClick={addTicketType}
                       style={{
                         padding: '12px',
-                        backgroundColor: '#f1f5f9',
-                        color: '#6366f1',
-                        border: '1px dashed #6366f1',
+                        backgroundColor: 'transparent',
+                        color: '#D4AF37',
+                        border: '1px dashed rgba(212, 175, 55, 0.5)',
                         borderRadius: '8px',
                         fontSize: '14px',
                         fontWeight: 600,
@@ -623,16 +648,11 @@ export default function CreateEventPage() {
             {/* Sidebar */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Publish */}
-              <div style={{
-                backgroundColor: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
+              <div style={sectionStyle}>
                 <h3 style={{
                   fontSize: '16px',
                   fontWeight: 600,
-                  color: '#0f172a',
+                  color: 'white',
                   marginBottom: '20px'
                 }}>
                   Publication
@@ -650,9 +670,9 @@ export default function CreateEventPage() {
                     name="published"
                     checked={formData.published}
                     onChange={handleChange}
-                    style={{ width: '18px', height: '18px' }}
+                    style={{ width: '18px', height: '18px', accentColor: '#D4AF37' }}
                   />
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
                     Publier immédiatement
                   </span>
                 </label>
@@ -663,13 +683,14 @@ export default function CreateEventPage() {
                   style={{
                     width: '100%',
                     padding: '14px',
-                    backgroundColor: saving ? '#94a3b8' : '#6366f1',
-                    color: 'white',
+                    background: saving ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                    color: saving ? 'rgba(255, 255, 255, 0.5)' : 'black',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '15px',
                     fontWeight: 600,
-                    cursor: saving ? 'not-allowed' : 'pointer'
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    boxShadow: saving ? 'none' : '0 4px 15px rgba(212, 175, 55, 0.3)'
                   }}
                 >
                   {saving ? 'Création...' : 'Créer l\'événement'}
@@ -677,16 +698,11 @@ export default function CreateEventPage() {
               </div>
 
               {/* Type & Status */}
-              <div style={{
-                backgroundColor: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
+              <div style={sectionStyle}>
                 <h3 style={{
                   fontSize: '16px',
                   fontWeight: 600,
-                  color: '#0f172a',
+                  color: 'white',
                   marginBottom: '20px'
                 }}>
                   Type & Statut
@@ -699,7 +715,7 @@ export default function CreateEventPage() {
                       name="type"
                       value={formData.type}
                       onChange={handleChange}
-                      style={inputStyle}
+                      style={{ ...inputStyle, cursor: 'pointer' }}
                     >
                       <option value="club">Club</option>
                       <option value="restaurant-bar">Restaurant & Bar</option>
@@ -715,7 +731,7 @@ export default function CreateEventPage() {
                       name="status"
                       value={formData.status}
                       onChange={handleChange}
-                      style={inputStyle}
+                      style={{ ...inputStyle, cursor: 'pointer' }}
                     >
                       <option value="upcoming">À venir</option>
                       <option value="ongoing">En cours</option>
@@ -727,16 +743,11 @@ export default function CreateEventPage() {
               </div>
 
               {/* Image */}
-              <div style={{
-                backgroundColor: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
+              <div style={sectionStyle}>
                 <h3 style={{
                   fontSize: '16px',
                   fontWeight: 600,
-                  color: '#0f172a',
+                  color: 'white',
                   marginBottom: '20px'
                 }}>
                   Image de couverture
@@ -750,29 +761,29 @@ export default function CreateEventPage() {
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
                     style={{
-                      border: `2px dashed ${isDragging ? '#6366f1' : '#e2e8f0'}`,
+                      border: `2px dashed ${isDragging ? '#D4AF37' : 'rgba(255, 255, 255, 0.2)'}`,
                       borderRadius: '12px',
                       padding: '32px 20px',
                       textAlign: 'center',
                       cursor: 'pointer',
-                      backgroundColor: isDragging ? '#eef2ff' : '#f8fafc',
+                      backgroundColor: isDragging ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255, 255, 255, 0.03)',
                       transition: 'all 0.2s'
                     }}
                   >
                     <div style={{ marginBottom: '12px' }}>
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={isDragging ? '#6366f1' : '#94a3b8'} strokeWidth="1.5" style={{ margin: '0 auto' }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={isDragging ? '#D4AF37' : 'rgba(255, 255, 255, 0.4)'} strokeWidth="1.5" style={{ margin: '0 auto' }}>
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round"/>
                         <polyline points="17,8 12,3 7,8" strokeLinecap="round" strokeLinejoin="round"/>
                         <line x1="12" y1="3" x2="12" y2="15" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '4px' }}>
+                    <p style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '4px' }}>
                       Glissez-déposez une image ici
                     </p>
-                    <p style={{ fontSize: '12px', color: '#64748b' }}>
+                    <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)' }}>
                       ou cliquez pour sélectionner
                     </p>
-                    <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '8px' }}>
+                    <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.3)', marginTop: '8px' }}>
                       PNG, JPG, WEBP (max 10MB)
                     </p>
                   </div>
@@ -811,7 +822,7 @@ export default function CreateEventPage() {
                         <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round"/>
                       </svg>
                     </button>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '8px', textAlign: 'center' }}>
                       Cliquez sur la croix pour changer l'image
                     </p>
                   </div>
@@ -829,10 +840,10 @@ export default function CreateEventPage() {
                   <div style={{
                     marginTop: '12px',
                     padding: '8px 12px',
-                    backgroundColor: '#eef2ff',
+                    backgroundColor: 'rgba(212, 175, 55, 0.15)',
                     borderRadius: '6px',
                     fontSize: '13px',
-                    color: '#6366f1',
+                    color: '#D4AF37',
                     textAlign: 'center'
                   }}>
                     {uploadProgress}
@@ -841,7 +852,7 @@ export default function CreateEventPage() {
 
                 {/* Option URL alternative */}
                 <div style={{ marginTop: '16px' }}>
-                  <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
+                  <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '8px' }}>
                     Ou entrez une URL d'image :
                   </p>
                   <input
@@ -862,16 +873,11 @@ export default function CreateEventPage() {
               </div>
 
               {/* Additional Options */}
-              <div style={{
-                backgroundColor: 'white',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
+              <div style={sectionStyle}>
                 <h3 style={{
                   fontSize: '16px',
                   fontWeight: 600,
-                  color: '#0f172a',
+                  color: 'white',
                   marginBottom: '20px'
                 }}>
                   Options
@@ -913,9 +919,9 @@ export default function CreateEventPage() {
                       name="hasGuestList"
                       checked={formData.hasGuestList}
                       onChange={handleChange}
-                      style={{ width: '18px', height: '18px' }}
+                      style={{ width: '18px', height: '18px', accentColor: '#D4AF37' }}
                     />
-                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
                       Activer la Guest List
                     </span>
                   </label>

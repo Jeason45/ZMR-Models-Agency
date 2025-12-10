@@ -28,7 +28,7 @@ interface Appointment {
 type ViewMode = 'month' | 'week';
 
 export default function CalendarPage() {
-  const { sidebarWidth } = useSidebar();
+  const { sidebarWidth, isMobile } = useSidebar();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -360,58 +360,81 @@ export default function CalendarPage() {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f1f5f9'
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
     }}>
       <AdminSidebar />
 
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
-        padding: '32px 40px',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px',
         transition: 'margin-left 0.3s ease'
       }}>
+        {/* Decorative line with title */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+          }} />
+          <div style={{
+            flex: 1,
+            height: '1px',
+            background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+          }} />
+          <span style={{
+            fontSize: '10px',
+            color: 'rgba(255,255,255,0.4)',
+            fontWeight: 600,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase'
+          }}>
+            Calendrier
+          </span>
+        </div>
+
         {/* Header */}
         <div style={{
           marginBottom: '32px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px'
         }}>
           <div>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: 600,
-              color: '#0f172a',
-              marginBottom: '4px',
-              letterSpacing: '-0.02em'
-            }}>
-              Calendrier
-            </h1>
             <p style={{
-              fontSize: '14px',
-              color: '#64748b',
-              fontWeight: 400
+              fontSize: '16px',
+              color: 'rgba(255, 255, 255, 0.6)'
             }}>
               Gérez vos rendez-vous et disponibilités
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* View Toggle */}
             <div style={{
               display: 'flex',
               gap: '4px',
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '4px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0'
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }}>
               <button
                 onClick={() => setViewMode('month')}
                 style={{
                   padding: '8px 16px',
                   backgroundColor: viewMode === 'month' ? '#6366f1' : 'transparent',
-                  color: viewMode === 'month' ? 'white' : '#64748b',
+                  color: viewMode === 'month' ? 'white' : 'rgba(255, 255, 255, 0.6)',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '14px',
@@ -427,7 +450,7 @@ export default function CalendarPage() {
                 style={{
                   padding: '8px 16px',
                   backgroundColor: viewMode === 'week' ? '#6366f1' : 'transparent',
-                  color: viewMode === 'week' ? 'white' : '#64748b',
+                  color: viewMode === 'week' ? 'white' : 'rgba(255, 255, 255, 0.6)',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '14px',
@@ -445,10 +468,10 @@ export default function CalendarPage() {
               display: 'flex',
               alignItems: 'center',
               gap: '16px',
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0'
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }}>
               <button
                 onClick={previousPeriod}
@@ -458,16 +481,16 @@ export default function CalendarPage() {
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  color: '#64748b',
+                  color: 'rgba(255, 255, 255, 0.6)',
                   transition: 'all 0.2s'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9';
-                  e.currentTarget.style.color = '#0f172a';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.color = 'white';
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#64748b';
+                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -478,8 +501,8 @@ export default function CalendarPage() {
               <span style={{
                 fontSize: '16px',
                 fontWeight: 600,
-                color: '#0f172a',
-                minWidth: '200px',
+                color: 'white',
+                minWidth: isMobile ? 'auto' : '200px',
                 textAlign: 'center'
               }}>
                 {viewMode === 'month'
@@ -496,16 +519,16 @@ export default function CalendarPage() {
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  color: '#64748b',
+                  color: 'rgba(255, 255, 255, 0.6)',
                   transition: 'all 0.2s'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9';
-                  e.currentTarget.style.color = '#0f172a';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.color = 'white';
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#64748b';
+                  e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -519,20 +542,20 @@ export default function CalendarPage() {
               onClick={() => openCreateModal()}
               style={{
                 padding: '10px 20px',
-                backgroundColor: '#6366f1',
-                color: 'white',
+                backgroundColor: '#D4AF37',
+                color: 'black',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '14px',
-                fontWeight: 500,
+                fontWeight: 600,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B8941F'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D4AF37'}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19"/>
@@ -545,11 +568,11 @@ export default function CalendarPage() {
 
         {/* Calendar Grid */}
         <div style={{
-          backgroundColor: 'white',
+          background: 'rgba(255, 255, 255, 0.05)',
           padding: '24px',
-          borderRadius: '8px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-          border: '1px solid #e2e8f0'
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)'
         }}>
           {/* Day Names */}
           <div style={{
@@ -564,7 +587,7 @@ export default function CalendarPage() {
                 textAlign: 'center',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: '#64748b',
+                color: 'rgba(255, 255, 255, 0.6)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
               }}>
@@ -578,8 +601,8 @@ export default function CalendarPage() {
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
             gap: '1px',
-            backgroundColor: '#e2e8f0',
-            border: '1px solid #e2e8f0',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: '6px',
             overflow: 'hidden'
           }}>
@@ -597,18 +620,18 @@ export default function CalendarPage() {
                   style={{
                     minHeight: viewMode === 'month' ? '100px' : '120px',
                     padding: '8px',
-                    backgroundColor: date ? (isCurrentMonth || viewMode === 'week' ? 'white' : '#f8fafc') : '#f8fafc',
+                    backgroundColor: date ? (isCurrentMonth || viewMode === 'week' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.2)') : 'rgba(0, 0, 0, 0.2)',
                     cursor: date ? 'pointer' : 'default',
                     transition: 'all 0.2s',
                     position: 'relative',
-                    border: isSelected ? '2px solid #6366f1' : 'none',
+                    border: isSelected ? '2px solid #D4AF37' : 'none',
                     opacity: (viewMode === 'month' && date && !isCurrentMonth) ? 0.5 : 1
                   }}
                   onMouseOver={(e) => {
-                    if (date) e.currentTarget.style.backgroundColor = '#f8fafc';
+                    if (date) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
                   }}
                   onMouseOut={(e) => {
-                    if (date && (isCurrentMonth || viewMode === 'week')) e.currentTarget.style.backgroundColor = 'white';
+                    if (date && (isCurrentMonth || viewMode === 'week')) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
                   }}
                 >
                   {date && (
@@ -622,14 +645,14 @@ export default function CalendarPage() {
                         <div style={{
                           fontSize: '14px',
                           fontWeight: isToday ? 700 : 500,
-                          color: isToday ? '#6366f1' : '#0f172a',
+                          color: isToday ? '#D4AF37' : 'white',
                           width: '28px',
                           height: '28px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           borderRadius: '50%',
-                          backgroundColor: isToday ? '#eef2ff' : 'transparent'
+                          backgroundColor: isToday ? 'rgba(212, 175, 55, 0.2)' : 'transparent'
                         }}>
                           {date.getDate()}
                         </div>
@@ -697,22 +720,24 @@ export default function CalendarPage() {
         {selectedDate && (
           <div style={{
             marginTop: '24px',
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '24px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)'
           }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              flexWrap: 'wrap',
+              gap: '12px'
             }}>
               <h3 style={{
                 fontSize: '16px',
                 fontWeight: 600,
-                color: '#0f172a'
+                color: 'white'
               }}>
                 Rendez-vous du {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </h3>
@@ -720,12 +745,12 @@ export default function CalendarPage() {
                 onClick={() => openCreateModal(selectedDate)}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: '#6366f1',
-                  color: 'white',
+                  backgroundColor: '#D4AF37',
+                  color: 'black',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '13px',
-                  fontWeight: 500,
+                  fontWeight: 600,
                   cursor: 'pointer'
                 }}
               >
@@ -734,7 +759,7 @@ export default function CalendarPage() {
             </div>
 
             {getAppointmentsForDate(selectedDate).length === 0 ? (
-              <p style={{ fontSize: '14px', color: '#64748b' }}>
+              <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
                 Aucun rendez-vous pour cette date
               </p>
             ) : (
@@ -744,29 +769,31 @@ export default function CalendarPage() {
                     key={apt.id}
                     style={{
                       padding: '16px',
-                      backgroundColor: '#f8fafc',
-                      borderRadius: '6px',
-                      border: '1px solid #e2e8f0'
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
                     }}
                   >
                     <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'start',
-                      marginBottom: '8px'
+                      marginBottom: '8px',
+                      flexWrap: 'wrap',
+                      gap: '8px'
                     }}>
                       <div>
                         <div style={{
                           fontSize: '15px',
                           fontWeight: 600,
-                          color: '#0f172a',
+                          color: 'white',
                           marginBottom: '4px'
                         }}>
                           {apt.title}
                         </div>
                         <div style={{
                           fontSize: '13px',
-                          color: '#64748b'
+                          color: 'rgba(255, 255, 255, 0.6)'
                         }}>
                           {new Date(apt.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {new Date(apt.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
@@ -784,17 +811,17 @@ export default function CalendarPage() {
                     </div>
                     <div style={{
                       fontSize: '13px',
-                      color: '#64748b'
+                      color: 'rgba(255, 255, 255, 0.6)'
                     }}>
-                      <strong>Contact:</strong> {apt.contact.name} ({apt.contact.email})
+                      <strong style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Contact:</strong> {apt.contact.name} ({apt.contact.email})
                     </div>
                     {apt.location && (
                       <div style={{
                         fontSize: '13px',
-                        color: '#64748b',
+                        color: 'rgba(255, 255, 255, 0.6)',
                         marginTop: '4px'
                       }}>
-                        <strong>Lieu:</strong> {apt.location}
+                        <strong style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Lieu:</strong> {apt.location}
                       </div>
                     )}
 

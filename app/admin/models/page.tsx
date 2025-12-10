@@ -9,7 +9,7 @@ type TalentCategory = 'all' | 'models' | 'acting' | 'promo' | 'details';
 type TalentStatus = 'all' | 'active' | 'inactive' | 'archived';
 
 export default function AdminModelsPage() {
-  const { sidebarWidth } = useSidebar();
+  const { sidebarWidth, isMobile } = useSidebar();
   const [talents, setTalents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<TalentCategory>('all');
@@ -183,17 +183,48 @@ export default function AdminModelsPage() {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f8fafc'
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
     }}>
       <AdminSidebar />
 
       {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
-        padding: '40px',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px',
         transition: 'margin-left 0.3s ease'
       }}>
+        {/* Decorative line with title */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+          }} />
+          <div style={{
+            flex: 1,
+            height: '1px',
+            background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+          }} />
+          <span style={{
+            fontSize: '10px',
+            color: 'rgba(255,255,255,0.4)',
+            fontWeight: 600,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase'
+          }}>
+            Talents
+          </span>
+        </div>
+
         {/* Header */}
         <div style={{
           marginBottom: '32px'
@@ -202,20 +233,14 @@ export default function AdminModelsPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '24px'
+            marginBottom: '24px',
+            flexWrap: 'wrap',
+            gap: '16px'
           }}>
             <div>
-              <h2 style={{
-                fontSize: '32px',
-                fontWeight: 700,
-                color: '#0f172a',
-                marginBottom: '8px'
-              }}>
-                Gestion des Talents
-              </h2>
               <p style={{
                 fontSize: '16px',
-                color: '#64748b'
+                color: 'rgba(255, 255, 255, 0.6)'
               }}>
                 Gérez tous vos talents : mannequins, comédiens, promo & détails
               </p>
@@ -225,8 +250,8 @@ export default function AdminModelsPage() {
               href="/admin/models/create"
               style={{
                 padding: '12px 24px',
-                backgroundColor: '#6366f1',
-                color: 'white',
+                backgroundColor: '#D4AF37',
+                color: 'black',
                 borderRadius: '8px',
                 fontSize: '15px',
                 fontWeight: 600,
@@ -234,8 +259,8 @@ export default function AdminModelsPage() {
                 display: 'inline-block',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B8941F'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D4AF37'}
             >
               + Ajouter un talent
             </Link>
@@ -244,77 +269,77 @@ export default function AdminModelsPage() {
           {/* Statistics Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)',
             gap: '16px',
             marginBottom: '24px'
           }}>
             <div style={{
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '20px',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Total
               </p>
-              <p style={{ fontSize: '28px', fontWeight: 700, color: '#0f172a' }}>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: 'white' }}>
                 {stats.total}
               </p>
             </div>
             <div style={{
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '20px',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Mannequins
               </p>
-              <p style={{ fontSize: '28px', fontWeight: 700, color: '#1e40af' }}>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#60a5fa' }}>
                 {stats.models}
               </p>
             </div>
             <div style={{
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '20px',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Comédiens
               </p>
-              <p style={{ fontSize: '28px', fontWeight: 700, color: '#db2777' }}>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#f472b6' }}>
                 {stats.acting}
               </p>
             </div>
             <div style={{
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '20px',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Promo
               </p>
-              <p style={{ fontSize: '28px', fontWeight: 700, color: '#9333ea' }}>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#c084fc' }}>
                 {stats.promo}
               </p>
             </div>
             <div style={{
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '20px',
               borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}>
-              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Détails
               </p>
-              <p style={{ fontSize: '28px', fontWeight: 700, color: '#059669' }}>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#34d399' }}>
                 {stats.details}
               </p>
             </div>
@@ -324,10 +349,11 @@ export default function AdminModelsPage() {
           <div style={{
             display: 'flex',
             gap: '16px',
-            alignItems: 'center'
+            alignItems: 'center',
+            flexWrap: 'wrap'
           }}>
             {/* Search */}
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
               <input
                 type="text"
                 placeholder="Rechercher un talent..."
@@ -336,14 +362,15 @@ export default function AdminModelsPage() {
                 style={{
                   width: '100%',
                   padding: '12px 16px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
                   borderRadius: '8px',
                   fontSize: '15px',
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
                   outline: 'none'
                 }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#6366f1'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#D4AF37'}
+                onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
               />
             </div>
 
@@ -351,10 +378,11 @@ export default function AdminModelsPage() {
             <div style={{
               display: 'flex',
               gap: '8px',
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '6px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              flexWrap: 'wrap'
             }}>
               {[
                 { value: 'all', label: 'Tous' },
@@ -369,7 +397,7 @@ export default function AdminModelsPage() {
                   style={{
                     padding: '8px 16px',
                     backgroundColor: categoryFilter === category.value ? '#6366f1' : 'transparent',
-                    color: categoryFilter === category.value ? 'white' : '#64748b',
+                    color: categoryFilter === category.value ? 'white' : 'rgba(255, 255, 255, 0.6)',
                     border: 'none',
                     borderRadius: '6px',
                     fontSize: '14px',
@@ -388,10 +416,11 @@ export default function AdminModelsPage() {
             <div style={{
               display: 'flex',
               gap: '8px',
-              backgroundColor: 'white',
+              background: 'rgba(255, 255, 255, 0.05)',
               padding: '6px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              flexWrap: 'wrap'
             }}>
               {[
                 { value: 'active', label: 'Actifs' },
@@ -405,7 +434,7 @@ export default function AdminModelsPage() {
                   style={{
                     padding: '8px 16px',
                     backgroundColor: statusFilter === status.value ? '#10b981' : 'transparent',
-                    color: statusFilter === status.value ? 'white' : '#64748b',
+                    color: statusFilter === status.value ? 'white' : 'rgba(255, 255, 255, 0.6)',
                     border: 'none',
                     borderRadius: '6px',
                     fontSize: '14px',
@@ -426,12 +455,12 @@ export default function AdminModelsPage() {
               onChange={(e) => setSortBy(e.target.value as 'recent' | 'name')}
               style={{
                 padding: '12px 16px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: 500,
-                backgroundColor: 'white',
-                color: '#64748b',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: 'rgba(255, 255, 255, 0.6)',
                 cursor: 'pointer',
                 outline: 'none'
               }}
@@ -447,7 +476,7 @@ export default function AdminModelsPage() {
           <div style={{
             textAlign: 'center',
             padding: '60px',
-            color: '#64748b'
+            color: 'rgba(255, 255, 255, 0.6)'
           }}>
             Chargement...
           </div>
@@ -464,20 +493,19 @@ export default function AdminModelsPage() {
                 <div
                   key={talent._id}
                   style={{
-                    backgroundColor: 'white',
+                    background: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: '12px',
                     overflow: 'hidden',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     transition: 'all 0.3s'
                   }}
                   onMouseOver={(e) => {
                     e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.3)';
                   }}
                   onMouseOut={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                   }}
                 >
                   {/* Image */}
@@ -486,7 +514,7 @@ export default function AdminModelsPage() {
                       width: '100%',
                       height: '300px',
                       overflow: 'hidden',
-                      backgroundColor: '#f1f5f9'
+                      backgroundColor: 'rgba(0, 0, 0, 0.3)'
                     }}>
                       <img
                         src={talent.mainImage}
@@ -505,7 +533,7 @@ export default function AdminModelsPage() {
                     <h3 style={{
                       fontSize: '18px',
                       fontWeight: 600,
-                      color: '#0f172a',
+                      color: 'white',
                       marginBottom: '8px'
                     }}>
                       {talent.name}
@@ -566,7 +594,7 @@ export default function AdminModelsPage() {
                     {talent.height && (
                       <p style={{
                         fontSize: '13px',
-                        color: '#64748b',
+                        color: 'rgba(255, 255, 255, 0.6)',
                         marginBottom: '4px'
                       }}>
                         {talent.height}
@@ -577,7 +605,7 @@ export default function AdminModelsPage() {
                     {talent.ageRange && (
                       <p style={{
                         fontSize: '13px',
-                        color: '#64748b',
+                        color: 'rgba(255, 255, 255, 0.6)',
                         marginBottom: '4px'
                       }}>
                         {talent.ageRange}
@@ -587,7 +615,7 @@ export default function AdminModelsPage() {
                     {talent.instagramFollowers && (
                       <p style={{
                         fontSize: '13px',
-                        color: '#64748b',
+                        color: 'rgba(255, 255, 255, 0.6)',
                         marginBottom: '4px'
                       }}>
                         📸 {talent.instagramFollowers} followers
@@ -604,8 +632,8 @@ export default function AdminModelsPage() {
                         style={{
                           flex: 1,
                           padding: '8px 12px',
-                          backgroundColor: '#f1f5f9',
-                          color: '#64748b',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          color: 'rgba(255, 255, 255, 0.8)',
                           border: 'none',
                           borderRadius: '6px',
                           fontSize: '13px',
@@ -690,14 +718,14 @@ export default function AdminModelsPage() {
 
         {!loading && filteredTalents.length === 0 && (
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '12px',
             padding: '60px',
             textAlign: 'center',
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
             <p style={{ fontSize: '48px', marginBottom: '16px' }}>📋</p>
-            <p style={{ fontSize: '16px', color: '#64748b', fontWeight: 500 }}>
+            <p style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.6)', fontWeight: 500 }}>
               Aucun talent trouvé
             </p>
           </div>

@@ -34,7 +34,7 @@ interface Contact {
 
 export default function SmartGenerateDocumentPage() {
   const router = useRouter();
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, isMobile } = useSidebar();
   const sidebarWidth = isCollapsed ? 80 : 260;
 
   const [step, setStep] = useState(1);
@@ -123,15 +123,15 @@ export default function SmartGenerateDocumentPage() {
 
       if (response.ok) {
         const result = await response.json();
-        alert('✅ Document généré avec succès !');
+        alert('Document généré avec succès !');
         router.push(`/admin/documents/${result.document.id}`);
       } else {
         const error = await response.json();
-        alert(`❌ Erreur: ${error.error}`);
+        alert(`Erreur: ${error.error}`);
       }
     } catch (error) {
       console.error('Error generating document:', error);
-      alert('❌ Erreur lors de la génération du document');
+      alert('Erreur lors de la génération du document');
     } finally {
       setGenerating(false);
     }
@@ -143,40 +143,104 @@ export default function SmartGenerateDocumentPage() {
       case 'FACTURE': return '#10b981';
       case 'DEVIS': return '#f59e0b';
       case 'ADMINISTRATIF': return '#6b7280';
-      default: return '#6366f1';
+      default: return '#D4AF37';
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    borderRadius: '8px',
+    fontSize: '14px',
+    color: 'white',
+    outline: 'none'
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: 600,
+    marginBottom: '8px',
+    color: 'rgba(255, 255, 255, 0.7)'
+  };
+
+  const sectionStyle = {
+    padding: '24px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '12px',
+    backdropFilter: 'blur(10px)'
+  };
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafbfc' }}>
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
+    }}>
       <AdminSidebar />
 
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
         transition: 'margin-left 0.3s ease',
-        padding: '40px'
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px'
       }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          {/* Decorative line with title */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '24px'
+          }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+              boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+            }} />
+            <div style={{
+              flex: 1,
+              height: '1px',
+              background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+            }} />
+            <span style={{
+              fontSize: '10px',
+              color: 'rgba(255,255,255,0.4)',
+              fontWeight: 600,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase'
+            }}>
+              Documents
+            </span>
+          </div>
+
           {/* Header */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '32px'
+            marginBottom: '32px',
+            flexWrap: 'wrap',
+            gap: '16px'
           }}>
             <div>
               <h1 style={{
                 fontSize: '28px',
                 fontWeight: 700,
-                color: '#0f172a',
+                color: 'white',
                 margin: 0,
                 marginBottom: '8px'
               }}>
                 Générer un document
               </h1>
               <p style={{
-                color: '#64748b',
+                color: 'rgba(255, 255, 255, 0.6)',
                 fontSize: '14px',
                 margin: 0
               }}>
@@ -190,9 +254,9 @@ export default function SmartGenerateDocumentPage() {
               href="/admin/documents"
               style={{
                 padding: '10px 20px',
-                backgroundColor: '#fff',
-                color: '#64748b',
-                border: '1px solid #e2e8f0',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: 'rgba(255, 255, 255, 0.6)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: 600,
@@ -222,7 +286,7 @@ export default function SmartGenerateDocumentPage() {
                 style={{
                   flex: 1,
                   height: '4px',
-                  backgroundColor: num <= step ? '#6366f1' : '#e2e8f0',
+                  backgroundColor: num <= step ? '#D4AF37' : 'rgba(255, 255, 255, 0.1)',
                   borderRadius: '2px',
                   transition: 'all 0.3s'
                 }}
@@ -235,7 +299,7 @@ export default function SmartGenerateDocumentPage() {
             <div>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))',
                 gap: '20px'
               }}>
                 {templates.map((template) => (
@@ -244,19 +308,20 @@ export default function SmartGenerateDocumentPage() {
                     onClick={() => handleTemplateSelect(template)}
                     style={{
                       padding: '24px',
-                      backgroundColor: '#fff',
-                      border: '2px solid #e2e8f0',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '2px solid rgba(255, 255, 255, 0.1)',
                       borderRadius: '12px',
                       cursor: 'pointer',
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s',
+                      backdropFilter: 'blur(10px)'
                     }}
                     onMouseOver={(e) => {
                       e.currentTarget.style.borderColor = getTypeColor(template.type);
                       e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = `0 4px 12px ${getTypeColor(template.type)}20`;
+                      e.currentTarget.style.boxShadow = `0 4px 20px ${getTypeColor(template.type)}30`;
                     }}
                     onMouseOut={(e) => {
-                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                       e.currentTarget.style.transform = 'translateY(0)';
                       e.currentTarget.style.boxShadow = 'none';
                     }}
@@ -273,7 +338,7 @@ export default function SmartGenerateDocumentPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: `${getTypeColor(template.type)}15`,
+                        backgroundColor: `${getTypeColor(template.type)}20`,
                         borderRadius: '8px',
                         fontSize: '20px'
                       }}>
@@ -286,7 +351,7 @@ export default function SmartGenerateDocumentPage() {
                         <h3 style={{
                           fontSize: '16px',
                           fontWeight: 600,
-                          color: '#0f172a',
+                          color: 'white',
                           margin: 0,
                           marginBottom: '4px'
                         }}>
@@ -294,7 +359,7 @@ export default function SmartGenerateDocumentPage() {
                         </h3>
                         <span style={{
                           padding: '2px 8px',
-                          backgroundColor: `${getTypeColor(template.type)}20`,
+                          backgroundColor: `${getTypeColor(template.type)}25`,
                           color: getTypeColor(template.type),
                           borderRadius: '4px',
                           fontSize: '11px',
@@ -307,7 +372,7 @@ export default function SmartGenerateDocumentPage() {
 
                     <p style={{
                       fontSize: '13px',
-                      color: '#64748b',
+                      color: 'rgba(255, 255, 255, 0.6)',
                       marginBottom: '16px',
                       lineHeight: '1.5'
                     }}>
@@ -317,24 +382,25 @@ export default function SmartGenerateDocumentPage() {
                     <div style={{
                       display: 'flex',
                       gap: '8px',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      flexWrap: 'wrap'
                     }}>
                       {template.requiresSignature && (
                         <span style={{
                           padding: '4px 8px',
-                          backgroundColor: '#f0fdf4',
-                          color: '#15803d',
+                          backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                          color: '#34d399',
                           borderRadius: '4px',
                           fontSize: '11px',
                           fontWeight: 600
                         }}>
-                          ✍️ Signature requise
+                          Signature requise
                         </span>
                       )}
                       <span style={{
                         padding: '4px 8px',
-                        backgroundColor: '#eff6ff',
-                        color: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                        color: '#60a5fa',
                         borderRadius: '4px',
                         fontSize: '11px',
                         fontWeight: 600
@@ -351,17 +417,11 @@ export default function SmartGenerateDocumentPage() {
           {/* Step 2: Select Contact/Talent */}
           {step === 2 && selectedTemplate && (
             <div>
-              <div style={{
-                padding: '24px',
-                backgroundColor: '#fff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                marginBottom: '24px'
-              }}>
+              <div style={sectionStyle}>
                 <h3 style={{
                   fontSize: '16px',
                   fontWeight: 600,
-                  color: '#0f172a',
+                  color: 'white',
                   marginBottom: '16px'
                 }}>
                   Template sélectionné : {selectedTemplate.name}
@@ -369,27 +429,13 @@ export default function SmartGenerateDocumentPage() {
 
                 {selectedTemplate.category === 'talent' && (
                   <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      marginBottom: '8px',
-                      color: '#475569'
-                    }}>
+                    <label style={labelStyle}>
                       Sélectionnez un talent
                     </label>
                     <select
                       value={selectedTalent}
                       onChange={(e) => setSelectedTalent(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        backgroundColor: '#fff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        outline: 'none'
-                      }}
+                      style={{ ...inputStyle, cursor: 'pointer' }}
                     >
                       <option value="">-- Choisir un talent --</option>
                       {talents.map(talent => (
@@ -403,27 +449,13 @@ export default function SmartGenerateDocumentPage() {
 
                 {(selectedTemplate.category === 'client' || selectedTemplate.category === 'commercial') && (
                   <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      marginBottom: '8px',
-                      color: '#475569'
-                    }}>
+                    <label style={labelStyle}>
                       Sélectionnez un client
                     </label>
                     <select
                       value={selectedContact}
                       onChange={(e) => setSelectedContact(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        backgroundColor: '#fff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        outline: 'none'
-                      }}
+                      style={{ ...inputStyle, cursor: 'pointer' }}
                     >
                       <option value="">-- Choisir un client --</option>
                       {contacts.map(contact => (
@@ -445,9 +477,9 @@ export default function SmartGenerateDocumentPage() {
                     onClick={() => setStep(1)}
                     style={{
                       padding: '12px 24px',
-                      backgroundColor: '#fff',
-                      color: '#64748b',
-                      border: '1px solid #e2e8f0',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      color: 'rgba(255, 255, 255, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
                       borderRadius: '8px',
                       fontSize: '14px',
                       fontWeight: 600,
@@ -460,13 +492,14 @@ export default function SmartGenerateDocumentPage() {
                     onClick={handleContinueToForm}
                     style={{
                       padding: '12px 24px',
-                      backgroundColor: '#6366f1',
-                      color: '#fff',
+                      background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                      color: 'black',
                       border: 'none',
                       borderRadius: '8px',
                       fontSize: '14px',
                       fontWeight: 600,
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)'
                     }}
                   >
                     Continuer
@@ -492,18 +525,15 @@ export default function SmartGenerateDocumentPage() {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 marginTop: '32px',
-                padding: '20px 24px',
-                backgroundColor: '#fff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px'
+                ...sectionStyle
               }}>
                 <button
                   onClick={() => setStep(2)}
                   style={{
                     padding: '12px 24px',
-                    backgroundColor: '#fff',
-                    color: '#64748b',
-                    border: '1px solid #e2e8f0',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: 600,
@@ -518,8 +548,8 @@ export default function SmartGenerateDocumentPage() {
                   disabled={generating}
                   style={{
                     padding: '14px 40px',
-                    backgroundColor: generating ? '#9ca3af' : '#6366f1',
-                    color: '#fff',
+                    background: generating ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                    color: generating ? 'rgba(255, 255, 255, 0.5)' : 'black',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '15px',
@@ -527,7 +557,8 @@ export default function SmartGenerateDocumentPage() {
                     cursor: generating ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    boxShadow: generating ? 'none' : '0 4px 15px rgba(212, 175, 55, 0.3)'
                   }}
                 >
                   {generating ? (

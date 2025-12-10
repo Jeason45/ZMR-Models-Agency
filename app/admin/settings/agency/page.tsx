@@ -26,7 +26,7 @@ interface AgencySettings {
 }
 
 export default function AgencySettingsPage() {
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, isMobile } = useSidebar();
   const sidebarWidth = isCollapsed ? 80 : 260;
 
   const [settings, setSettings] = useState<AgencySettings>({
@@ -94,47 +94,130 @@ export default function AgencySettingsPage() {
     }
   }
 
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '14px',
+    outline: 'none'
+  };
+
+  const labelStyle = {
+    display: 'block' as const,
+    fontSize: '13px',
+    fontWeight: 600,
+    marginBottom: '8px',
+    color: 'rgba(255, 255, 255, 0.7)'
+  };
+
+  const sectionStyle = {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '12px',
+    padding: '24px',
+    backdropFilter: 'blur(10px)'
+  };
+
+  const sectionTitleStyle = {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: 'white',
+    marginBottom: '20px'
+  };
+
   if (loading) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafbfc' }}>
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
+      }}>
         <AdminSidebar />
         <div style={{
           flex: 1,
-          marginLeft: `${sidebarWidth}px`,
-          padding: '40px',
+          marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+          padding: isMobile ? '20px' : '40px',
+          paddingTop: isMobile ? '80px' : '40px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          color: '#64748b'
+          color: 'rgba(255, 255, 255, 0.6)',
+          transition: 'margin-left 0.3s ease'
         }}>
-          Chargement...
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '3px solid rgba(212, 175, 55, 0.3)',
+            borderTopColor: '#D4AF37',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafbfc' }}>
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
+    }}>
       <AdminSidebar />
 
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
         transition: 'margin-left 0.3s ease',
-        padding: '40px'
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px'
       }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          {/* Decorative line with title */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '24px'
+          }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+              boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+            }} />
+            <div style={{
+              flex: 1,
+              height: '1px',
+              background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+            }} />
+            <span style={{
+              fontSize: '10px',
+              color: 'rgba(255,255,255,0.4)',
+              fontWeight: 600,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase'
+            }}>
+              Paramètres
+            </span>
+          </div>
+
           {/* Header */}
           <div style={{ marginBottom: '32px' }}>
             <h1 style={{
               fontSize: '28px',
               fontWeight: 700,
-              color: '#0f172a',
+              color: 'white',
               marginBottom: '8px'
             }}>
               Paramètres de l'agence
             </h1>
-            <p style={{ color: '#64748b', fontSize: '14px' }}>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
               Ces informations seront automatiquement utilisées dans vos documents (devis, contrats, factures...)
             </p>
           </div>
@@ -144,10 +227,10 @@ export default function AgencySettingsPage() {
             <div style={{
               padding: '16px',
               marginBottom: '24px',
-              backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2',
-              border: `1px solid ${message.type === 'success' ? '#86efac' : '#fecaca'}`,
+              backgroundColor: message.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+              border: `1px solid ${message.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
               borderRadius: '8px',
-              color: message.type === 'success' ? '#15803d' : '#dc2626',
+              color: message.type === 'success' ? '#34d399' : '#f87171',
               fontSize: '14px',
               fontWeight: 500
             }}>
@@ -158,108 +241,62 @@ export default function AgencySettingsPage() {
           {/* Form */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Informations de base */}
-            <div style={{
-              backgroundColor: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px'
-            }}>
-              <h2 style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: '#0f172a',
-                marginBottom: '20px'
-              }}>
+            <div style={sectionStyle}>
+              <h2 style={sectionTitleStyle}>
                 Informations de base
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '20px' }}>
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Nom de l'agence *
                   </label>
                   <input
                     type="text"
                     value={settings.nom_agence}
                     onChange={(e) => setSettings({ ...settings, nom_agence: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Adresse complète *
                   </label>
                   <input
                     type="text"
                     value={settings.adresse_agence}
                     onChange={(e) => setSettings({ ...settings, adresse_agence: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Téléphone *
                   </label>
                   <input
                     type="text"
                     value={settings.telephone_agence}
                     onChange={(e) => setSettings({ ...settings, telephone_agence: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Email *
                   </label>
                   <input
                     type="email"
                     value={settings.email_agence}
                     onChange={(e) => setSettings({ ...settings, email_agence: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Site web
                   </label>
                   <input
@@ -267,75 +304,40 @@ export default function AgencySettingsPage() {
                     value={settings.site_web_agence}
                     onChange={(e) => setSettings({ ...settings, site_web_agence: e.target.value })}
                     placeholder="https://..."
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
               </div>
             </div>
 
             {/* Informations juridiques */}
-            <div style={{
-              backgroundColor: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px'
-            }}>
-              <h2 style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: '#0f172a',
-                marginBottom: '20px'
-              }}>
+            <div style={sectionStyle}>
+              <h2 style={sectionTitleStyle}>
                 Informations juridiques
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '20px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     SIRET *
                   </label>
                   <input
                     type="text"
                     value={settings.siret_agence}
                     onChange={(e) => setSettings({ ...settings, siret_agence: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Forme juridique *
                   </label>
                   <select
                     value={settings.forme_juridique}
                     onChange={(e) => setSettings({ ...settings, forme_juridique: e.target.value })}
                     style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none',
+                      ...inputStyle,
                       cursor: 'pointer'
                     }}
                   >
@@ -349,7 +351,7 @@ export default function AgencySettingsPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Capital social *
                   </label>
                   <input
@@ -357,21 +359,12 @@ export default function AgencySettingsPage() {
                     value={settings.capital}
                     onChange={(e) => setSettings({ ...settings, capital: e.target.value })}
                     placeholder="Ex: 50 000 EUR"
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Ville RCS *
                   </label>
                   <input
@@ -379,82 +372,45 @@ export default function AgencySettingsPage() {
                     value={settings.ville_rcs}
                     onChange={(e) => setSettings({ ...settings, ville_rcs: e.target.value })}
                     placeholder="Ex: Paris"
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Numéro RCS *
                   </label>
                   <input
                     type="text"
                     value={settings.numero_rcs}
                     onChange={(e) => setSettings({ ...settings, numero_rcs: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
               </div>
             </div>
 
             {/* Représentant légal */}
-            <div style={{
-              backgroundColor: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px'
-            }}>
-              <h2 style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: '#0f172a',
-                marginBottom: '20px'
-              }}>
+            <div style={sectionStyle}>
+              <h2 style={sectionTitleStyle}>
                 Représentant légal
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '20px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Nom complet *
                   </label>
                   <input
                     type="text"
                     value={settings.representant_nom}
                     onChange={(e) => setSettings({ ...settings, representant_nom: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Qualité *
                   </label>
                   <input
@@ -462,40 +418,21 @@ export default function AgencySettingsPage() {
                     value={settings.representant_qualite}
                     onChange={(e) => setSettings({ ...settings, representant_qualite: e.target.value })}
                     placeholder="Ex: Président, Gérant..."
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
               </div>
             </div>
 
             {/* Paramètres par défaut */}
-            <div style={{
-              backgroundColor: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '24px'
-            }}>
-              <h2 style={{
-                fontSize: '18px',
-                fontWeight: 600,
-                color: '#0f172a',
-                marginBottom: '20px'
-              }}>
+            <div style={sectionStyle}>
+              <h2 style={sectionTitleStyle}>
                 Paramètres par défaut pour les documents
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '20px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     TVA par défaut (%)
                   </label>
                   <input
@@ -503,21 +440,12 @@ export default function AgencySettingsPage() {
                     step="0.1"
                     value={settings.tva_par_defaut}
                     onChange={(e) => setSettings({ ...settings, tva_par_defaut: parseFloat(e.target.value) || 0 })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Délai de paiement
                   </label>
                   <input
@@ -525,37 +453,19 @@ export default function AgencySettingsPage() {
                     value={settings.delai_paiement_defaut}
                     onChange={(e) => setSettings({ ...settings, delai_paiement_defaut: e.target.value })}
                     placeholder="Ex: 30 jours"
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
+                  <label style={labelStyle}>
                     Validité devis (jours)
                   </label>
                   <input
                     type="number"
                     value={settings.validite_devis_defaut}
                     onChange={(e) => setSettings({ ...settings, validite_devis_defaut: parseInt(e.target.value) || 0 })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      color: '#0f172a',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
+                    style={inputStyle}
                   />
                 </div>
               </div>
@@ -568,20 +478,27 @@ export default function AgencySettingsPage() {
                 disabled={saving}
                 style={{
                   padding: '12px 32px',
-                  backgroundColor: saving ? '#9ca3af' : '#6366f1',
-                  color: '#fff',
+                  background: saving ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                  color: saving ? 'rgba(255, 255, 255, 0.5)' : 'black',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: 600,
                   cursor: saving ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  boxShadow: saving ? 'none' : '0 4px 15px rgba(212, 175, 55, 0.3)'
                 }}
                 onMouseOver={(e) => {
-                  if (!saving) e.currentTarget.style.backgroundColor = '#4f46e5';
+                  if (!saving) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.4)';
+                  }
                 }}
                 onMouseOut={(e) => {
-                  if (!saving) e.currentTarget.style.backgroundColor = '#6366f1';
+                  if (!saving) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.3)';
+                  }
                 }}
               >
                 {saving ? 'Sauvegarde...' : 'Sauvegarder'}

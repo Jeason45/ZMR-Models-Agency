@@ -345,7 +345,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       'failed': { label: 'Échoué', bg: '#fee2e2', color: '#dc2626' },
       'refunded': { label: 'Remboursé', bg: '#e0e7ff', color: '#4f46e5' }
     };
-    return badges[status] || { label: status, bg: '#f1f5f9', color: '#64748b' };
+    return badges[status] || { label: status, bg: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.6)' };
   };
 
   const getBookingStatusBadge = (status: string) => {
@@ -355,7 +355,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       'cancelled': { label: 'Annulé', bg: '#fee2e2', color: '#dc2626' },
       'checked_in': { label: 'Enregistré', bg: '#dbeafe', color: '#2563eb' }
     };
-    return badges[status] || { label: status, bg: '#f1f5f9', color: '#64748b' };
+    return badges[status] || { label: status, bg: 'rgba(255, 255, 255, 0.1)', color: 'rgba(255, 255, 255, 0.6)' };
   };
 
   const formatDate = (dateString: string) => {
@@ -378,10 +378,11 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const inputStyle = {
     width: '100%',
     padding: '12px 16px',
-    border: '1px solid #e2e8f0',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
     borderRadius: '8px',
     fontSize: '15px',
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    color: 'white',
     outline: 'none'
   };
 
@@ -389,7 +390,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     display: 'block',
     fontSize: '14px',
     fontWeight: 600,
-    color: '#374151',
+    color: 'rgba(255, 255, 255, 0.7)',
     marginBottom: '8px'
   };
 
@@ -398,7 +399,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       <div style={{
         display: 'flex',
         minHeight: '100vh',
-        backgroundColor: '#f8fafc'
+        background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
       }}>
         <AdminSidebar />
         <div style={{
@@ -420,7 +421,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
       <div style={{
         display: 'flex',
         minHeight: '100vh',
-        backgroundColor: '#f8fafc'
+        background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
       }}>
         <AdminSidebar />
         <div style={{
@@ -433,12 +434,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           flexDirection: 'column',
           gap: '16px'
         }}>
-          <p style={{ fontSize: '18px', color: '#64748b' }}>Événement non trouvé</p>
+          <p style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.6)' }}>Événement non trouvé</p>
           <Link
             href="/admin/events"
             style={{
               padding: '12px 24px',
-              backgroundColor: '#6366f1',
+              background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
               color: 'white',
               borderRadius: '8px',
               textDecoration: 'none'
@@ -468,7 +469,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f8fafc'
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
     }}>
       <AdminSidebar />
 
@@ -489,10 +490,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             href="/admin/events"
             style={{
               padding: '8px 12px',
-              backgroundColor: '#f1f5f9',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
               textDecoration: 'none',
-              color: '#64748b',
+              color: 'rgba(255, 255, 255, 0.6)',
               fontSize: '14px',
               fontWeight: 500
             }}
@@ -503,12 +504,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             <h2 style={{
               fontSize: '28px',
               fontWeight: 700,
-              color: '#0f172a',
+              color: 'white',
               marginBottom: '4px'
             }}>
               {event.title}
             </h2>
-            <p style={{ fontSize: '14px', color: '#64748b' }}>
+            <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
               {formatDate(event.date)} - {event.location}
             </p>
           </div>
@@ -550,25 +551,25 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           marginBottom: '24px'
         }}>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
               Réservations
             </p>
-            <p style={{ fontSize: '24px', fontWeight: 700, color: '#0f172a' }}>
+            <p style={{ fontSize: '24px', fontWeight: 700, color: 'white' }}>
               {bookingStats.total}
             </p>
           </div>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
               Confirmées
             </p>
             <p style={{ fontSize: '24px', fontWeight: 700, color: '#059669' }}>
@@ -576,12 +577,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </p>
           </div>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
               Enregistrés
             </p>
             <p style={{ fontSize: '24px', fontWeight: 700, color: '#2563eb' }}>
@@ -589,12 +590,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </p>
           </div>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
               Annulées
             </p>
             <p style={{ fontSize: '24px', fontWeight: 700, color: '#dc2626' }}>
@@ -602,12 +603,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </p>
           </div>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
               Billets vendus
             </p>
             <p style={{ fontSize: '24px', fontWeight: 700, color: '#a21caf' }}>
@@ -615,12 +616,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             </p>
           </div>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0'
+            border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
               Revenus
             </p>
             <p style={{ fontSize: '20px', fontWeight: 700, color: '#059669' }}>
@@ -633,10 +634,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         <div style={{
           display: 'flex',
           gap: '8px',
-          backgroundColor: 'white',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
           padding: '6px',
           borderRadius: '8px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           width: 'fit-content',
           marginBottom: '24px'
         }}>
@@ -644,8 +645,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             onClick={() => setActiveTab('details')}
             style={{
               padding: '10px 20px',
-              backgroundColor: activeTab === 'details' ? '#6366f1' : 'transparent',
-              color: activeTab === 'details' ? 'white' : '#64748b',
+              background: activeTab === 'details' ? 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)' : 'transparent',
+              color: activeTab === 'details' ? 'black' : 'rgba(255, 255, 255, 0.6)',
               border: 'none',
               borderRadius: '6px',
               fontSize: '14px',
@@ -659,8 +660,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
             onClick={() => setActiveTab('bookings')}
             style={{
               padding: '10px 20px',
-              backgroundColor: activeTab === 'bookings' ? '#6366f1' : 'transparent',
-              color: activeTab === 'bookings' ? 'white' : '#64748b',
+              background: activeTab === 'bookings' ? 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)' : 'transparent',
+              color: activeTab === 'bookings' ? 'black' : 'rgba(255, 255, 255, 0.6)',
               border: 'none',
               borderRadius: '6px',
               fontSize: '14px',
@@ -683,15 +684,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {/* Basic Info */}
                 <div style={{
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   padding: '28px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <h3 style={{
                     fontSize: '18px',
                     fontWeight: 600,
-                    color: '#0f172a',
+                    color: 'white',
                     marginBottom: '24px'
                   }}>
                     Informations générales
@@ -760,15 +761,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                 {/* Location */}
                 <div style={{
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   padding: '28px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <h3 style={{
                     fontSize: '18px',
                     fontWeight: 600,
-                    color: '#0f172a',
+                    color: 'white',
                     marginBottom: '24px'
                   }}>
                     Lieu
@@ -813,10 +814,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                 {/* Tickets */}
                 <div style={{
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   padding: '28px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <div style={{
                     display: 'flex',
@@ -827,7 +828,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     <h3 style={{
                       fontSize: '18px',
                       fontWeight: 600,
-                      color: '#0f172a'
+                      color: 'white'
                     }}>
                       Billetterie
                     </h3>
@@ -845,7 +846,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         onChange={handleChange}
                         style={{ width: '18px', height: '18px' }}
                       />
-                      <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
                         Événement gratuit
                       </span>
                     </label>
@@ -858,9 +859,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           key={index}
                           style={{
                             padding: '20px',
-                            backgroundColor: '#f8fafc',
+                            background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)',
                             borderRadius: '8px',
-                            border: '1px solid #e2e8f0'
+                            border: '1px solid rgba(255, 255, 255, 0.1)'
                           }}
                         >
                           <div style={{
@@ -869,7 +870,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                             alignItems: 'center',
                             marginBottom: '16px'
                           }}>
-                            <span style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}>
                               Type de billet #{index + 1}
                               {ticket.sold ? ` (${ticket.sold} vendus)` : ''}
                             </span>
@@ -932,9 +933,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         onClick={addTicketType}
                         style={{
                           padding: '12px',
-                          backgroundColor: '#f1f5f9',
-                          color: '#6366f1',
-                          border: '1px dashed #6366f1',
+                          backgroundColor: 'transparent',
+                          color: '#D4AF37',
+                          border: '1px dashed rgba(212, 175, 55, 0.5)',
                           borderRadius: '8px',
                           fontSize: '14px',
                           fontWeight: 600,
@@ -963,15 +964,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {/* Publish */}
                 <div style={{
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   padding: '24px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <h3 style={{
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: '#0f172a',
+                    color: 'white',
                     marginBottom: '20px'
                   }}>
                     Publication
@@ -991,7 +992,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       onChange={handleChange}
                       style={{ width: '18px', height: '18px' }}
                     />
-                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
                       Publié
                     </span>
                   </label>
@@ -1002,13 +1003,14 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     style={{
                       width: '100%',
                       padding: '14px',
-                      backgroundColor: saving ? '#94a3b8' : '#6366f1',
-                      color: 'white',
+                      background: saving ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                      color: saving ? 'rgba(255, 255, 255, 0.5)' : 'black',
                       border: 'none',
                       borderRadius: '8px',
                       fontSize: '15px',
                       fontWeight: 600,
-                      cursor: saving ? 'not-allowed' : 'pointer'
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                      boxShadow: saving ? 'none' : '0 4px 15px rgba(212, 175, 55, 0.3)'
                     }}
                   >
                     {saving ? 'Enregistrement...' : 'Enregistrer'}
@@ -1017,15 +1019,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                 {/* Type & Status */}
                 <div style={{
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   padding: '24px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <h3 style={{
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: '#0f172a',
+                    color: 'white',
                     marginBottom: '20px'
                   }}>
                     Type & Statut
@@ -1067,15 +1069,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                 {/* Image */}
                 <div style={{
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   padding: '24px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <h3 style={{
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: '#0f172a',
+                    color: 'white',
                     marginBottom: '20px'
                   }}>
                     Image de couverture
@@ -1089,29 +1091,29 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                       onDrop={handleDrop}
                       onClick={() => fileInputRef.current?.click()}
                       style={{
-                        border: `2px dashed ${isDragging ? '#6366f1' : '#e2e8f0'}`,
+                        border: `2px dashed ${isDragging ? '#D4AF37' : 'rgba(255, 255, 255, 0.2)'}`,
                         borderRadius: '12px',
                         padding: '32px 20px',
                         textAlign: 'center',
                         cursor: 'pointer',
-                        backgroundColor: isDragging ? '#eef2ff' : '#f8fafc',
+                        backgroundColor: isDragging ? 'rgba(212, 175, 55, 0.1)' : 'rgba(255, 255, 255, 0.03)',
                         transition: 'all 0.2s'
                       }}
                     >
                       <div style={{ marginBottom: '12px' }}>
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={isDragging ? '#6366f1' : '#94a3b8'} strokeWidth="1.5" style={{ margin: '0 auto' }}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={isDragging ? '#D4AF37' : 'rgba(255, 255, 255, 0.4)'} strokeWidth="1.5" style={{ margin: '0 auto' }}>
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeLinecap="round" strokeLinejoin="round"/>
                           <polyline points="17,8 12,3 7,8" strokeLinecap="round" strokeLinejoin="round"/>
                           <line x1="12" y1="3" x2="12" y2="15" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
-                      <p style={{ fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '4px' }}>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '4px' }}>
                         Glissez-déposez une image ici
                       </p>
-                      <p style={{ fontSize: '12px', color: '#64748b' }}>
+                      <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
                         ou cliquez pour sélectionner
                       </p>
-                      <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '8px' }}>
+                      <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.3)', marginTop: '8px' }}>
                         PNG, JPG, WEBP (max 10MB)
                       </p>
                     </div>
@@ -1150,7 +1152,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                           <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round"/>
                         </svg>
                       </button>
-                      <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px', textAlign: 'center' }}>
+                      <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginTop: '8px', textAlign: 'center' }}>
                         Cliquez sur la croix pour changer l'image
                       </p>
                     </div>
@@ -1168,10 +1170,10 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     <div style={{
                       marginTop: '12px',
                       padding: '8px 12px',
-                      backgroundColor: '#eef2ff',
+                      backgroundColor: 'rgba(212, 175, 55, 0.15)',
                       borderRadius: '6px',
                       fontSize: '13px',
-                      color: '#6366f1',
+                      color: '#D4AF37',
                       textAlign: 'center'
                     }}>
                       {uploadProgress}
@@ -1180,7 +1182,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                   {/* Option URL alternative */}
                   <div style={{ marginTop: '16px' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
+                    <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '8px' }}>
                       Ou entrez une URL d'image :
                     </p>
                     <input
@@ -1202,15 +1204,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
                 {/* Additional Options */}
                 <div style={{
-                  backgroundColor: 'white',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   padding: '24px',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0'
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <h3 style={{
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: '#0f172a',
+                    color: 'white',
                     marginBottom: '20px'
                   }}>
                     Options
@@ -1252,7 +1254,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                         onChange={handleChange}
                         style={{ width: '18px', height: '18px' }}
                       />
-                      <span style={{ fontSize: '14px', fontWeight: 500, color: '#374151' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
                         Activer la Guest List
                       </span>
                     </label>
@@ -1277,36 +1279,36 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         ) : (
           /* Bookings Tab */
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
             overflow: 'hidden'
           }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#f8fafc' }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <tr style={{ background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)' }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     N° Réservation
                   </th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Client
                   </th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Billet
                   </th>
-                  <th style={{ padding: '16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Qté
                   </th>
-                  <th style={{ padding: '16px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '16px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Montant
                   </th>
-                  <th style={{ padding: '16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Paiement
                   </th>
-                  <th style={{ padding: '16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '16px', textAlign: 'center', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Statut
                   </th>
-                  <th style={{ padding: '16px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <th style={{ padding: '16px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Actions
                   </th>
                 </tr>
@@ -1314,7 +1316,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <tbody>
                 {event.bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
+                    <td colSpan={8} style={{ padding: '60px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)' }}>
                       <p style={{ fontSize: '48px', marginBottom: '16px' }}>🎫</p>
                       <p>Aucune réservation pour cet événement</p>
                     </td>
@@ -1327,40 +1329,40 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
                     return (
                       <tr
                         key={booking.id}
-                        style={{ borderTop: '1px solid #e2e8f0' }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                        style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
                         <td style={{ padding: '16px' }}>
-                          <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0f172a' }}>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'white' }}>
                             {booking.bookingNumber}
                           </span>
                         </td>
                         <td style={{ padding: '16px' }}>
-                          <p style={{ fontWeight: 500, color: '#0f172a', marginBottom: '2px' }}>
+                          <p style={{ fontWeight: 500, color: 'white', marginBottom: '2px' }}>
                             {booking.firstName} {booking.lastName}
                           </p>
-                          <p style={{ fontSize: '13px', color: '#64748b' }}>
+                          <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.6)' }}>
                             {booking.email}
                           </p>
                           {booking.phone && (
-                            <p style={{ fontSize: '13px', color: '#64748b' }}>
+                            <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.6)' }}>
                               {booking.phone}
                             </p>
                           )}
                         </td>
                         <td style={{ padding: '16px' }}>
-                          <span style={{ color: '#64748b' }}>
+                          <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                             {booking.ticketType}
                           </span>
                         </td>
                         <td style={{ padding: '16px', textAlign: 'center' }}>
-                          <span style={{ fontWeight: 600, color: '#0f172a' }}>
+                          <span style={{ fontWeight: 600, color: 'white' }}>
                             {booking.quantity}
                           </span>
                         </td>
                         <td style={{ padding: '16px', textAlign: 'right' }}>
-                          <span style={{ fontWeight: 600, color: '#0f172a' }}>
+                          <span style={{ fontWeight: 600, color: 'white' }}>
                             {formatPrice(booking.totalAmount)}
                           </span>
                         </td>

@@ -10,7 +10,7 @@ export default function EditModelPage() {
   const router = useRouter();
   const params = useParams();
   const modelId = params.id as string;
-  const { sidebarWidth } = useSidebar();
+  const { sidebarWidth, isMobile } = useSidebar();
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [currentStep, setCurrentStep] = useState(0); // Start at 0 for type selection
@@ -478,12 +478,12 @@ export default function EditModelPage() {
     return (
       <div style={{
         padding: '16px',
-        backgroundColor: 'white',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         borderRadius: '8px',
         border: `1px solid ${color}30`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <p style={{ fontSize: '13px', fontWeight: 600, color: '#475569' }}>{label}</p>
+          <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}>{label}</p>
           {sectionName && (
             <span style={{ padding: '2px 8px', backgroundColor: `${color}15`, color: color, fontSize: '10px', fontWeight: 600, borderRadius: '4px', textTransform: 'uppercase' }}>
               {sectionName}
@@ -498,7 +498,7 @@ export default function EditModelPage() {
             aspectRatio: aspectRatio,
             borderRadius: '8px',
             overflow: 'hidden',
-            border: '2px solid #e2e8f0',
+            border: '2px solid rgba(255, 255, 255, 0.15)',
             cursor: 'grab',
             position: 'relative',
             margin: '0 auto',
@@ -553,8 +553,8 @@ export default function EditModelPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px' }}>
-          <p style={{ fontSize: '11px', color: '#94a3b8' }}>Position: {position.x}% / {position.y}%</p>
-          <button type="button" onClick={() => updateImagePosition(imageKey, 50, 50)} style={{ padding: '4px 12px', fontSize: '11px', color: '#64748b', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '4px', cursor: 'pointer' }}>
+          <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.4)' }}>Position: {position.x}% / {position.y}%</p>
+          <button type="button" onClick={() => updateImagePosition(imageKey, 50, 50)} style={{ padding: '4px 12px', fontSize: '11px', color: 'rgba(255, 255, 255, 0.5)', backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '4px', cursor: 'pointer' }}>
             Centrer
           </button>
         </div>
@@ -1058,11 +1058,11 @@ export default function EditModelPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>
           Types de talent
         </h3>
 
-        <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '16px' }}>
           Sélectionnez un ou plusieurs types pour ce talent (cochez toutes les cases applicables)
         </p>
 
@@ -1077,9 +1077,9 @@ export default function EditModelPage() {
                 onClick={() => toggleType(type.value as any)}
                 style={{
                   padding: '20px',
-                  border: isSelected ? `2px solid ${type.color}` : '2px solid #e2e8f0',
+                  border: isSelected ? `2px solid ${type.color}` : '2px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '12px',
-                  background: isSelected ? `${type.color}10` : 'white',
+                  background: isSelected ? `${type.color}15` : 'rgba(255, 255, 255, 0.05)',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.2s',
@@ -1094,8 +1094,8 @@ export default function EditModelPage() {
                   width: '24px',
                   height: '24px',
                   borderRadius: '6px',
-                  border: isSelected ? `2px solid ${type.color}` : '2px solid #cbd5e1',
-                  backgroundColor: isSelected ? type.color : 'white',
+                  border: isSelected ? `2px solid ${type.color}` : '2px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: isSelected ? type.color : 'rgba(255, 255, 255, 0.1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1129,13 +1129,13 @@ export default function EditModelPage() {
                 <div style={{
                   fontSize: '16px',
                   fontWeight: 600,
-                  color: isSelected ? type.color : '#0f172a',
+                  color: isSelected ? type.color : 'white',
                   marginBottom: '8px',
                   marginTop: isPrimary ? '20px' : '0'
                 }}>
                   {type.label}
                 </div>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>
+                <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)' }}>
                   {type.desc}
                 </div>
               </div>
@@ -1146,11 +1146,11 @@ export default function EditModelPage() {
         {/* Résumé des types sélectionnés */}
         <div style={{
           padding: '16px',
-          backgroundColor: '#f8fafc',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
           borderRadius: '8px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
         }}>
-          <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '8px' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '8px' }}>
             Types sélectionnés :
           </p>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1173,7 +1173,7 @@ export default function EditModelPage() {
               );
             })}
           </div>
-          <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '8px' }}>
+          <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.4)', marginTop: '8px' }}>
             ★ = Type principal (utilisé pour la catégorie et les mensurations)
           </p>
         </div>
@@ -1183,12 +1183,12 @@ export default function EditModelPage() {
 
   const renderStep1 = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
+      <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>
         Informations de base
       </h3>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
           Nom * <span style={{ color: '#ef4444' }}>requis</span>
         </label>
         <input
@@ -1204,16 +1204,18 @@ export default function EditModelPage() {
           style={{
             width: '100%',
             padding: '10px 12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '6px',
             fontSize: '14px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            color: 'white',
           }}
           placeholder="Ex: Marie Martin"
         />
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
           Catégorie *
         </label>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -1228,7 +1230,7 @@ export default function EditModelPage() {
                   checked={formData.category === 'woman'}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                 />
-                <span style={{ fontSize: '14px', color: '#475569' }}>Woman</span>
+                <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>Woman</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                 <input
@@ -1238,7 +1240,7 @@ export default function EditModelPage() {
                   checked={formData.category === 'man'}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                 />
-                <span style={{ fontSize: '14px', color: '#475569' }}>Man</span>
+                <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>Man</span>
               </label>
             </>
           )}
@@ -1255,7 +1257,7 @@ export default function EditModelPage() {
                     checked={formData.category === cat}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                   />
-                  <span style={{ fontSize: '14px', color: '#475569', textTransform: 'capitalize' }}>{cat}</span>
+                  <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', textTransform: 'capitalize' }}>{cat}</span>
                 </label>
               ))}
             </>
@@ -1264,7 +1266,7 @@ export default function EditModelPage() {
           {/* Catégories PROMO - Multiples (checkboxes) */}
           {formData.type === 'PROMO' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '4px' }}>
+              <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '4px' }}>
                 Sélectionnez une ou plusieurs catégories:
               </div>
               {[
@@ -1286,7 +1288,7 @@ export default function EditModelPage() {
                       }
                     }}
                   />
-                  <span style={{ fontSize: '14px', color: '#475569' }}>{cat.label}</span>
+                  <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>{cat.label}</span>
                 </label>
               ))}
             </div>
@@ -1304,7 +1306,7 @@ export default function EditModelPage() {
                     checked={formData.category === cat}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                   />
-                  <span style={{ fontSize: '14px', color: '#475569', textTransform: 'capitalize' }}>{cat}</span>
+                  <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', textTransform: 'capitalize' }}>{cat}</span>
                 </label>
               ))}
             </>
@@ -1313,7 +1315,7 @@ export default function EditModelPage() {
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
           Statut
         </label>
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -1326,7 +1328,7 @@ export default function EditModelPage() {
                 checked={formData.status === status}
                 onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
               />
-              <span style={{ fontSize: '14px', color: '#475569', textTransform: 'capitalize' }}>{status}</span>
+              <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', textTransform: 'capitalize' }}>{status}</span>
             </label>
           ))}
         </div>
@@ -1346,7 +1348,7 @@ export default function EditModelPage() {
       required?: boolean;
     }) => (
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
           {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
         </label>
         <input
@@ -1356,9 +1358,11 @@ export default function EditModelPage() {
           style={{
             width: '100%',
             padding: '10px 12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '6px',
             fontSize: '14px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            color: 'white',
           }}
         />
         {(previews[fieldKey] || existingImages[fieldKey]) && (
@@ -1393,19 +1397,19 @@ export default function EditModelPage() {
         {/* ===== SECTION 1: IMAGES POUR LES CARDS (LISTES) ===== */}
         <div style={{
           padding: '24px',
-          backgroundColor: '#f8fafc',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
           borderRadius: '12px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <span style={{ padding: '4px 12px', backgroundColor: '#6366f1', color: 'white', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>
               CARDS
             </span>
-            <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', margin: 0 }}>
+            <h4 style={{ fontSize: '15px', fontWeight: 600, color: 'white', margin: 0 }}>
               Images pour les listes (All Models, etc.)
             </h4>
           </div>
-          <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '20px' }}>
             Ces images s'affichent dans les grilles de tous les talents. Ratio 3/4 (portrait).
           </p>
 
@@ -1418,8 +1422,8 @@ export default function EditModelPage() {
           {(previews.mainImage || existingImages.mainImage || previews.hoverImage || existingImages.hoverImage) && (
             <div style={{ display: 'grid', gridTemplateColumns: (previews.mainImage || existingImages.mainImage) && (previews.hoverImage || existingImages.hoverImage) ? '1fr 1fr' : '1fr', gap: '20px' }}>
               {(previews.mainImage || existingImages.mainImage) && (
-                <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <p style={{ fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '12px', textAlign: 'center' }}>
+                <div style={{ padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '12px', textAlign: 'center' }}>
                     Position: Card principale
                   </p>
                   <div
@@ -1428,7 +1432,7 @@ export default function EditModelPage() {
                       aspectRatio: '3/4',
                       borderRadius: '6px',
                       overflow: 'hidden',
-                      border: '2px solid #e2e8f0',
+                      border: '2px solid rgba(255, 255, 255, 0.15)',
                       cursor: 'grab',
                       position: 'relative',
                       margin: '0 auto',
@@ -1466,13 +1470,13 @@ export default function EditModelPage() {
                       </div>
                     </div>
                   </div>
-                  <p style={{ fontSize: '10px', color: '#94a3b8', textAlign: 'center', marginTop: '8px' }}>{formData.mainImagePositionX}% / {formData.mainImagePositionY}%</p>
-                  <button type="button" onClick={() => setFormData(prev => ({ ...prev, mainImagePositionX: 50, mainImagePositionY: 20 }))} style={{ display: 'block', margin: '4px auto 0', padding: '4px 12px', fontSize: '10px', color: '#64748b', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '4px', cursor: 'pointer' }}>Centrer</button>
+                  <p style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', textAlign: 'center', marginTop: '8px' }}>{formData.mainImagePositionX}% / {formData.mainImagePositionY}%</p>
+                  <button type="button" onClick={() => setFormData(prev => ({ ...prev, mainImagePositionX: 50, mainImagePositionY: 20 }))} style={{ display: 'block', margin: '4px auto 0', padding: '4px 12px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '4px', cursor: 'pointer' }}>Centrer</button>
                 </div>
               )}
               {(previews.hoverImage || existingImages.hoverImage) && (
-                <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <p style={{ fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '12px', textAlign: 'center' }}>
+                <div style={{ padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '12px', textAlign: 'center' }}>
                     Position: Card hover
                   </p>
                   <div
@@ -1481,7 +1485,7 @@ export default function EditModelPage() {
                       aspectRatio: '3/4',
                       borderRadius: '6px',
                       overflow: 'hidden',
-                      border: '2px solid #e2e8f0',
+                      border: '2px solid rgba(255, 255, 255, 0.15)',
                       cursor: 'grab',
                       position: 'relative',
                       margin: '0 auto',
@@ -1519,8 +1523,8 @@ export default function EditModelPage() {
                       </div>
                     </div>
                   </div>
-                  <p style={{ fontSize: '10px', color: '#94a3b8', textAlign: 'center', marginTop: '8px' }}>{formData.hoverImagePositionX}% / {formData.hoverImagePositionY}%</p>
-                  <button type="button" onClick={() => setFormData(prev => ({ ...prev, hoverImagePositionX: 50, hoverImagePositionY: 20 }))} style={{ display: 'block', margin: '4px auto 0', padding: '4px 12px', fontSize: '10px', color: '#64748b', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '4px', cursor: 'pointer' }}>Centrer</button>
+                  <p style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.4)', textAlign: 'center', marginTop: '8px' }}>{formData.hoverImagePositionX}% / {formData.hoverImagePositionY}%</p>
+                  <button type="button" onClick={() => setFormData(prev => ({ ...prev, hoverImagePositionX: 50, hoverImagePositionY: 20 }))} style={{ display: 'block', margin: '4px auto 0', padding: '4px 12px', fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '4px', cursor: 'pointer' }}>Centrer</button>
                 </div>
               )}
             </div>
@@ -1530,33 +1534,33 @@ export default function EditModelPage() {
         {/* ===== SECTION 2: HERO (pleine largeur sur le site) ===== */}
         <div style={{
           padding: '24px',
-          backgroundColor: '#fef3c7',
+          backgroundColor: 'rgba(245, 158, 11, 0.15)',
           borderRadius: '12px',
-          border: '1px solid #fbbf24',
+          border: '1px solid rgba(245, 158, 11, 0.4)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <span style={{ padding: '4px 12px', backgroundColor: '#f59e0b', color: 'white', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>
               HERO
             </span>
-            <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', margin: 0 }}>
+            <h4 style={{ fontSize: '15px', fontWeight: 600, color: 'white', margin: 0 }}>
               Section Hero (pleine largeur sur le site)
             </h4>
           </div>
-          <p style={{ fontSize: '13px', color: '#92400e', marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', color: '#f59e0b', marginBottom: '20px' }}>
             Première section visible. Ratio 16/9 (paysage). Si vidéo fournie, elle remplace l'image.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
             <ImageUploadField fieldKey="heroImage" label="Image Hero" />
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                 Vidéo Hero (prioritaire sur image)
               </label>
               <input
                 type="file"
                 accept="video/*"
                 onChange={(e) => e.target.files && handleFileChange('heroVideo', e.target.files[0])}
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '14px' }}
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '6px', fontSize: '14px', backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'white' }}
               />
               {(formData.heroVideo || existingImages.heroVideo) && (
                 <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1583,19 +1587,19 @@ export default function EditModelPage() {
         {/* ===== SECTION 3: PORTFOLIO (pleine largeur sur le site) ===== */}
         <div style={{
           padding: '24px',
-          backgroundColor: '#dbeafe',
+          backgroundColor: 'rgba(59, 130, 246, 0.15)',
           borderRadius: '12px',
-          border: '1px solid #3b82f6',
+          border: '1px solid rgba(59, 130, 246, 0.4)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <span style={{ padding: '4px 12px', backgroundColor: '#3b82f6', color: 'white', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>
               PORTFOLIO
             </span>
-            <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', margin: 0 }}>
+            <h4 style={{ fontSize: '15px', fontWeight: 600, color: 'white', margin: 0 }}>
               Section Portfolio (pleine largeur sur le site)
             </h4>
           </div>
-          <p style={{ fontSize: '13px', color: '#1e40af', marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', color: '#60a5fa', marginBottom: '20px' }}>
             Section cliquable qui mène à la galerie portfolio. Ratio 16/9 (paysage).
           </p>
 
@@ -1618,30 +1622,30 @@ export default function EditModelPage() {
         {/* ===== SECTION 4: SHOWS + SOCIAL (côte à côte sur le site) ===== */}
         <div style={{
           padding: '24px',
-          backgroundColor: '#f0fdf4',
+          backgroundColor: 'rgba(16, 185, 129, 0.15)',
           borderRadius: '12px',
-          border: '1px solid #22c55e',
+          border: '1px solid rgba(34, 197, 94, 0.4)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <span style={{ padding: '4px 12px', backgroundColor: '#22c55e', color: 'white', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>
               SHOWS + SOCIAL
             </span>
-            <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', margin: 0 }}>
+            <h4 style={{ fontSize: '15px', fontWeight: 600, color: 'white', margin: 0 }}>
               Sections Shows & Social (côte à côte sur le site)
             </h4>
           </div>
-          <p style={{ fontSize: '13px', color: '#166534', marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', color: '#22c55e', marginBottom: '20px' }}>
             Ces deux sections apparaissent côte à côte. Ratio 1/1 (carré) chacune.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             {/* Shows */}
-            <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <h5 style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', marginBottom: '12px' }}>Shows</h5>
+            <div style={{ padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <h5 style={{ fontSize: '14px', fontWeight: 600, color: 'white', marginBottom: '12px' }}>Shows</h5>
               <ImageUploadField fieldKey="showsImage" label="Image Shows" />
               <div style={{ marginTop: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#64748b', marginBottom: '6px' }}>Vidéo Shows (optionnel)</label>
-                <input type="file" accept="video/*" onChange={(e) => e.target.files && handleFileChange('showsVideo', e.target.files[0])} style={{ width: '100%', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '13px' }} />
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.5)', marginBottom: '6px' }}>Vidéo Shows (optionnel)</label>
+                <input type="file" accept="video/*" onChange={(e) => e.target.files && handleFileChange('showsVideo', e.target.files[0])} style={{ width: '100%', padding: '8px', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '4px', fontSize: '13px', backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'white' }} />
                 {(formData.showsVideo || existingImages.showsVideo) && <p style={{ fontSize: '11px', color: '#10b981', marginTop: '4px' }}>Video: {formData.showsVideo?.name || 'Existante'}</p>}
               </div>
               {(previews.showsImage || existingImages.showsImage) && (
@@ -1659,12 +1663,12 @@ export default function EditModelPage() {
             </div>
 
             {/* Social */}
-            <div style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <h5 style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', marginBottom: '12px' }}>Social / Instagram</h5>
+            <div style={{ padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+              <h5 style={{ fontSize: '14px', fontWeight: 600, color: 'white', marginBottom: '12px' }}>Social / Instagram</h5>
               <ImageUploadField fieldKey="instagramImage" label="Image Instagram" />
               <div style={{ marginTop: '12px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#64748b', marginBottom: '6px' }}>URL Instagram</label>
-                <input type="url" value={formData.instagramUrl} onChange={(e) => setFormData(prev => ({ ...prev, instagramUrl: e.target.value }))} placeholder="https://instagram.com/..." style={{ width: '100%', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '13px' }} />
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.5)', marginBottom: '6px' }}>URL Instagram</label>
+                <input type="url" value={formData.instagramUrl} onChange={(e) => setFormData(prev => ({ ...prev, instagramUrl: e.target.value }))} placeholder="https://instagram.com/..." style={{ width: '100%', padding: '8px', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '4px', fontSize: '13px', backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'white' }} />
               </div>
               {(previews.instagramImage || existingImages.instagramImage) && (
                 <div style={{ marginTop: '16px' }}>
@@ -1716,14 +1720,14 @@ export default function EditModelPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>
           {sectionTitles[formData.type]}
         </h3>
 
         {/* Showreel Video principal - uniquement pour ACTING */}
         {fields.video && (
           <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
               {imageLabels[formData.type].video}
             </label>
             <input
@@ -1733,9 +1737,11 @@ export default function EditModelPage() {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '6px',
                 fontSize: '14px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: 'white',
               }}
             />
             {formData[fields.video as keyof typeof formData] && (
@@ -1767,7 +1773,7 @@ export default function EditModelPage() {
         {/* Portfolio/Showreel image - sauf pour PROMO */}
         {fields.image && (
           <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
               {imageLabels[formData.type].single}
             </label>
             <input
@@ -1777,9 +1783,11 @@ export default function EditModelPage() {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '6px',
                 fontSize: '14px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: 'white',
               }}
             />
             {previews[fields.image] && (
@@ -1812,7 +1820,7 @@ export default function EditModelPage() {
         {/* Gallery - sauf pour PROMO */}
         {fields.gallery && (
           <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
               {imageLabels[formData.type].gallery}
             </label>
             <input
@@ -1823,9 +1831,11 @@ export default function EditModelPage() {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '6px',
                 fontSize: '14px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: 'white',
               }}
             />
             {/* Show both new files and existing images */}
@@ -1873,7 +1883,7 @@ export default function EditModelPage() {
         )}
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
           {formData.type === 'PROMO' || formData.type === 'ACTING' || formData.type === 'DETAILS' ? 'Cover Image - Pour section SOCIAL' : 'Image Instagram'}
         </label>
         <input
@@ -1883,9 +1893,11 @@ export default function EditModelPage() {
           style={{
             width: '100%',
             padding: '10px 12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '6px',
             fontSize: '14px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            color: 'white',
           }}
         />
         {previews.instagramImage && (
@@ -1915,7 +1927,7 @@ export default function EditModelPage() {
       </div>
 
       <div>
-        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
           {formData.type === 'PROMO' || formData.type === 'ACTING' || formData.type === 'DETAILS' ? 'URL Instagram - Pour section SOCIAL' : 'URL Instagram'}
         </label>
         <input
@@ -1930,9 +1942,11 @@ export default function EditModelPage() {
           style={{
             width: '100%',
             padding: '10px 12px',
-            border: '1px solid #e2e8f0',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '6px',
             fontSize: '14px',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            color: 'white',
           }}
           placeholder="https://instagram.com/..."
         />
@@ -1951,7 +1965,7 @@ export default function EditModelPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>
           {sectionTitles[formData.type]}
         </h3>
 
@@ -1959,7 +1973,7 @@ export default function EditModelPage() {
         {formData.type === 'MODELS' && (
           <>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                 Image Shows
               </label>
               <input
@@ -1969,9 +1983,11 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '6px',
                   fontSize: '14px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
                 }}
               />
               {previews.showsImage && (
@@ -2001,7 +2017,7 @@ export default function EditModelPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                 Vidéo Shows
               </label>
               <input
@@ -2011,9 +2027,11 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '6px',
                   fontSize: '14px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
                 }}
               />
               {formData.showsVideo && (
@@ -2047,7 +2065,7 @@ export default function EditModelPage() {
         {formData.type === 'ACTING' && (
           <>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                 Cover Image - Pour section CREDITS
               </label>
               <input
@@ -2057,9 +2075,11 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '6px',
                   fontSize: '14px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
                 }}
               />
               {previews.creditsImage && (
@@ -2089,10 +2109,10 @@ export default function EditModelPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '12px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '12px' }}>
                 Credits List (optionnel)
               </label>
-              <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>
+              <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '12px' }}>
                 Films, séries, théâtre, publicités, etc.
               </p>
 
@@ -2105,15 +2125,15 @@ export default function EditModelPage() {
                       alignItems: 'center',
                       gap: '12px',
                       padding: '12px',
-                      backgroundColor: '#f8fafc',
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
                       borderRadius: '6px',
-                      border: '1px solid #e2e8f0'
+                      border: '1px solid rgba(255, 255, 255, 0.15)'
                     }}>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '14px', fontWeight: 500, color: '#0f172a', marginBottom: '4px' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 500, color: 'white', marginBottom: '4px' }}>
                           {credit.title}
                         </p>
-                        <p style={{ fontSize: '13px', color: '#64748b' }}>
+                        <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)' }}>
                           {credit.role} • {credit.year} • {credit.type}
                         </p>
                       </div>
@@ -2162,22 +2182,22 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  backgroundColor: '#f1f5f9',
-                  border: '1px dashed #cbd5e1',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px dashed rgba(255, 255, 255, 0.2)',
                   borderRadius: '6px',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: '#475569',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e2e8f0';
-                  e.currentTarget.style.borderColor = '#94a3b8';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9';
-                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                 }}
               >
                 + Ajouter un crédit
@@ -2190,7 +2210,7 @@ export default function EditModelPage() {
         {formData.type === 'PROMO' && (
           <>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                 Cover Image - Pour section SHOWS
               </label>
               <input
@@ -2200,9 +2220,11 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '6px',
                   fontSize: '14px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
                 }}
               />
               {previews.showsImage && (
@@ -2232,7 +2254,7 @@ export default function EditModelPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                 Vidéo Shows - Pour section SHOWS (optionnel)
               </label>
               <input
@@ -2242,9 +2264,11 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '6px',
                   fontSize: '14px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
                 }}
               />
               {formData.showsVideo && (
@@ -2278,7 +2302,7 @@ export default function EditModelPage() {
         {formData.type === 'DETAILS' && (
           <>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                 Cover Image - Pour section CAMPAIGNS
               </label>
               <input
@@ -2288,9 +2312,11 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '6px',
                   fontSize: '14px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
                 }}
               />
               {previews.campaignsImage && (
@@ -2320,10 +2346,10 @@ export default function EditModelPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#475569', marginBottom: '12px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '12px' }}>
                 Campaigns List (optionnel)
               </label>
-              <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>
+              <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '12px' }}>
                 Ajoutez les campagnes publicitaires (marques, collaborations...)
               </p>
 
@@ -2336,16 +2362,16 @@ export default function EditModelPage() {
                       alignItems: 'center',
                       gap: '12px',
                       padding: '12px',
-                      backgroundColor: '#f8fafc',
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
                       borderRadius: '6px',
-                      border: '1px solid #e2e8f0'
+                      border: '1px solid rgba(255, 255, 255, 0.15)'
                     }}>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '14px', fontWeight: 500, color: '#0f172a', marginBottom: '4px' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 500, color: 'white', marginBottom: '4px' }}>
                           {campaign.brandName}
                         </p>
                         {(campaign.year || campaign.type) && (
-                          <p style={{ fontSize: '13px', color: '#64748b' }}>
+                          <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)' }}>
                             {campaign.year && <span>{campaign.year}</span>}
                             {campaign.year && campaign.type && <span> • </span>}
                             {campaign.type && <span>{campaign.type}</span>}
@@ -2393,22 +2419,22 @@ export default function EditModelPage() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  backgroundColor: '#f1f5f9',
-                  border: '1px dashed #cbd5e1',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px dashed rgba(255, 255, 255, 0.2)',
                   borderRadius: '6px',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: '#475569',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e2e8f0';
-                  e.currentTarget.style.borderColor = '#94a3b8';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9';
-                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                 }}
               >
                 + Ajouter une campagne
@@ -2420,16 +2446,16 @@ export default function EditModelPage() {
         {/* SECTION EXPERIENCE (commun à tous les types) */}
         <div style={{
           padding: '24px',
-          backgroundColor: '#f0f9ff',
+          backgroundColor: 'rgba(14, 165, 233, 0.15)',
           borderRadius: '12px',
-          border: '1px solid #bae6fd',
+          border: '1px solid rgba(14, 165, 233, 0.3)',
           marginTop: '24px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <span style={{ padding: '4px 12px', backgroundColor: '#0ea5e9', color: 'white', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>EXPERIENCE</span>
-            <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', margin: 0 }}>Section Experience (Shows, Credits, Collabs, Campaigns)</h4>
+            <h4 style={{ fontSize: '15px', fontWeight: 600, color: 'white', margin: 0 }}>Section Experience (Shows, Credits, Collabs, Campaigns)</h4>
           </div>
-          <p style={{ fontSize: '13px', color: '#0369a1', marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', color: '#38bdf8', marginBottom: '20px' }}>
             Cette section regroupe toutes les expériences du talent sur le site public. Cliquez sur une expérience pour la modifier.
           </p>
 
@@ -2449,7 +2475,7 @@ export default function EditModelPage() {
                 <div
                   key={exp.id}
                   style={{
-                    backgroundColor: 'white',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: '12px',
                     border: `2px solid ${colors.bg}30`,
                     overflow: 'hidden',
@@ -2530,10 +2556,10 @@ export default function EditModelPage() {
 
                   {/* Infos */}
                   <div style={{ padding: '12px 16px' }}>
-                    <p style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a', margin: '0 0 4px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', margin: '0 0 4px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {exp.title}
                     </p>
-                    <p style={{ fontSize: '12px', color: '#64748b', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {[exp.brand, exp.role, exp.year].filter(Boolean).join(' • ') || 'Cliquez pour ajouter des détails'}
                     </p>
                   </div>
@@ -2541,8 +2567,8 @@ export default function EditModelPage() {
                   {/* Actions */}
                   <div style={{
                     display: 'flex',
-                    borderTop: '1px solid #f1f5f9',
-                    backgroundColor: '#f8fafc',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
                   }}>
                     {/* Monter */}
                     <button
@@ -2582,7 +2608,7 @@ export default function EditModelPage() {
                         flex: 1,
                         padding: '8px',
                         border: 'none',
-                        borderLeft: '1px solid #e2e8f0',
+                        borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
                         backgroundColor: 'transparent',
                         cursor: index === (formData.experiences?.length || 0) - 1 ? 'not-allowed' : 'pointer',
                         opacity: index === (formData.experiences?.length || 0) - 1 ? 0.3 : 1,
@@ -2604,7 +2630,7 @@ export default function EditModelPage() {
                         flex: 1,
                         padding: '8px',
                         border: 'none',
-                        borderLeft: '1px solid #e2e8f0',
+                        borderLeft: '1px solid rgba(255, 255, 255, 0.15)',
                         backgroundColor: 'transparent',
                         cursor: 'pointer',
                         color: '#ef4444',
@@ -2624,7 +2650,7 @@ export default function EditModelPage() {
               onClick={() => openExperienceModal(null)}
               style={{
                 minHeight: '200px',
-                backgroundColor: 'white',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 border: '2px dashed #0ea5e950',
                 borderRadius: '12px',
                 fontSize: '14px',
@@ -2722,24 +2748,24 @@ export default function EditModelPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>
           Mensurations & Informations
         </h3>
 
         {/* Champs communs */}
         <div style={{
           padding: '20px',
-          backgroundColor: '#f8fafc',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
           borderRadius: '12px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
         }}>
-          <p style={{ fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '16px' }}>
+          <p style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '16px' }}>
             Informations communes
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             {commonFields.map(field => (
               <div key={field.key}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#64748b', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.5)', marginBottom: '6px' }}>
                   {field.label}
                 </label>
                 <input
@@ -2750,9 +2776,11 @@ export default function EditModelPage() {
                   style={{
                     width: '100%',
                     padding: '10px 12px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '6px',
                     fontSize: '14px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
                   }}
                   placeholder={field.placeholder}
                 />
@@ -2765,7 +2793,7 @@ export default function EditModelPage() {
         {allTypeFields.map(({ type, fields }) => (
           <div key={type} style={{
             padding: '20px',
-            backgroundColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             borderRadius: '12px',
             border: `2px solid ${typeColors[type]}20`,
           }}>
@@ -2780,14 +2808,14 @@ export default function EditModelPage() {
               }}>
                 {type}
               </span>
-              <p style={{ fontSize: '14px', fontWeight: 500, color: '#475569' }}>
+              <p style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>
                 Champs spécifiques
               </p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
               {fields.map(field => (
                 <div key={field.key}>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#64748b', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'rgba(255, 255, 255, 0.5)', marginBottom: '6px' }}>
                     {field.label}
                   </label>
                   <input
@@ -2801,9 +2829,11 @@ export default function EditModelPage() {
                     style={{
                       width: '100%',
                       padding: '10px 12px',
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
                       borderRadius: '6px',
                       fontSize: '14px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
                     }}
                     placeholder={field.placeholder}
                   />
@@ -2826,18 +2856,18 @@ export default function EditModelPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#0f172a', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>
           Récapitulatif
         </h3>
-        <p style={{ fontSize: '14px', color: '#64748b' }}>
+        <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.5)' }}>
           Vérifiez toutes les informations avant de valider les modifications.
         </p>
-        <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <p style={{ fontSize: '14px', color: '#475569' }}>
+        <div style={{ padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+          <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
             <strong>Nom:</strong> {formData.name}
           </p>
           <div style={{ marginTop: '12px' }}>
-            <strong style={{ fontSize: '14px', color: '#475569' }}>Types:</strong>
+            <strong style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>Types:</strong>
             <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
               {formData.types.map((type, index) => (
                 <span
@@ -2856,10 +2886,10 @@ export default function EditModelPage() {
               ))}
             </div>
           </div>
-          <p style={{ fontSize: '14px', color: '#475569', marginTop: '12px' }}>
+          <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '12px' }}>
             <strong>Catégorie:</strong> {formData.category}
           </p>
-          <p style={{ fontSize: '14px', color: '#475569', marginTop: '8px' }}>
+          <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', marginTop: '8px' }}>
             <strong>Statut:</strong> {formData.status}
           </p>
         </div>
@@ -2869,7 +2899,7 @@ export default function EditModelPage() {
 
   if (loadingData) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
+      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'rgba(255, 255, 255, 0.08)' }}>
         <AdminSidebar />
         <div style={{
           flex: 1,
@@ -2879,29 +2909,57 @@ export default function EditModelPage() {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <p style={{ fontSize: '16px', color: '#64748b' }}>Chargement...</p>
+          <p style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.5)' }}>Chargement...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)' }}>
       <AdminSidebar />
 
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
-        padding: '32px 40px',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px',
         transition: 'margin-left 0.3s ease'
       }}>
+        {/* Decorative line with title */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+          }} />
+          <div style={{
+            flex: 1,
+            height: '1px',
+            background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+          }} />
+          <span style={{
+            fontSize: '10px',
+            color: 'rgba(255,255,255,0.4)',
+            fontWeight: 600,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase'
+          }}>
+            Modifier Talent
+          </span>
+        </div>
+
         {/* Header */}
-        <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '28px', fontWeight: 600, color: '#0f172a', marginBottom: '4px' }}>
-              Modifier le Model
-            </h1>
-            <p style={{ fontSize: '14px', color: '#64748b' }}>
+            <p style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.6)' }}>
               Étape {currentStep + 1} sur 7
             </p>
           </div>
@@ -2909,12 +2967,12 @@ export default function EditModelPage() {
             onClick={() => router.push('/admin/models')}
             style={{
               padding: '10px 20px',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #e2e8f0',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: 500,
-              color: '#475569',
+              color: 'rgba(255, 255, 255, 0.8)',
               cursor: 'pointer',
             }}
           >
@@ -2931,14 +2989,14 @@ export default function EditModelPage() {
                 style={{
                   flex: 1,
                   height: '4px',
-                  backgroundColor: step <= currentStep ? '#6366f1' : '#e2e8f0',
+                  backgroundColor: step <= currentStep ? '#D4AF37' : 'rgba(255, 255, 255, 0.1)',
                   borderRadius: '2px',
                   transition: 'background-color 0.3s',
                 }}
               />
             ))}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)' }}>
             <span>Type</span>
             <span>Infos</span>
             <span>Images</span>
@@ -2952,12 +3010,12 @@ export default function EditModelPage() {
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '32px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0',
-            marginBottom: '24px'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            marginBottom: '24px',
+            backdropFilter: 'blur(10px)'
           }}>
             {currentStep === 0 && renderStep0()}
             {currentStep === 1 && renderStep1()}
@@ -2976,13 +3034,14 @@ export default function EditModelPage() {
               disabled={currentStep === 0}
               style={{
                 padding: '12px 24px',
-                backgroundColor: currentStep === 0 ? '#f1f5f9' : 'white',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
+                backgroundColor: currentStep === 0 ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: 500,
-                color: currentStep === 0 ? '#94a3b8' : '#475569',
+                color: currentStep === 0 ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.8)',
                 cursor: currentStep === 0 ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
               }}
             >
               Précédent
@@ -2998,13 +3057,14 @@ export default function EditModelPage() {
                 }}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: '#6366f1',
+                  backgroundColor: '#D4AF37',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   fontSize: '14px',
-                  fontWeight: 500,
-                  color: 'white',
+                  fontWeight: 600,
+                  color: 'black',
                   cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
               >
                 Suivant
@@ -3023,13 +3083,14 @@ export default function EditModelPage() {
                 }}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: loading || !formData.name || (!formData.mainImage && !existingImages.mainImage) ? '#94a3b8' : '#10b981',
+                  backgroundColor: loading || !formData.name || (!formData.mainImage && !existingImages.mainImage) ? 'rgba(255, 255, 255, 0.1)' : '#D4AF37',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   fontSize: '14px',
-                  fontWeight: 500,
-                  color: 'white',
+                  fontWeight: 600,
+                  color: loading || !formData.name || (!formData.mainImage && !existingImages.mainImage) ? 'rgba(255, 255, 255, 0.3)' : 'black',
                   cursor: loading || !formData.name || (!formData.mainImage && !existingImages.mainImage) ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
                 }}
               >
                 {loading ? 'Modification en cours...' : 'Modifier le Talent'}
@@ -3045,40 +3106,42 @@ export default function EditModelPage() {
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)',
+            backgroundColor: 'rgba(0,0,0,0.7)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
             padding: '20px',
+            backdropFilter: 'blur(4px)',
           }}
           onClick={closeExperienceModal}
         >
           <div
             style={{
-              backgroundColor: 'white',
+              background: 'linear-gradient(135deg, #0f1b2e 0%, #1a2744 100%)',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '700px',
               maxHeight: '90vh',
               overflow: 'auto',
-              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div style={{
               padding: '24px',
-              borderBottom: '1px solid #e2e8f0',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               position: 'sticky',
               top: 0,
-              backgroundColor: 'white',
+              background: 'linear-gradient(135deg, #0f1b2e 0%, #1a2744 100%)',
               zIndex: 1,
             }}>
-              <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#0f172a', margin: 0 }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'white', margin: 0 }}>
                 {experienceModal.editingIndex !== null ? 'Modifier l\'expérience' : 'Nouvelle expérience'}
               </h3>
               <button
@@ -3086,12 +3149,14 @@ export default function EditModelPage() {
                 onClick={closeExperienceModal}
                 style={{
                   padding: '8px',
-                  backgroundColor: '#f1f5f9',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   border: 'none',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   fontSize: '18px',
                   lineHeight: 1,
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  transition: 'all 0.2s',
                 }}
               >
                 ✕
@@ -3102,12 +3167,12 @@ export default function EditModelPage() {
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Type */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                   Type d'expérience *
                 </label>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {[
-                    { value: 'show', label: 'Show', desc: 'Défilés, Fashion Week', color: '#6366f1' },
+                    { value: 'show', label: 'Show', desc: 'Défilés, Fashion Week', color: '#D4AF37' },
                     { value: 'credit', label: 'Credit', desc: 'Films, Séries, Pubs', color: '#f59e0b' },
                     { value: 'collab', label: 'Collab', desc: 'Collaborations marques', color: '#10b981' },
                     { value: 'campaign', label: 'Campaign', desc: 'Campagnes pub', color: '#ec4899' },
@@ -3119,9 +3184,9 @@ export default function EditModelPage() {
                       style={{
                         flex: '1 1 140px',
                         padding: '12px',
-                        backgroundColor: experienceModal.data.type === opt.value ? opt.color : 'white',
-                        color: experienceModal.data.type === opt.value ? 'white' : '#475569',
-                        border: `2px solid ${experienceModal.data.type === opt.value ? opt.color : '#e2e8f0'}`,
+                        backgroundColor: experienceModal.data.type === opt.value ? opt.color : 'rgba(255, 255, 255, 0.05)',
+                        color: experienceModal.data.type === opt.value ? (opt.value === 'show' ? 'black' : 'white') : 'rgba(255, 255, 255, 0.7)',
+                        border: `2px solid ${experienceModal.data.type === opt.value ? opt.color : 'rgba(255, 255, 255, 0.15)'}`,
                         borderRadius: '8px',
                         cursor: 'pointer',
                         textAlign: 'left',
@@ -3137,7 +3202,7 @@ export default function EditModelPage() {
 
               {/* Titre */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                   Titre *
                 </label>
                 <input
@@ -3148,10 +3213,12 @@ export default function EditModelPage() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
                   }}
                 />
               </div>
@@ -3159,7 +3226,7 @@ export default function EditModelPage() {
               {/* Row: Marque + Année */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                     Marque / Maison
                   </label>
                   <input
@@ -3170,15 +3237,17 @@ export default function EditModelPage() {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
                       borderRadius: '8px',
                       fontSize: '14px',
                       boxSizing: 'border-box',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                     Année
                   </label>
                   <input
@@ -3189,10 +3258,12 @@ export default function EditModelPage() {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
                       borderRadius: '8px',
                       fontSize: '14px',
                       boxSizing: 'border-box',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
                     }}
                   />
                 </div>
@@ -3200,7 +3271,7 @@ export default function EditModelPage() {
 
               {/* Rôle */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                   Rôle / Description courte
                 </label>
                 <input
@@ -3211,17 +3282,19 @@ export default function EditModelPage() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
                   }}
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                   Description (optionnel)
                 </label>
                 <textarea
@@ -3232,18 +3305,20 @@ export default function EditModelPage() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     resize: 'vertical',
                     boxSizing: 'border-box',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
                   }}
                 />
               </div>
 
               {/* Images */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                   Images
                 </label>
                 <input
@@ -3254,11 +3329,13 @@ export default function EditModelPage() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '2px dashed #e2e8f0',
+                    border: '2px dashed rgba(255, 255, 255, 0.2)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     cursor: 'pointer',
                     boxSizing: 'border-box',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'rgba(255, 255, 255, 0.7)',
                   }}
                 />
 
@@ -3277,7 +3354,7 @@ export default function EditModelPage() {
                               height: '100px',
                               objectFit: 'cover',
                               borderRadius: '8px',
-                              border: idx === 0 ? '3px solid #0ea5e9' : '1px solid #e2e8f0',
+                              border: idx === 0 ? '3px solid #D4AF37' : '1px solid rgba(255, 255, 255, 0.15)',
                             }}
                           />
                           {idx === 0 && (
@@ -3286,8 +3363,8 @@ export default function EditModelPage() {
                               bottom: '-8px',
                               left: '50%',
                               transform: 'translateX(-50%)',
-                              backgroundColor: '#0ea5e9',
-                              color: 'white',
+                              backgroundColor: '#D4AF37',
+                              color: 'black',
                               padding: '2px 8px',
                               borderRadius: '4px',
                               fontSize: '9px',
@@ -3330,7 +3407,7 @@ export default function EditModelPage() {
               {/* Position de l'image (si au moins une image) */}
               {experienceModal.data.images.length > 0 && (
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                     Position de l'image cover (drag & drop)
                   </label>
                   <div
@@ -3340,7 +3417,7 @@ export default function EditModelPage() {
                       aspectRatio: '16/9',
                       borderRadius: '8px',
                       overflow: 'hidden',
-                      border: '2px solid #0ea5e9',
+                      border: '2px solid #D4AF37',
                       cursor: 'grab',
                       position: 'relative',
                       margin: '0 auto',
@@ -3401,7 +3478,7 @@ export default function EditModelPage() {
                       Glissez pour repositionner
                     </div>
                   </div>
-                  <p style={{ textAlign: 'center', fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
+                  <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '8px' }}>
                     Position: {Math.round(experienceModal.data.imagePosition.x)}% / {Math.round(experienceModal.data.imagePosition.y)}%
                   </p>
                 </div>
@@ -3409,7 +3486,7 @@ export default function EditModelPage() {
 
               {/* Vidéo (optionnel) */}
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '8px' }}>
                   Vidéo (optionnel)
                 </label>
                 <input
@@ -3419,10 +3496,12 @@ export default function EditModelPage() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     borderRadius: '8px',
                     fontSize: '14px',
                     boxSizing: 'border-box',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'rgba(255, 255, 255, 0.7)',
                   }}
                 />
                 {experienceModal.data.video && (
@@ -3438,26 +3517,27 @@ export default function EditModelPage() {
             {/* Footer */}
             <div style={{
               padding: '20px 24px',
-              borderTop: '1px solid #e2e8f0',
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               gap: '12px',
               justifyContent: 'flex-end',
               position: 'sticky',
               bottom: 0,
-              backgroundColor: 'white',
+              background: 'linear-gradient(135deg, #0f1b2e 0%, #1a2744 100%)',
             }}>
               <button
                 type="button"
                 onClick={closeExperienceModal}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: '#f1f5f9',
-                  border: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: 600,
-                  color: '#475569',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
               >
                 Annuler
@@ -3468,13 +3548,14 @@ export default function EditModelPage() {
                 disabled={!experienceModal.data.title.trim()}
                 style={{
                   padding: '12px 24px',
-                  backgroundColor: experienceModal.data.title.trim() ? '#0ea5e9' : '#94a3b8',
+                  backgroundColor: experienceModal.data.title.trim() ? '#D4AF37' : 'rgba(255, 255, 255, 0.1)',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: 600,
-                  color: 'white',
+                  color: experienceModal.data.title.trim() ? 'black' : 'rgba(255, 255, 255, 0.3)',
                   cursor: experienceModal.data.title.trim() ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s',
                 }}
               >
                 {experienceModal.editingIndex !== null ? 'Enregistrer' : 'Ajouter'}
