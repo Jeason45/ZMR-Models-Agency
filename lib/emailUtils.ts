@@ -1382,3 +1382,460 @@ export async function testEmailConnection(): Promise<boolean> {
     return false;
   }
 }
+
+// ============================================
+// MEMBER VERIFICATION EMAILS
+// ============================================
+
+/**
+ * Send verification email to new member
+ */
+export async function sendVerificationEmail(
+  email: string,
+  token: string,
+  firstName?: string
+): Promise<void> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const verificationUrl = `${baseUrl}/api/members/verify-email?token=${token}`;
+
+  const htmlContent = generateVerificationEmailHtml({
+    firstName: firstName || 'Membre',
+    verificationUrl,
+  });
+
+  const textContent = generateVerificationEmailText({
+    firstName: firstName || 'Membre',
+    verificationUrl,
+  });
+
+  await sendEmail({
+    to: email,
+    subject: 'Vérifiez votre email - ZMR Models Agency',
+    htmlContent,
+    textContent,
+    type: 'confirmation',
+  });
+}
+
+/**
+ * Generate HTML email for verification
+ */
+function generateVerificationEmailHtml(params: {
+  firstName: string;
+  verificationUrl: string;
+}): string {
+  const { firstName, verificationUrl } = params;
+
+  return `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérification de votre email</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background-color: #0f172a;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      margin: 0;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .greeting {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #0f172a;
+    }
+    .message {
+      font-size: 15px;
+      color: #475569;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .button-container {
+      text-align: center;
+      margin: 35px 0;
+    }
+    .button {
+      display: inline-block;
+      background-color: #0f172a;
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 16px 40px;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .button:hover {
+      background-color: #1e293b;
+    }
+    .link-fallback {
+      margin-top: 25px;
+      padding: 20px;
+      background-color: #f8fafc;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .link-fallback a {
+      color: #3b82f6;
+      word-break: break-all;
+    }
+    .warning {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #fef3c7;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #92400e;
+    }
+    .footer {
+      background-color: #f8fafc;
+      padding: 30px;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 13px;
+      color: #64748b;
+    }
+    .agency-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ZMR MODELS</h1>
+    </div>
+
+    <div class="content">
+      <p class="greeting">Bonjour ${firstName},</p>
+
+      <p class="message">
+        Merci de vous être inscrit sur ZMR Models Agency ! Pour activer votre compte et accéder à tout notre contenu exclusif, veuillez vérifier votre adresse email en cliquant sur le bouton ci-dessous.
+      </p>
+
+      <div class="button-container">
+        <a href="${verificationUrl}" class="button">VÉRIFIER MON EMAIL</a>
+      </div>
+
+      <div class="link-fallback">
+        Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :<br><br>
+        <a href="${verificationUrl}">${verificationUrl}</a>
+      </div>
+
+      <div class="warning">
+        ⏰ Ce lien expire dans 24 heures. Si vous n'avez pas demandé cette inscription, vous pouvez ignorer cet email.
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="agency-name">ZMR Models Agency</div>
+      <div class="footer-text">
+        Agence de mannequins professionnelle<br>
+        Paris, France
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Generate text email for verification
+ */
+function generateVerificationEmailText(params: {
+  firstName: string;
+  verificationUrl: string;
+}): string {
+  const { firstName, verificationUrl } = params;
+
+  return `
+Vérification de votre email - ZMR Models Agency
+
+Bonjour ${firstName},
+
+Merci de vous être inscrit sur ZMR Models Agency !
+
+Pour activer votre compte et accéder à tout notre contenu exclusif, veuillez vérifier votre adresse email en cliquant sur le lien ci-dessous :
+
+${verificationUrl}
+
+Ce lien expire dans 24 heures.
+
+Si vous n'avez pas demandé cette inscription, vous pouvez ignorer cet email.
+
+Cordialement,
+ZMR Models Agency
+  `.trim();
+}
+
+// ============================================
+// MEMBER APPROVAL EMAILS
+// ============================================
+
+/**
+ * Send approval email to member when admin approves their account
+ */
+export async function sendApprovalEmail(
+  email: string,
+  firstName?: string
+): Promise<void> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const loginUrl = `${baseUrl}/member/login`;
+
+  const htmlContent = generateApprovalEmailHtml({
+    firstName: firstName || 'Membre',
+    loginUrl,
+  });
+
+  const textContent = generateApprovalEmailText({
+    firstName: firstName || 'Membre',
+    loginUrl,
+  });
+
+  await sendEmail({
+    to: email,
+    subject: 'Votre compte a été validé - ZMR Models Agency',
+    htmlContent,
+    textContent,
+    type: 'confirmation',
+  });
+}
+
+/**
+ * Generate HTML email for account approval
+ */
+function generateApprovalEmailHtml(params: {
+  firstName: string;
+  loginUrl: string;
+}): string {
+  const { firstName, loginUrl } = params;
+
+  return `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compte validé</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background-color: #0f172a;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      margin: 0;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .success-badge {
+      background-color: #dcfce7;
+      color: #166534;
+      padding: 12px 24px;
+      border-radius: 50px;
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .greeting {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #0f172a;
+    }
+    .message {
+      font-size: 15px;
+      color: #475569;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .features {
+      background-color: #f8fafc;
+      padding: 24px;
+      border-radius: 8px;
+      margin: 24px 0;
+    }
+    .features h3 {
+      font-size: 14px;
+      color: #0f172a;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .features ul {
+      list-style: none;
+      padding: 0;
+    }
+    .features li {
+      padding: 8px 0;
+      color: #475569;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+    .features li::before {
+      content: "✓";
+      color: #22c55e;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+    .button-container {
+      text-align: center;
+      margin: 35px 0;
+    }
+    .button {
+      display: inline-block;
+      background-color: #22c55e;
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 16px 40px;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      border-radius: 4px;
+    }
+    .footer {
+      background-color: #f8fafc;
+      padding: 30px;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 13px;
+      color: #64748b;
+    }
+    .agency-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>ZMR MODELS</h1>
+    </div>
+
+    <div class="content">
+      <div style="text-align: center;">
+        <span class="success-badge">✓ Compte validé</span>
+      </div>
+
+      <p class="greeting">Bonjour ${firstName},</p>
+
+      <p class="message">
+        Excellente nouvelle ! Votre compte a été validé par notre équipe. Vous pouvez maintenant vous connecter et accéder à tout le contenu exclusif de ZMR Models Agency.
+      </p>
+
+      <div class="features">
+        <h3>Vous avez maintenant accès à :</h3>
+        <ul>
+          <li>Portfolios complets des mannequins</li>
+          <li>Photos exclusives</li>
+          <li>Galeries haute résolution</li>
+          <li>Contenu premium réservé aux membres</li>
+        </ul>
+      </div>
+
+      <div class="button-container">
+        <a href="${loginUrl}" class="button">SE CONNECTER</a>
+      </div>
+
+      <p class="message">
+        Nous vous remercions de votre confiance et vous souhaitons une excellente expérience sur notre plateforme.
+      </p>
+    </div>
+
+    <div class="footer">
+      <div class="agency-name">ZMR Models Agency</div>
+      <div class="footer-text">
+        Agence de mannequins professionnelle<br>
+        Paris, France
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
+/**
+ * Generate text email for account approval
+ */
+function generateApprovalEmailText(params: {
+  firstName: string;
+  loginUrl: string;
+}): string {
+  const { firstName, loginUrl } = params;
+
+  return `
+Compte validé - ZMR Models Agency
+
+Bonjour ${firstName},
+
+Excellente nouvelle ! Votre compte a été validé par notre équipe.
+
+Vous pouvez maintenant vous connecter et accéder à tout le contenu exclusif de ZMR Models Agency :
+
+- Portfolios complets des mannequins
+- Photos exclusives
+- Galeries haute résolution
+- Contenu premium réservé aux membres
+
+Connectez-vous ici : ${loginUrl}
+
+Nous vous remercions de votre confiance et vous souhaitons une excellente expérience sur notre plateforme.
+
+Cordialement,
+ZMR Models Agency
+  `.trim();
+}

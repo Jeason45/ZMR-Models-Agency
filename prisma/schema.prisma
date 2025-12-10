@@ -139,8 +139,11 @@ model Availability {
 model Talent {
   id        String   @id @default(cuid())
 
-  // Type de talent
+  // Type de talent (principal pour rétrocompatibilité)
   type      String   // "MODELS", "ACTING", "PROMO", "DETAILS"
+
+  // Types multiples (nouveau système)
+  types     Json?    // Array: ["MODELS", "ACTING"] - un talent peut être dans plusieurs catégories
 
   // Infos de base
   name      String
@@ -148,11 +151,31 @@ model Talent {
   category  String   // Pour MODELS: "woman"/"man", ACTING: "commercial"/"cinema"/"theater", PROMO: array, DETAILS: "hands"/"face"/etc.
   status    String   @default("active") // "active", "inactive", "archived"
 
+  // Contenu restreint (nécessite un compte membre pour voir)
+  hasRestrictedContent Boolean @default(false) // Si true, certaines galeries nécessitent une connexion
+  restrictedGallery    Json?   // Array d'images réservées aux membres connectés
+
   // Images principales (tous types)
   mainImage      String?  // Chemin vers l'image principale
   hoverImage     String?  // Chemin vers l'image au survol
   heroVideo      String?  // Chemin vers la vidéo hero
   heroImage      String?  // Pour DETAILS uniquement
+
+  // Position de l'image hero (top, center, bottom) - par défaut top pour montrer le visage
+  heroImagePosition String? @default("top")
+
+  // Position de l'image principale dans les cards (objectPosition en %)
+  // 50 = centré, 0 = gauche/haut, 100 = droite/bas
+  mainImagePositionX Int? @default(50)  // Position horizontale (0-100%)
+  mainImagePositionY Int? @default(20)  // Position verticale (0-100%) - défaut 20% pour montrer le visage
+
+  // Position de l'image hover dans les cards
+  hoverImagePositionX Int? @default(50)
+  hoverImagePositionY Int? @default(20)
+
+  // Positions de toutes les images (JSON flexible)
+  // Format: { "heroImage": {x: 50, y: 20}, "portfolioImage": {x: 50, y: 50}, ... }
+  imagePositions Json?
 
   // Gallery Images (array stocké en JSON)
   galleryImages  Json?    // Array de chemins d'images
@@ -228,6 +251,23 @@ model Talent {
   tiktokFollowers    Int?
   tiktokUrl          String?
   promoCategories    Json?  // Array: ["Beauty & Fashion", "Luxury Events", "Lifestyle"]
+
+  // ============================================
+  // WORK - Expériences unifiées (remplace credits, collaborations, campaigns, shows)
+  // ============================================
+  // Array d'objets: [{
+  //   id: string,
+  //   title: string,
+  //   type: "show" | "credit" | "collab" | "campaign",
+  //   description?: string,
+  //   brand?: string,
+  //   role?: string,
+  //   year?: string,
+  //   images: string[],
+  //   video?: string,
+  //   order: number
+  // }]
+  experiences       Json?
 
   // Informations personnelles complètes (pour CONTRATS)
   prenom_talent      String?
@@ -521,6 +561,165 @@ model MailLog {
 }
 
 // ============================================
+// EVENTS & BOOKINGS
+// ============================================
+
+model Event {
+  id          String   @id @default(cuid())
+
+  // Infos de base
+  title       String
+  slug        String   @unique
+  description String?  @db.Text
+
+  // Date et lieu
+  date        DateTime
+  endDate     DateTime?
+  location    String   // Nom du lieu
+  address     String?  // Adresse complète
+  city        String?
+
+  // Médias
+  coverImage  String?
+  gallery     Json?    // Array d'images
+
+  // Type et statut
+  type        String   // "club", "restaurant-bar", "private", "fashion", "casting"
+  status      String   @default("upcoming") // "upcoming", "ongoing", "past", "cancelled"
+
+  // Ticketing
+  isFree         Boolean @default(false)
+  ticketTypes    Json?   // [{name: "Regular", price: 20, quantity: 100, sold: 0}, {name: "VIP", price: 50, quantity: 20, sold: 0}]
+  maxCapacity    Int?
+
+  // Guest list
+  hasGuestList   Boolean @default(false)
+  guestListInfo  String? // Instructions pour la guest list
+
+  // Infos complémentaires
+  dresscode      String?
+  ageRestriction String? // "18+", "21+"
+  lineup         Json?   // [{name: "DJ Name", role: "DJ", time: "23:00"}]
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Publication
+  published    Boolean  @default(false)
+  publishedAt  DateTime?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  bookings     Booking[]
+
+  @@index([slug])
+  @@index([type])
+  @@index([status])
+  @@index([date])
+  @@index([published])
+  @@map("events")
+}
+
+model Booking {
+  id            String   @id @default(cuid())
+
+  // Relation avec l'event
+  eventId       String
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Numéro de réservation unique
+  bookingNumber String   @unique // ex: "ZMR-EVT-2025-001"
+
+  // Infos client
+  firstName     String
+  lastName      String
+  email         String
+  phone         String?
+
+  // Tickets
+  ticketType    String   // "Regular", "VIP", "Table"
+  quantity      Int
+  unitPrice     Float
+  totalAmount   Float
+
+  // Code promo appliqué
+  promoCode     String?
+  discount      Float?   // Montant de la réduction
+
+  // Paiement Stripe
+  stripePaymentIntentId String?
+  stripeSessionId       String?
+  paymentStatus         String   @default("pending") // "pending", "paid", "failed", "refunded"
+  paidAt                DateTime?
+
+  // Statut de la réservation
+  status        String   @default("pending") // "pending", "confirmed", "cancelled", "used", "no-show"
+
+  // QR Code pour validation à l'entrée
+  qrCode        String?  @unique
+  qrCodeUrl     String?
+
+  // Check-in
+  checkedInAt   DateTime?
+  checkedInBy   String?
+
+  // Notes
+  specialRequests String?
+  internalNotes   String?
+
+  // Remboursement
+  refundedAt    DateTime?
+  refundAmount  Float?
+  refundReason  String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([email])
+  @@index([bookingNumber])
+  @@index([status])
+  @@index([paymentStatus])
+  @@map("bookings")
+}
+
+model PromoCode {
+  id            String   @id @default(cuid())
+
+  code          String   @unique
+  description   String?
+
+  // Type de réduction
+  discountType  String   // "percentage", "fixed"
+  discountValue Float    // 10 pour 10% ou 10€
+
+  // Limites
+  maxUses       Int?     // Nombre max d'utilisations
+  usedCount     Int      @default(0)
+  minAmount     Float?   // Montant minimum de commande
+
+  // Validité
+  validFrom     DateTime @default(now())
+  validUntil    DateTime?
+
+  // Restrictions
+  eventIds      Json?    // Array d'IDs d'events où le code est valide (null = tous)
+  ticketTypes   Json?    // Array de types de tickets où le code est valide (null = tous)
+
+  isActive      Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@map("promo_codes")
+}
+
+// ============================================
 // BLOG
 // ============================================
 
@@ -565,5 +764,49 @@ model BlogPost {
   @@index([published])
   @@index([publishedAt])
   @@map("blog_posts")
+}
+
+// ============================================
+// MEMBERS (Utilisateurs du site - espace membre)
+// ============================================
+
+model Member {
+  id            String   @id @default(cuid())
+
+  // Informations de base
+  email         String   @unique
+  password      String?  // Null si connexion via OAuth uniquement
+  name          String?
+  firstName     String?
+  lastName      String?
+  avatar        String?  // URL de l'avatar
+
+  // Authentification OAuth
+  provider      String?  // "google", "credentials", etc.
+  providerId    String?  // ID unique du provider OAuth
+
+  // Vérification email
+  emailVerified Boolean  @default(false)
+  verificationToken String?  @unique
+  verificationTokenExpires DateTime?
+
+  // Réinitialisation mot de passe
+  resetPasswordToken String?  @unique
+  resetPasswordExpires DateTime?
+
+  // Statut du compte
+  status        String   @default("pending") // "pending", "active", "suspended", "banned"
+
+  // Métadonnées
+  lastLoginAt   DateTime?
+  loginCount    Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([verificationToken])
+  @@map("members")
 }
 

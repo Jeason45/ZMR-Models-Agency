@@ -2,9 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
+import MemberIcon from '@/components/MemberIcon';
 
 export default function Home() {
+  const router = useRouter();
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -20,13 +23,15 @@ export default function Home() {
   ];
 
   const menuItems = [
-    { name: 'Models', href: '/models' },
-    { name: 'Acting', href: '/acting' },
-    { name: 'Promo', href: '/promo' },
-    { name: 'Détails', href: '/details' },
-    { name: 'Blog', href: '/blog' },
+    { name: 'All Models', href: '/explore' },
+    { name: 'Events', href: '/events' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  const handleMenuClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    router.push(href);
+  };
 
   const handleVideoEnd = () => {
     setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
@@ -154,7 +159,7 @@ export default function Home() {
                 color: 'white',
                 fontWeight: 300,
                 letterSpacing: '0.2em',
-                fontSize: 'clamp(35px, 8vw, 110px)',
+                fontSize: 'clamp(32px, 6vw, 72px)',
                 lineHeight: 1,
                 margin: 0,
                 transition: 'opacity 0.3s'
@@ -168,9 +173,9 @@ export default function Home() {
                 color: 'white',
                 fontWeight: 300,
                 letterSpacing: '0.4em',
-                fontSize: 'clamp(9px, 1.3vw, 12px)',
+                fontSize: 'clamp(8px, 1vw, 11px)',
                 textTransform: 'uppercase',
-                marginTop: '12px'
+                marginTop: '10px'
               }}>
                 Models Agency
               </p>
@@ -209,6 +214,9 @@ export default function Home() {
               <path d="m21 21-4.35-4.35" strokeLinecap="round" />
             </svg>
           </button>
+
+          {/* Member Icon */}
+          <MemberIcon size={20} color="white" />
 
           {/* Instagram Icon */}
           <a
@@ -275,12 +283,13 @@ export default function Home() {
           left: 0,
           width: '100%',
           height: '100vh',
-          backgroundColor: 'white',
-          zIndex: 45,
+          backgroundColor: '#0a0a0a',
+          zIndex: 100,
           display: 'flex',
-          alignItems: 'flex-start',
+          flexDirection: 'column',
+          alignItems: 'center',
           justifyContent: 'center',
-          paddingTop: '150px',
+          padding: '20px',
           overflowY: 'auto',
           overscrollBehavior: 'contain'
         }}>
@@ -291,10 +300,11 @@ export default function Home() {
               autoFocus
               style={{
                 width: '100%',
-                fontSize: '32px',
+                fontSize: 'clamp(24px, 5vw, 32px)',
                 fontWeight: 300,
+                color: 'white',
                 border: 'none',
-                borderBottom: '1px solid #e0e0e0',
+                borderBottom: '1px solid rgba(255,255,255,0.3)',
                 paddingBottom: '16px',
                 outline: 'none',
                 background: 'transparent'
@@ -307,14 +317,14 @@ export default function Home() {
             onClick={() => setIsSearchOpen(false)}
             style={{
               position: 'fixed',
-              top: '32px',
-              right: '32px',
-              zIndex: 50,
+              top: 'clamp(20px, 4vh, 32px)',
+              right: 'clamp(16px, 4vw, 32px)',
+              zIndex: 101,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              width: '32px',
-              height: '32px',
+              width: 'clamp(28px, 4vw, 32px)',
+              height: 'clamp(28px, 4vw, 32px)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
@@ -326,14 +336,14 @@ export default function Home() {
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: "black",
+              backgroundColor: 'white',
               transform: 'rotate(45deg)'
             }} />
             <span style={{
               position: 'absolute',
               width: '100%',
               height: '2px',
-              backgroundColor: "black",
+              backgroundColor: 'white',
               transform: 'rotate(-45deg)'
             }} />
           </button>
@@ -369,6 +379,7 @@ export default function Home() {
                 key={item.name}
                 href={item.href}
                 prefetch={true}
+                onClick={(e) => handleMenuClick(e, item.href)}
                 style={{
                   color: 'white',
                   fontSize: 'clamp(28px, 5.5vw, 90px)',

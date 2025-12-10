@@ -2,19 +2,25 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useMemberAuth } from '@/hooks/useMemberAuth';
+import RestrictedContent from '@/components/RestrictedContent';
+import MemberIcon from '@/components/MemberIcon';
 
 function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const router = useRouter();
 
   const menuItems = [
-    { name: 'Models', href: '/models' },
-    { name: 'Acting', href: '/acting' },
-    { name: 'Promo', href: '/promo' },
-    { name: 'Détails', href: '/details' },
-    { name: 'Blog', href: '/blog' },
+    { name: 'All Models', href: '/explore' },
+    { name: 'Events', href: '/events' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  const handleMenuClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    router.push(href);
+  };
 
   return (
     <>
@@ -38,7 +44,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               color: 'white',
               fontWeight: 300,
               letterSpacing: '0.2em',
-              fontSize: 'clamp(35px, 8vw, 110px)',
+              fontSize: 'clamp(32px, 6vw, 72px)',
               lineHeight: 1,
               margin: 0,
               transition: 'opacity 0.3s'
@@ -52,9 +58,9 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
               color: 'white',
               fontWeight: 300,
               letterSpacing: '0.4em',
-              fontSize: 'clamp(9px, 1.3vw, 12px)',
+              fontSize: 'clamp(8px, 1vw, 11px)',
               textTransform: 'uppercase',
-              marginTop: '12px'
+              marginTop: '10px'
             }}>
               Models Agency
             </p>
@@ -66,33 +72,16 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
       {!isMenuOpen && (
         <div style={{
           position: 'fixed',
-          top: scrollDirection === 'down' ? '-300px' : '32px',
-          right: '32px',
+          top: scrollDirection === 'down' ? '-300px' : 'clamp(20px, 4vh, 32px)',
+          right: 'clamp(16px, 4vw, 32px)',
           zIndex: 50,
           display: 'flex',
           alignItems: 'center',
-          gap: '24px',
+          gap: 'clamp(16px, 3vw, 24px)',
           transition: 'top 0.5s ease-in-out'
         }}>
-        {/* Search Icon */}
-        <button
-          onClick={() => setIsSearchOpen(!isSearchOpen)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          aria-label="Search"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" strokeLinecap="round" />
-          </svg>
-        </button>
+        {/* Member Icon */}
+        <MemberIcon size={20} color="white" />
 
         {/* Instagram Icon */}
         <a
@@ -126,8 +115,8 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            width: '32px',
-            height: '32px',
+            width: 'clamp(28px, 4vw, 32px)',
+            height: 'clamp(28px, 4vw, 32px)',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
@@ -139,7 +128,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             width: '100%',
             height: '2px',
             backgroundColor: 'white',
-            marginBottom: '8px'
+            marginBottom: 'clamp(6px, 1vw, 8px)'
           }} />
           <span style={{
             width: '100%',
@@ -147,76 +136,6 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
             backgroundColor: 'white'
           }} />
         </button>
-        </div>
-      )}
-
-      {/* Search Overlay */}
-      {isSearchOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'white',
-          zIndex: 45,
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'center',
-          paddingTop: '150px'
-        }}>
-          <div style={{ width: '100%', maxWidth: '600px', padding: '0 32px' }}>
-            <input
-              type="text"
-              placeholder="Search..."
-              autoFocus
-              style={{
-                width: '100%',
-                fontSize: '32px',
-                fontWeight: 300,
-                border: 'none',
-                borderBottom: '1px solid #e0e0e0',
-                paddingBottom: '16px',
-                outline: 'none',
-                background: 'transparent'
-              }}
-            />
-          </div>
-
-          <button
-            onClick={() => setIsSearchOpen(false)}
-            style={{
-              position: 'fixed',
-              top: '32px',
-              right: '32px',
-              zIndex: 50,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '32px',
-              height: '32px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0
-            }}
-            aria-label="Close Search"
-          >
-            <span style={{
-              position: 'absolute',
-              width: '100%',
-              height: '2px',
-              backgroundColor: 'black',
-              transform: 'rotate(45deg)'
-            }} />
-            <span style={{
-              position: 'absolute',
-              width: '100%',
-              height: '2px',
-              backgroundColor: 'black',
-              transform: 'rotate(-45deg)'
-            }} />
-          </button>
         </div>
       )}
 
@@ -246,6 +165,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
                 key={item.name}
                 href={item.href}
                 prefetch={true}
+                onClick={(e) => handleMenuClick(e, item.href)}
                 style={{
                   color: 'white',
                   fontSize: 'clamp(32px, 6vw, 100px)',
@@ -302,7 +222,7 @@ function Navbar({ scrollDirection }: { scrollDirection: 'up' | 'down' }) {
   );
 }
 
-type CategoryType = 'all' | 'hands' | 'face' | 'feet' | 'legs' | 'body' | 'hair' | 'torso' | 'others';
+type CategoryType = 'all' | 'hands' | 'face' | 'feet' | 'legs' | 'body' | 'hair' | 'torso' | 'eyes' | 'lips' | 'others';
 
 export default function DetailsPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('all');
@@ -313,6 +233,13 @@ export default function DetailsPage() {
   const [loading, setLoading] = useState(true);
   const lastScrollY = useRef(0);
   const scrollDirectionRef = useRef<'up' | 'down'>('up');
+  const { isAuthenticated } = useMemberAuth();
+
+  // Helper pour vérifier si le contenu est restreint
+  const isContentRestricted = (detail: any) => {
+    const restrictedCategories = ['hands', 'feet'];
+    return restrictedCategories.includes(detail.category?.toLowerCase()) || detail.hasRestrictedContent;
+  };
 
   useEffect(() => {
     const updateScrollDirection = () => {
@@ -354,6 +281,7 @@ export default function DetailsPage() {
           mainImage: detail.mainImage,
           hoverImage: detail.hoverImage,
           height: detail.height,
+          hasRestrictedContent: detail.hasRestrictedContent,
           isPrisma: true
         }));
 
@@ -406,6 +334,8 @@ export default function DetailsPage() {
           { value: 'all', label: 'All' },
           { value: 'hands', label: 'Hands' },
           { value: 'face', label: 'Face' },
+          { value: 'eyes', label: 'Eyes' },
+          { value: 'lips', label: 'Lips' },
           { value: 'feet', label: 'Feet' },
           { value: 'legs', label: 'Legs' },
           { value: 'body', label: 'Body' },
@@ -499,21 +429,26 @@ export default function DetailsPage() {
         {filteredDetails.map((detail) => (
           <Link
             key={detail._id}
-            href={`/details/${detail.slug}`}
+            href={`/talent/${detail.slug}`}
             style={{
               textDecoration: 'none'
             }}
             onMouseEnter={() => setHoveredDetailId(detail._id)}
             onMouseLeave={() => setHoveredDetailId(null)}
           >
-            {/* Image Container */}
-            <div style={{
-              position: 'relative',
-              aspectRatio: '3/4',
-              overflow: 'hidden',
-              cursor: 'pointer',
-              marginBottom: '16px'
-            }}>
+            {/* Image Container - avec floutage si restreint */}
+            <RestrictedContent
+              isAuthenticated={isAuthenticated || !isContentRestricted(detail)}
+              blurAmount={12}
+              overlayOpacity={0.7}
+              message="Contenu réservé aux membres"
+              showLoginButton={false}
+              style={{
+                aspectRatio: '3/4',
+                marginBottom: '16px',
+                borderRadius: '4px'
+              }}
+            >
               <div style={{
                 width: '100%',
                 height: '100%',
@@ -553,7 +488,7 @@ export default function DetailsPage() {
                   />
                 )}
               </div>
-            </div>
+            </RestrictedContent>
 
             {/* Detail Name & Category Below Image */}
             <div style={{

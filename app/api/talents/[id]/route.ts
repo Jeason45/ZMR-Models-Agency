@@ -134,6 +134,7 @@ export async function PUT(
       name: body.name,
       slug: body.slug,
       type: body.type,
+      types: body.types || [body.type],
       category: body.category,
       status: body.status,
 
@@ -142,12 +143,25 @@ export async function PUT(
       hoverImage: body.hoverImage,
       heroVideo: body.heroVideo,
       heroImage: body.heroImage,
+      heroImagePosition: body.heroImagePosition,
       galleryImages: body.galleryImages,
+
+      // Position des images dans les cards
+      mainImagePositionX: body.mainImagePositionX,
+      mainImagePositionY: body.mainImagePositionY,
+      hoverImagePositionX: body.hoverImagePositionX,
+      hoverImagePositionY: body.hoverImagePositionY,
+
+      // Positions de toutes les images de la page talent (JSON)
+      imagePositions: body.imagePositions,
 
       // Mensurations communes
       height: body.height,
       eyes: body.eyes,
       hair: body.hair,
+
+      // Experiences (commun à tous les types)
+      experiences: body.experiences || [],
     };
 
     // Champs spécifiques MODELS
@@ -188,6 +202,10 @@ export async function PUT(
 
     // Champs spécifiques PROMO
     if (body.type === 'PROMO') {
+      // Conversion des followers en entiers (ou null si vide/invalide)
+      const instagramFollowers = body.instagramFollowers ? parseInt(body.instagramFollowers, 10) : null;
+      const tiktokFollowers = body.tiktokFollowers ? parseInt(body.tiktokFollowers, 10) : null;
+
       Object.assign(updateData, {
         portfolioImage: body.portfolioImage,
         showsImage: body.showsImage,
@@ -199,8 +217,8 @@ export async function PUT(
         socialImage: body.socialImage,
         instagramImage: body.instagramImage,
         instagramUrl: body.instagramUrl,
-        instagramFollowers: body.instagramFollowers,
-        tiktokFollowers: body.tiktokFollowers,
+        instagramFollowers: isNaN(instagramFollowers as number) ? null : instagramFollowers,
+        tiktokFollowers: isNaN(tiktokFollowers as number) ? null : tiktokFollowers,
         tiktokUrl: body.tiktokUrl,
         promoCategories: body.promoCategories,
       });

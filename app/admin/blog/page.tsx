@@ -29,7 +29,7 @@ type BlogPost = {
 const categories = ['Actualités', 'Success Stories', 'Conseils', 'Behind-the-Scenes', 'Industrie'];
 
 export default function AdminBlogPage() {
-  const { sidebarWidth } = useSidebar();
+  const { sidebarWidth, isMobile } = useSidebar();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
@@ -37,7 +37,6 @@ export default function AdminBlogPage() {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Form state
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -117,7 +116,6 @@ export default function AdminBlogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation de l'image
     if (!formData.coverImage) {
       alert('Veuillez sélectionner une image de couverture');
       return;
@@ -202,52 +200,78 @@ export default function AdminBlogPage() {
     });
   };
 
+  const stats = {
+    total: posts.length,
+    published: posts.filter(p => p.published).length,
+    draft: posts.filter(p => !p.published).length
+  };
+
   return (
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f1f5f9'
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
     }}>
       <AdminSidebar />
 
-      {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
-        padding: '32px 40px',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px',
         transition: 'margin-left 0.3s ease'
       }}>
+        {/* Decorative line with title */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+          }} />
+          <div style={{
+            flex: 1,
+            height: '1px',
+            background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+          }} />
+          <span style={{
+            fontSize: '10px',
+            color: 'rgba(255,255,255,0.4)',
+            fontWeight: 600,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase'
+          }}>
+            Blog
+          </span>
+        </div>
+
         {/* Header */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '32px'
+          justifyContent: 'space-between',
+          marginBottom: '24px',
+          flexWrap: 'wrap',
+          gap: '16px'
         }}>
-          <div>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: 600,
-              color: '#0f172a',
-              marginBottom: '4px',
-              letterSpacing: '-0.02em'
-            }}>
-              Blog
-            </h1>
-            <p style={{
-              fontSize: '14px',
-              color: '#64748b',
-              fontWeight: 400
-            }}>
-              Gérez les articles du blog
-            </p>
-          </div>
+          <p style={{
+            fontSize: '16px',
+            color: 'rgba(255, 255, 255, 0.6)'
+          }}>
+            Gérez les articles du blog
+          </p>
           <button
             onClick={openCreateModal}
             style={{
               padding: '12px 24px',
-              backgroundColor: '#6366f1',
-              color: 'white',
+              backgroundColor: '#fb923c',
+              color: 'black',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
@@ -255,100 +279,60 @@ export default function AdminBlogPage() {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s'
+              gap: '8px'
             }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6366f1'}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Nouvel article
+            + Nouvel article
           </button>
         </div>
 
         {/* Stats Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '20px',
-          marginBottom: '32px'
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+          gap: '16px',
+          marginBottom: '24px'
         }}>
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)'
           }}>
-            <p style={{
-              fontSize: '13px',
-              color: '#64748b',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '8px'
-            }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Total Articles
             </p>
-            <p style={{
-              fontSize: '28px',
-              fontWeight: 700,
-              color: '#0f172a'
-            }}>
-              {posts.length}
+            <p style={{ fontSize: '28px', fontWeight: 700, color: 'white' }}>
+              {loading ? '...' : stats.total}
             </p>
           </div>
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)'
           }}>
-            <p style={{
-              fontSize: '13px',
-              color: '#64748b',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '8px'
-            }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Publiés
             </p>
-            <p style={{
-              fontSize: '28px',
-              fontWeight: 700,
-              color: '#10b981'
-            }}>
-              {posts.filter(p => p.published).length}
+            <p style={{ fontSize: '28px', fontWeight: 700, color: '#34d399' }}>
+              {loading ? '...' : stats.published}
             </p>
           </div>
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)'
           }}>
-            <p style={{
-              fontSize: '13px',
-              color: '#64748b',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '8px'
-            }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Brouillons
             </p>
-            <p style={{
-              fontSize: '28px',
-              fontWeight: 700,
-              color: '#f59e0b'
-            }}>
-              {posts.filter(p => !p.published).length}
+            <p style={{ fontSize: '28px', fontWeight: 700, color: '#fb923c' }}>
+              {loading ? '...' : stats.draft}
             </p>
           </div>
         </div>
@@ -356,7 +340,12 @@ export default function AdminBlogPage() {
         {/* Filter Buttons */}
         <div style={{
           display: 'flex',
-          gap: '12px',
+          gap: '8px',
+          background: 'rgba(255, 255, 255, 0.05)',
+          padding: '6px',
+          borderRadius: '8px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          width: 'fit-content',
           marginBottom: '24px'
         }}>
           {[
@@ -368,13 +357,13 @@ export default function AdminBlogPage() {
               key={key}
               onClick={() => setFilter(key as any)}
               style={{
-                padding: '8px 16px',
-                backgroundColor: filter === key ? '#6366f1' : 'white',
-                color: filter === key ? 'white' : '#64748b',
-                border: '1px solid #e2e8f0',
+                padding: '10px 20px',
+                backgroundColor: filter === key ? '#fb923c' : 'transparent',
+                color: filter === key ? 'black' : 'rgba(255, 255, 255, 0.6)',
+                border: 'none',
                 borderRadius: '6px',
-                fontSize: '13px',
-                fontWeight: 500,
+                fontSize: '14px',
+                fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'all 0.2s'
               }}
@@ -384,256 +373,155 @@ export default function AdminBlogPage() {
           ))}
         </div>
 
-        {/* Articles List */}
+        {/* Results count */}
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-          border: '1px solid #e2e8f0',
-          overflow: 'hidden'
+          fontSize: '13px',
+          color: 'rgba(255, 255, 255, 0.5)',
+          marginBottom: '16px'
+        }}>
+          {filteredPosts.length} article{filteredPosts.length > 1 ? 's' : ''}
+        </div>
+
+        {/* Articles Table */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          overflow: isMobile ? 'auto' : 'hidden'
         }}>
           {loading ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
+            <div style={{ padding: '60px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)' }}>
               Chargement...
             </div>
           ) : filteredPosts.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
-              Aucun article trouvé
+            <div style={{ padding: '60px', textAlign: 'center' }}>
+              <p style={{ fontSize: '48px', marginBottom: '16px' }}>📝</p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Aucun article trouvé</p>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse'
-              }}>
-                <thead>
-                  <tr style={{
-                    backgroundColor: '#f8fafc',
-                    borderBottom: '1px solid #e2e8f0'
-                  }}>
-                    <th style={{
-                      padding: '12px 20px',
-                      textAlign: 'left',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#64748b',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Article
-                    </th>
-                    <th style={{
-                      padding: '12px 20px',
-                      textAlign: 'left',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#64748b',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Catégorie
-                    </th>
-                    <th style={{
-                      padding: '12px 20px',
-                      textAlign: 'left',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#64748b',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Statut
-                    </th>
-                    <th style={{
-                      padding: '12px 20px',
-                      textAlign: 'left',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#64748b',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Vues
-                    </th>
-                    <th style={{
-                      padding: '12px 20px',
-                      textAlign: 'left',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#64748b',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Date
-                    </th>
-                    <th style={{
-                      padding: '12px 20px',
-                      textAlign: 'right',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#64748b',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredPosts.map((post) => (
-                    <tr
-                      key={post.id}
-                      style={{
-                        borderBottom: '1px solid #e2e8f0',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <td style={{ padding: '16px 20px' }}>
-                        <div>
-                          <p style={{
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            color: '#0f172a',
-                            marginBottom: '4px'
-                          }}>
-                            {post.title}
-                          </p>
-                          <p style={{
-                            fontSize: '12px',
-                            color: '#64748b'
-                          }}>
-                            /{post.slug}
-                          </p>
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px 20px' }}>
-                        <span style={{
-                          fontSize: '12px',
-                          fontWeight: 500,
-                          color: '#64748b',
-                          backgroundColor: '#f1f5f9',
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? '800px' : 'auto' }}>
+              <thead>
+                <tr style={{ background: 'rgba(255, 255, 255, 0.03)' }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Article
+                  </th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Catégorie
+                  </th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Statut
+                  </th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Vues
+                  </th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Date
+                  </th>
+                  <th style={{ padding: '16px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPosts.map((post) => (
+                  <tr
+                    key={post.id}
+                    style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}
+                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <td style={{ padding: '16px' }}>
+                      <p style={{ fontWeight: 600, color: 'white', marginBottom: '4px' }}>{post.title}</p>
+                      <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)' }}>/{post.slug}</p>
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <span style={{
+                        padding: '4px 10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        borderRadius: '6px'
+                      }}>
+                        {post.category}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <button
+                        onClick={() => togglePublish(post)}
+                        style={{
                           padding: '4px 10px',
-                          borderRadius: '4px'
-                        }}>
-                          {post.category}
-                        </span>
-                      </td>
-                      <td style={{ padding: '16px 20px' }}>
-                        <button
-                          onClick={() => togglePublish(post)}
+                          backgroundColor: post.published ? 'rgba(52, 211, 153, 0.15)' : 'rgba(251, 146, 60, 0.15)',
+                          color: post.published ? '#34d399' : '#fb923c',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {post.published ? '✓ Publié' : 'Brouillon'}
+                      </button>
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <p style={{ fontSize: '14px', fontWeight: 500, color: 'white' }}>{post.views}</p>
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.6)' }}>{formatDate(post.publishedAt)}</p>
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          target="_blank"
                           style={{
+                            padding: '6px 10px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            borderRadius: '6px',
                             fontSize: '12px',
-                            fontWeight: 500,
-                            color: post.published ? '#10b981' : '#f59e0b',
-                            backgroundColor: post.published ? '#f0fdf4' : '#fef3c7',
-                            padding: '4px 10px',
-                            borderRadius: '4px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            fontWeight: 600,
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            textDecoration: 'none'
                           }}
                         >
-                          {post.published ? '✓ Publié' : 'Brouillon'}
+                          Voir
+                        </Link>
+                        <button
+                          onClick={() => openEditModal(post)}
+                          style={{
+                            padding: '6px 10px',
+                            backgroundColor: '#fb923c',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            color: 'black',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Modifier
                         </button>
-                      </td>
-                      <td style={{ padding: '16px 20px' }}>
-                        <p style={{
-                          fontSize: '14px',
-                          fontWeight: 500,
-                          color: '#0f172a'
-                        }}>
-                          {post.views}
-                        </p>
-                      </td>
-                      <td style={{ padding: '16px 20px' }}>
-                        <p style={{
-                          fontSize: '13px',
-                          color: '#64748b'
-                        }}>
-                          {formatDate(post.publishedAt)}
-                        </p>
-                      </td>
-                      <td style={{ padding: '16px 20px' }}>
-                        <div style={{
-                          display: 'flex',
-                          gap: '8px',
-                          justifyContent: 'flex-end'
-                        }}>
-                          <Link
-                            href={`/blog/${post.slug}`}
-                            target="_blank"
-                            style={{
-                              padding: '6px 10px',
-                              backgroundColor: '#f1f5f9',
-                              border: 'none',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              fontWeight: 500,
-                              color: '#64748b',
-                              cursor: 'pointer',
-                              textDecoration: 'none',
-                              transition: 'all 0.2s'
-                            }}
-                          >
-                            Voir
-                          </Link>
-                          <button
-                            onClick={() => openEditModal(post)}
-                            style={{
-                              padding: '6px 10px',
-                              backgroundColor: '#f1f5f9',
-                              border: 'none',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              fontWeight: 500,
-                              color: '#64748b',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => {
-                              e.currentTarget.style.backgroundColor = '#6366f1';
-                              e.currentTarget.style.color = 'white';
-                            }}
-                            onMouseOut={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f1f5f9';
-                              e.currentTarget.style.color = '#64748b';
-                            }}
-                          >
-                            Modifier
-                          </button>
-                          <button
-                            onClick={() => deletePost(post.id)}
-                            style={{
-                              padding: '6px 10px',
-                              backgroundColor: '#f1f5f9',
-                              border: 'none',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              fontWeight: 500,
-                              color: '#64748b',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => {
-                              e.currentTarget.style.backgroundColor = '#ef4444';
-                              e.currentTarget.style.color = 'white';
-                            }}
-                            onMouseOut={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f1f5f9';
-                              e.currentTarget.style.color = '#64748b';
-                            }}
-                          >
-                            Supprimer
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        <button
+                          onClick={() => deletePost(post.id)}
+                          style={{
+                            padding: '6px 10px',
+                            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            color: '#ef4444',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
@@ -646,7 +534,7 @@ export default function AdminBlogPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.8)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -654,41 +542,39 @@ export default function AdminBlogPage() {
           padding: '20px'
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)',
+            borderRadius: '16px',
             width: '100%',
             maxWidth: '900px',
             maxHeight: '90vh',
             overflow: 'auto',
-            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
           }}>
             <div style={{
               padding: '24px',
-              borderBottom: '1px solid #e2e8f0',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               position: 'sticky',
               top: 0,
-              backgroundColor: 'white',
+              background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)',
               zIndex: 10
             }}>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: 600,
-                color: '#0f172a'
-              }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'white' }}>
                 {editingPost ? 'Modifier l\'article' : 'Nouvel article'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
                 style={{
-                  padding: '8px',
-                  backgroundColor: 'transparent',
+                  padding: '8px 12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
                   border: 'none',
+                  borderRadius: '6px',
                   cursor: 'pointer',
-                  color: '#64748b',
-                  fontSize: '24px'
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '18px'
                 }}
               >
                 ×
@@ -699,13 +585,7 @@ export default function AdminBlogPage() {
               <div style={{ display: 'grid', gap: '20px' }}>
                 {/* Title */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    marginBottom: '8px'
-                  }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                     Titre *
                   </label>
                   <input
@@ -714,7 +594,6 @@ export default function AdminBlogPage() {
                     value={formData.title}
                     onChange={(e) => {
                       setFormData({ ...formData, title: e.target.value });
-                      // Auto-generate slug
                       if (!editingPost) {
                         const slug = e.target.value
                           .toLowerCase()
@@ -727,24 +606,19 @@ export default function AdminBlogPage() {
                     }}
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: '14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontFamily: 'inherit'
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white'
                     }}
                   />
                 </div>
 
                 {/* Slug */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    marginBottom: '8px'
-                  }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                     Slug *
                   </label>
                   <input
@@ -754,25 +628,20 @@ export default function AdminBlogPage() {
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: '14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontFamily: 'inherit'
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white'
                     }}
                   />
                 </div>
 
                 {/* Category & Author */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      marginBottom: '8px'
-                    }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                       Catégorie *
                     </label>
                     <select
@@ -781,26 +650,21 @@ export default function AdminBlogPage() {
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '10px 14px',
+                        padding: '12px 16px',
                         fontSize: '14px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        fontFamily: 'inherit'
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white'
                       }}
                     >
                       {categories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
+                        <option key={cat} value={cat} style={{ background: '#0f1b2e', color: 'white' }}>{cat}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      marginBottom: '8px'
-                    }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                       Auteur
                     </label>
                     <input
@@ -809,11 +673,12 @@ export default function AdminBlogPage() {
                       onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '10px 14px',
+                        padding: '12px 16px',
                         fontSize: '14px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        fontFamily: 'inherit'
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white'
                       }}
                     />
                   </div>
@@ -828,13 +693,7 @@ export default function AdminBlogPage() {
 
                 {/* Excerpt */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    marginBottom: '8px'
-                  }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                     Extrait *
                   </label>
                   <textarea
@@ -844,11 +703,12 @@ export default function AdminBlogPage() {
                     onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: '14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontFamily: 'inherit',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
                       resize: 'vertical'
                     }}
                   />
@@ -856,27 +716,23 @@ export default function AdminBlogPage() {
 
                 {/* Content */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    marginBottom: '8px'
-                  }}>
-                    Contenu * (format markdown simple)
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
+                    Contenu * (format markdown)
                   </label>
                   <textarea
                     required
                     rows={10}
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Utilisez ## pour les titres&#10;&#10;## Premier titre&#10;Votre paragraphe ici..."
+                    placeholder="Utilisez ## pour les titres..."
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: '14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
                       fontFamily: 'monospace',
                       resize: 'vertical'
                     }}
@@ -884,15 +740,9 @@ export default function AdminBlogPage() {
                 </div>
 
                 {/* Tags & Read Time */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: '16px' }}>
                   <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      marginBottom: '8px'
-                    }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                       Tags (séparés par des virgules)
                     </label>
                     <input
@@ -902,22 +752,17 @@ export default function AdminBlogPage() {
                       placeholder="Fashion Week, Elite, Shooting"
                       style={{
                         width: '100%',
-                        padding: '10px 14px',
+                        padding: '12px 16px',
                         fontSize: '14px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        fontFamily: 'inherit'
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white'
                       }}
                     />
                   </div>
                   <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      marginBottom: '8px'
-                    }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                       Temps lecture (min)
                     </label>
                     <input
@@ -926,11 +771,12 @@ export default function AdminBlogPage() {
                       onChange={(e) => setFormData({ ...formData, readTime: e.target.value ? parseInt(e.target.value) : null })}
                       style={{
                         width: '100%',
-                        padding: '10px 14px',
+                        padding: '12px 16px',
                         fontSize: '14px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        fontFamily: 'inherit'
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'white'
                       }}
                     />
                   </div>
@@ -938,13 +784,7 @@ export default function AdminBlogPage() {
 
                 {/* SEO */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    marginBottom: '8px'
-                  }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                     Meta Title (SEO)
                   </label>
                   <input
@@ -953,23 +793,18 @@ export default function AdminBlogPage() {
                     onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: '14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontFamily: 'inherit'
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white'
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    marginBottom: '8px'
-                  }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)', marginBottom: '8px' }}>
                     Meta Description (SEO)
                   </label>
                   <textarea
@@ -978,11 +813,12 @@ export default function AdminBlogPage() {
                     onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: '14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontFamily: 'inherit',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'white',
                       resize: 'vertical'
                     }}
                   />
@@ -994,26 +830,18 @@ export default function AdminBlogPage() {
                   alignItems: 'center',
                   gap: '12px',
                   padding: '16px',
-                  backgroundColor: '#f8fafc',
-                  borderRadius: '6px'
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
                 }}>
                   <input
                     type="checkbox"
                     id="published"
                     checked={formData.published}
                     onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      cursor: 'pointer'
-                    }}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                   />
-                  <label htmlFor="published" style={{
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    color: '#0f172a',
-                    cursor: 'pointer'
-                  }}>
+                  <label htmlFor="published" style={{ fontSize: '14px', fontWeight: 500, color: 'white', cursor: 'pointer' }}>
                     Publier immédiatement
                   </label>
                 </div>
@@ -1025,7 +853,7 @@ export default function AdminBlogPage() {
                 gap: '12px',
                 marginTop: '24px',
                 paddingTop: '24px',
-                borderTop: '1px solid #e2e8f0'
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
                 <button
                   type="button"
@@ -1033,12 +861,12 @@ export default function AdminBlogPage() {
                   style={{
                     flex: 1,
                     padding: '12px',
-                    backgroundColor: '#f1f5f9',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: 600,
-                    color: '#64748b',
+                    color: 'rgba(255, 255, 255, 0.8)',
                     cursor: 'pointer'
                   }}
                 >
@@ -1050,12 +878,12 @@ export default function AdminBlogPage() {
                   style={{
                     flex: 1,
                     padding: '12px',
-                    backgroundColor: '#6366f1',
+                    backgroundColor: '#fb923c',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: 600,
-                    color: 'white',
+                    color: 'black',
                     cursor: saving ? 'not-allowed' : 'pointer',
                     opacity: saving ? 0.7 : 1
                   }}

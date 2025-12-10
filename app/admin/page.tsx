@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/AdminSidebar';
 import { useSidebar } from '@/components/SidebarContext';
 
 export default function AdminPage() {
-  const { sidebarWidth } = useSidebar();
+  const { sidebarWidth, isMobile } = useSidebar();
   const [models, setModels] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
@@ -41,53 +41,81 @@ export default function AdminPage() {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: '#f1f5f9'
+      background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1b2e 100%)'
     }}>
       <AdminSidebar />
 
-      {/* Main Content */}
       <div style={{
         flex: 1,
-        marginLeft: `${sidebarWidth}px`,
-        padding: '32px 40px',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+        padding: isMobile ? '20px' : '40px',
+        paddingTop: isMobile ? '80px' : '40px',
         transition: 'margin-left 0.3s ease'
       }}>
-        {/* Header */}
+        {/* Decorative line with title */}
         <div style={{
-          marginBottom: '32px'
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px'
         }}>
-          <h1 style={{
-            fontSize: '28px',
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+            boxShadow: '0 0 12px rgba(212, 175, 55, 0.4)'
+          }} />
+          <div style={{
+            flex: 1,
+            height: '1px',
+            background: 'linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, transparent 100%)'
+          }} />
+          <span style={{
+            fontSize: '10px',
+            color: 'rgba(255,255,255,0.4)',
             fontWeight: 600,
-            color: '#0f172a',
-            marginBottom: '4px',
-            letterSpacing: '-0.02em'
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase'
           }}>
             Dashboard
+          </span>
+        </div>
+
+        {/* Header */}
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{
+            fontSize: isMobile ? '24px' : '28px',
+            fontWeight: 700,
+            color: 'white',
+            marginBottom: '8px',
+            letterSpacing: '-0.02em'
+          }}>
+            Bienvenue
           </h1>
           <p style={{
-            fontSize: '14px',
-            color: '#64748b',
-            fontWeight: 400
+            fontSize: '16px',
+            color: 'rgba(255, 255, 255, 0.6)'
           }}>
-            Bienvenue sur votre plateforme CRM
+            Vue d'ensemble de votre plateforme CRM
           </p>
         </div>
 
         {/* Stats Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '20px',
           marginBottom: '32px'
         }}>
           {/* Models Card */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '24px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease'
           }}>
             <div style={{
               display: 'flex',
@@ -96,8 +124,8 @@ export default function AdminPage() {
               marginBottom: '16px'
             }}>
               <p style={{
-                fontSize: '13px',
-                color: '#64748b',
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.6)',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
@@ -105,15 +133,15 @@ export default function AdminPage() {
                 Modèles actifs
               </p>
               <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '8px',
-                backgroundColor: '#f0fdf4',
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
+                background: 'rgba(52, 211, 153, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                   <circle cx="8.5" cy="7" r="4"/>
                   <polyline points="17 11 19 13 23 9"/>
@@ -121,17 +149,17 @@ export default function AdminPage() {
               </div>
             </div>
             <p style={{
-              fontSize: '32px',
+              fontSize: '36px',
               fontWeight: 700,
-              color: '#0f172a',
-              marginBottom: '4px',
+              color: 'white',
+              marginBottom: '8px',
               letterSpacing: '-0.02em'
             }}>
               {loading ? '...' : models.length}
             </p>
             <p style={{
-              fontSize: '13px',
-              color: '#10b981',
+              fontSize: '14px',
+              color: '#34d399',
               fontWeight: 500
             }}>
               Dans le portfolio
@@ -140,11 +168,12 @@ export default function AdminPage() {
 
           {/* Appointments Card */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '24px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease'
           }}>
             <div style={{
               display: 'flex',
@@ -153,8 +182,8 @@ export default function AdminPage() {
               marginBottom: '16px'
             }}>
               <p style={{
-                fontSize: '13px',
-                color: '#64748b',
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.6)',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
@@ -162,15 +191,15 @@ export default function AdminPage() {
                 Rendez-vous
               </p>
               <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '8px',
-                backgroundColor: '#faf5ff',
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
+                background: 'rgba(168, 85, 247, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                   <line x1="16" y1="2" x2="16" y2="6"/>
                   <line x1="8" y1="2" x2="8" y2="6"/>
@@ -179,10 +208,10 @@ export default function AdminPage() {
               </div>
             </div>
             <p style={{
-              fontSize: '32px',
+              fontSize: '36px',
               fontWeight: 700,
-              color: '#0f172a',
-              marginBottom: '4px',
+              color: 'white',
+              marginBottom: '8px',
               letterSpacing: '-0.02em'
             }}>
               {loading ? '...' : appointments.filter(apt => apt.status !== 'cancelled').length}
@@ -190,23 +219,30 @@ export default function AdminPage() {
             <Link
               href="/admin/calendar"
               style={{
-                fontSize: '13px',
+                fontSize: '14px',
                 color: '#a855f7',
                 fontWeight: 500,
-                textDecoration: 'none'
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
               }}
             >
-              Voir le calendrier →
+              Voir le calendrier
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </Link>
           </div>
 
           {/* Contacts Card */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '24px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease'
           }}>
             <div style={{
               display: 'flex',
@@ -215,8 +251,8 @@ export default function AdminPage() {
               marginBottom: '16px'
             }}>
               <p style={{
-                fontSize: '13px',
-                color: '#64748b',
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.6)',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
@@ -224,15 +260,15 @@ export default function AdminPage() {
                 Contacts
               </p>
               <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '8px',
-                backgroundColor: '#eff6ff',
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
+                background: 'rgba(59, 130, 246, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                   <circle cx="9" cy="7" r="4"/>
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -241,10 +277,10 @@ export default function AdminPage() {
               </div>
             </div>
             <p style={{
-              fontSize: '32px',
+              fontSize: '36px',
               fontWeight: 700,
-              color: '#0f172a',
-              marginBottom: '4px',
+              color: 'white',
+              marginBottom: '8px',
               letterSpacing: '-0.02em'
             }}>
               {loading ? '...' : contacts.length}
@@ -252,23 +288,30 @@ export default function AdminPage() {
             <Link
               href="/admin/contacts"
               style={{
-                fontSize: '13px',
+                fontSize: '14px',
                 color: '#3b82f6',
                 fontWeight: 500,
-                textDecoration: 'none'
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
               }}
             >
-              Gérer les contacts →
+              Gérer les contacts
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </Link>
           </div>
 
           {/* Documents Card */}
           <div style={{
-            backgroundColor: 'white',
+            background: 'rgba(255, 255, 255, 0.05)',
             padding: '24px',
-            borderRadius: '8px',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-            border: '1px solid #e2e8f0'
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.3s ease'
           }}>
             <div style={{
               display: 'flex',
@@ -277,8 +320,8 @@ export default function AdminPage() {
               marginBottom: '16px'
             }}>
               <p style={{
-                fontSize: '13px',
-                color: '#64748b',
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.6)',
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
@@ -286,27 +329,27 @@ export default function AdminPage() {
                 Documents
               </p>
               <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '8px',
-                backgroundColor: '#f0fdf4',
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
+                background: 'rgba(251, 146, 60, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="2">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                   <polyline points="14 2 14 8 20 8"/>
-                  <line x1="9" y1="15" x2="15" y2="15"/>
-                  <path d="M9 18.5c.83.83 2.17.83 3 0"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
                 </svg>
               </div>
             </div>
             <p style={{
-              fontSize: '32px',
+              fontSize: '36px',
               fontWeight: 700,
-              color: '#0f172a',
-              marginBottom: '4px',
+              color: 'white',
+              marginBottom: '8px',
               letterSpacing: '-0.02em'
             }}>
               {loading ? '...' : documents.length}
@@ -314,29 +357,35 @@ export default function AdminPage() {
             <Link
               href="/admin/documents"
               style={{
-                fontSize: '13px',
-                color: '#10b981',
+                fontSize: '14px',
+                color: '#fb923c',
                 fontWeight: 500,
-                textDecoration: 'none'
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
               }}
             >
-              Voir les documents →
+              Voir les documents
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </Link>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div style={{
-          backgroundColor: 'white',
+          background: 'rgba(255, 255, 255, 0.05)',
           padding: '28px',
-          borderRadius: '8px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-          border: '1px solid #e2e8f0'
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)'
         }}>
           <h3 style={{
-            fontSize: '16px',
+            fontSize: '18px',
             fontWeight: 600,
-            color: '#0f172a',
+            color: 'white',
             marginBottom: '20px',
             letterSpacing: '-0.01em'
           }}>
@@ -344,19 +393,19 @@ export default function AdminPage() {
           </h3>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '12px'
           }}>
             <Link href="/admin/models" style={{ textDecoration: 'none' }}>
               <div
                 style={{
                   padding: '16px 20px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: '#475569',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   display: 'flex',
@@ -364,17 +413,17 @@ export default function AdminPage() {
                   gap: '12px'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.backgroundColor = '#f5f3ff';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+                  e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                   <circle cx="8.5" cy="7" r="4"/>
                   <polyline points="17 11 19 13 23 9"/>
@@ -382,21 +431,16 @@ export default function AdminPage() {
                 Gérer les modèles
               </div>
             </Link>
-            <a
-              href="/studio"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: 'none' }}
-            >
+            <Link href="/admin/models/create" style={{ textDecoration: 'none' }}>
               <div
                 style={{
                   padding: '16px 20px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: '#475569',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   display: 'flex',
@@ -404,34 +448,34 @@ export default function AdminPage() {
                   gap: '12px'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.backgroundColor = '#f5f3ff';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+                  e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"/>
                   <line x1="12" y1="8" x2="12" y2="16"/>
                   <line x1="8" y1="12" x2="16" y2="12"/>
                 </svg>
                 Ajouter un modèle
               </div>
-            </a>
+            </Link>
             <Link href="/admin/calendar" style={{ textDecoration: 'none' }}>
               <div
                 style={{
                   padding: '16px 20px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: '#475569',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   display: 'flex',
@@ -439,17 +483,17 @@ export default function AdminPage() {
                   gap: '12px'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.backgroundColor = '#f5f3ff';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+                  e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                   <line x1="16" y1="2" x2="16" y2="6"/>
                   <line x1="8" y1="2" x2="8" y2="6"/>
@@ -462,12 +506,12 @@ export default function AdminPage() {
               <div
                 style={{
                   padding: '16px 20px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: '#475569',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   display: 'flex',
@@ -475,21 +519,21 @@ export default function AdminPage() {
                   gap: '12px'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.backgroundColor = '#f5f3ff';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+                  e.currentTarget.style.background = 'rgba(212, 175, 55, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                   <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/>
                   <line x1="9" y1="15" x2="15" y2="15"/>
-                  <path d="M9 18.5c.83.83 2.17.83 3 0"/>
                 </svg>
                 Générer un document
               </div>

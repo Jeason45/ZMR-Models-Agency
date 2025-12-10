@@ -35,42 +35,27 @@ export default function ImageUpload({ onImageUploaded, currentImage, category = 
       const compressedFile = await imageCompression(file, options);
       console.log('Image compressée:', compressedFile.size / 1024 / 1024, 'MB');
 
-      // 1. Demander une URL signée
-      const presignedResponse = await fetch('/api/upload/presigned', {
+      // Upload via l'API server-side (évite les problèmes CORS avec R2)
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      formData.append('type', 'image');
+      formData.append('category', category);
+
+      const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: compressedFile.type,
-          category,
-          type: 'image',
-        }),
-      });
-
-      if (!presignedResponse.ok) {
-        throw new Error('Failed to get presigned URL');
-      }
-
-      const { presignedUrl, publicUrl } = await presignedResponse.json();
-
-      // 2. Upload direct vers R2
-      const uploadResponse = await fetch(presignedUrl, {
-        method: 'PUT',
-        body: compressedFile,
-        headers: {
-          'Content-Type': compressedFile.type,
-        },
+        body: formData,
       });
 
       if (!uploadResponse.ok) {
-        throw new Error('Failed to upload to R2');
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to upload');
       }
 
-      console.log('✓ Image uploadée directement vers R2:', publicUrl);
+      const { filePath } = await uploadResponse.json();
+      console.log('✓ Image uploadée vers R2:', filePath);
 
-      // 3. Utiliser l'URL publique
-      setPreview(publicUrl);
-      onImageUploaded(publicUrl);
+      setPreview(filePath);
+      onImageUploaded(filePath);
     } catch (error) {
       console.error('Upload error:', error);
       alert('Erreur lors de l\'upload');

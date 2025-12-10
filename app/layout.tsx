@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { MemberAuthProvider } from "@/hooks/useMemberAuth";
 
 export const metadata: Metadata = {
   title: "ZMR Models Agency",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <MemberAuthProvider>
+          {children}
+        </MemberAuthProvider>
       </body>
     </html>
   );

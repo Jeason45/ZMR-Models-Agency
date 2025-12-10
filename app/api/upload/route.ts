@@ -132,52 +132,59 @@ export async function POST(request: NextRequest) {
 
     // Déterminer le Content-Type
     let contentType = fileType;
-    const ext = file.name.split('.').pop()?.toLowerCase();
+    const rawExt = file.name.split('.').pop()?.toLowerCase();
+
+    // Liste des extensions valides
+    const validImageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+    const validVideoExtensions = ['mp4', 'mov', 'avi', 'webm'];
+    const isValidExt = rawExt && (validImageExtensions.includes(rawExt) || validVideoExtensions.includes(rawExt));
+
     if (!contentType) {
-      if (ext === 'jpg' || ext === 'jpeg') contentType = 'image/jpeg';
-      else if (ext === 'png') contentType = 'image/png';
-      else if (ext === 'gif') contentType = 'image/gif';
-      else if (ext === 'webp') contentType = 'image/webp';
-      else if (ext === 'mp4') contentType = 'video/mp4';
-      else if (ext === 'mov') contentType = 'video/quicktime';
-      else if (ext === 'avi') contentType = 'video/x-msvideo';
+      if (rawExt === 'jpg' || rawExt === 'jpeg') contentType = 'image/jpeg';
+      else if (rawExt === 'png') contentType = 'image/png';
+      else if (rawExt === 'gif') contentType = 'image/gif';
+      else if (rawExt === 'webp') contentType = 'image/webp';
+      else if (rawExt === 'mp4') contentType = 'video/mp4';
+      else if (rawExt === 'mov') contentType = 'video/quicktime';
+      else if (rawExt === 'avi') contentType = 'video/x-msvideo';
       else contentType = 'application/octet-stream';
+    }
+
+    // Dériver l'extension à partir du Content-Type si l'extension du fichier n'est pas valide
+    let extension = rawExt || 'bin';
+    if (!isValidExt) {
+      // Map Content-Type vers extension
+      const contentTypeToExt: Record<string, string> = {
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'image/gif': 'gif',
+        'image/webp': 'webp',
+        'image/avif': 'avif',
+        'video/mp4': 'mp4',
+        'video/quicktime': 'mov',
+        'video/x-msvideo': 'avi',
+        'video/webm': 'webm',
+      };
+      extension = contentTypeToExt[contentType] || extension;
     }
 
     // Construire le chemin R2 (même structure que local)
     const subfolder = type === 'video' ? 'videos' : 'images';
     const prefix = `uploads/${category || 'models'}/${subfolder}/`;
 
-    // Vérifier si un fichier identique existe déjà
-    const existingKey = await findExistingFileInR2(buffer, prefix);
+    // Upload direct sans vérification de déduplication (trop lent)
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(7);
+    const fileName = `${timestamp}-${randomString}.${extension}`;
+    const key = `${prefix}${fileName}`;
 
-    let fileUrl: string;
-    let fileName: string;
-    let isExisting = false;
-
-    if (existingKey) {
-      // Utiliser le fichier existant
-      fileUrl = `${R2_PUBLIC_URL}/${existingKey}`;
-      fileName = existingKey.split('/').pop() || '';
-      isExisting = true;
-      console.log(`♻️  Réutilisation du fichier existant: ${existingKey}`);
-    } else {
-      // Créer un nouveau fichier
-      const timestamp = Date.now();
-      const randomString = Math.random().toString(36).substring(7);
-      const extension = ext || 'bin';
-      fileName = `${timestamp}-${randomString}.${extension}`;
-      const key = `${prefix}${fileName}`;
-
-      fileUrl = await uploadToR2(buffer, key, contentType);
-      console.log(`✓ Nouveau fichier uploadé vers R2: ${key}`);
-    }
+    const fileUrl = await uploadToR2(buffer, key, contentType);
+    console.log(`✓ Fichier uploadé vers R2: ${key}`);
 
     return NextResponse.json({
       success: true,
-      filePath: fileUrl, // Retourne maintenant l'URL R2 complète
+      filePath: fileUrl,
       fileName: fileName,
-      isExisting: isExisting,
     });
   } catch (error) {
     console.error('Upload error:', error);
