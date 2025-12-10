@@ -260,7 +260,6 @@ export default function AdminMembersPage() {
               onClick={() => setStatusFilter(tab.value as any)}
               style={{
                 padding: isMobile ? '10px 16px' : '12px 20px',
-                border: 'none',
                 borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: 600,
